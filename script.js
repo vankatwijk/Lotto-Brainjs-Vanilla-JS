@@ -183,7 +183,7 @@ function runthrough(){
     numbersToPlay = ordlst.slice(0,7);
     document.getElementById('output').innerHTML += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
     document.getElementById('output').innerHTML += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
-    document.getElementById('output').innerHTML += "Here are 10 sets ran in series (which could be played as well including the above set):<br/>";
+    document.getElementById('output').innerHTML += "Here are 10 sets ran in series:<br/>";
     nextResult = lastResult;
     balls = ordlst.length;
     numbers = numbersToPlay.length;
