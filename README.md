@@ -13,7 +13,7 @@ Machine Learning AI - This simple example shows how to use a neaural network ,ta
 ```
 
 ## Built With
-* [brain.js](https://brain.js.org) - brain.js naural network framework
+* [brain.js](https://brain.js.org) - brain.js naural network
 
 ## Authors
 
