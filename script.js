@@ -172,8 +172,10 @@ function trainnetwork(){
     stats = net.train(tD);
     document.getElementById('output').innerHTML = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
     document.getElementById('output').innerHTML += "<br/>Trained.<br/>Run with last Draw result: " + lastDraw.join(", ") +"<br/>";
+
     const diagram = document.getElementById('networkd')
     diagram.innerHTML = brain.utilities.toSVG(net)
+
     runthrough();
 }
 
