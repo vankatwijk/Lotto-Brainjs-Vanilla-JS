@@ -245,19 +245,25 @@ function run(){
 
 
     inputs = checks;
+
+    //get row length
+    lengthrow = document.getElementById('lengthrow').value;
+    
+
     //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
     len = 7;
 
     // put them in groups of 6 for each item
+    //create rows here
     finputs = [];
-    for (var i=0;i<(Math.floor(inputs.length/8));i++){
-        input = inputs.slice(i*8,i*8+8);
+    for (var i=0;i<(Math.floor(inputs.length/lengthrow));i++){
+        input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
         finputs.push(input);
     }
     inputs = finputs;
 
     inputs = inputs.reverse(); //reverse so that it's from oldest to newest
-    balls = 50;
+    balls = document.getElementById('numberballs').value;
 
     tD = [];
     for (var i=0;i<inputs.length-1;i++){

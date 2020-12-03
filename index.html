@@ -88,15 +88,17 @@
 14 25 39 41 44
                     </textarea>
                 </div>
-                <table>
-                    <tbody><tr><td align="right">Hidden Layers Shape:</td><td><input size="4" type="text" id="layers" value="70"></td></tr>
-                    
-                    <!--<tr><td align="right">Enter 2nd Pick-4 Draw:</td><td><input size="4" type="text" id="input2" value="2957"></td></tr>-->
-                    </tbody>
-                </table>
-                <input type="submit" value="Create Neural Network" onclick="createnetwork();">
-                <input type="submit" value="Read Training Data" onclick="readtrainingdata();"><br>
-                <input type="submit" value="Train => Run" onclick="trainnetwork();">
+                <p>Number columns in a winning : </p>
+                <input size="4" type="text" id="lengthrow" value="5">
+                <p>Number of balls(0 is detected automatically) : </p>
+                <input size="4" type="text" id="numberballs" value="50">
+                <p>Hidden Layers Shape: </p>
+                <input size="4" type="text" id="layers" value="70">
+                <p>
+                    <input type="submit" value="Create Neural Network" onclick="createnetwork();">
+                    <input type="submit" value="Read Training Data" onclick="readtrainingdata();"><br>
+                    <input type="submit" value="Train => Run" onclick="trainnetwork();">
+                </p>
 
             </div>
             <div class="column">
