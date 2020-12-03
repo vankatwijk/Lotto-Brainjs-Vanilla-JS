@@ -1,10 +1,10 @@
 # Project Title
 
-Machine Learning AI- learns what color text should be on a certain background
+Machine Learning AI- trys to predict the lotto with previous winnings
 
 # Project Description
 
-Machine Learning AI - This simple example shows how to use a neaural network ,taking some training data and training it even more to learn what color whould look best on which background
+Machine Learning AI - This simple example shows how to use a neaural network ,taking some training data and training it even more to predict the next posible outcome of the lotto
 
 
 ### Prerequisites
@@ -21,7 +21,7 @@ Machine Learning AI - This simple example shows how to use a neaural network ,ta
 
 ## Based on
 
-* **Web Dev Simplified** - [Youtube](https://www.youtube.com/watch?v=60c4rMq-aH0)
+* **thelotteryforum** - [thelotteryforum](https://thelotteryforum.com/-LottoMax-neural-network-system.php)
 
 ## License
 
