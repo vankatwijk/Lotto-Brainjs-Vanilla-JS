@@ -1,6 +1,48 @@
+var app = new Vue({
+    el: '#app',
+    data: {
+        message: 'Hello Vue!',
+        net: 0,
+        tD :0,
+        lastDraw :0,
+        lastResult :0,
+        lengthrow :5,
+        numberballs :50,
+        layers :70,
+
+        diagram : "",
+        output : "",
+        inputData : `
+        3 8 16 40 43
+        1 29 33 45 47
+        14 27 39 46 48
+        5 25 34 48 50
+        15 27 33 39 50
+        3 16 25 39 44
+        20 23 28 30 44
+        12 24 40 41 46
+        6 15 17 42 48
+        6 12 23 39 45
+        17 25 35 39 44
+        3 22 34 49 50
+        4 16 20 31 39
+        5 8 10 13 31
+        1 11 37 41 48
+        13 15 16 28 41
+        6 11 20 38 43
+        17 18 24 29 40
+        9 15 22 39 46
+        8 19 32 43 46
+        7 21 23 36 38
+        23 26 33 38 49
+        7 19 26 42 50
+        14 25 39 41 44
+        `,
+    },
+    methods: {
 
 //https://stackoverflow.com/questions/39927452/recursively-print-all-permutations-of-a-string-javascript
-function permut(string) {
+permut(string) {
     if (string.length < 2) return string; // This is our break condition
 
     var permutations = []; // This array will hold our permutations
@@ -19,73 +61,73 @@ function permut(string) {
 
     }
     return permutations;
-}
-
-function clean(s){
+},
+clean(s){
+    console.log('clean: '+s);
     r = s.replace(/\D/g,' ');
     r = r.replace(/\s\s+/g, ' ');
     return r;
-}
-function zpadlen(n,len){
+},
+zpadlen(n,len){
     return ("00000"+n).slice(-len);
-}
-function zpad(n){
+},
+zpad(n){
     return ("0000"+n).slice(-4);
-}
-function zpad2(n){
+},
+zpad2(n){
     return ("0000"+n).slice(-2);
-}
-function zpad3(n){
+},
+zpad3(n){
     return ("0000"+n).slice(-3);
-}
-function zpad4(n){
+},
+zpad4(n){
     return ("0000"+n).slice(-4);
-}
-function sumstr(s){
+},
+sumstr(s){
     r = 0;
     for (i=0;i<s.length;i++){
         r += parseInt(s[i]);
     }
     return r;
-}
-function rootstr(s){
+},
+rootstr(s){
     n = parseInt(s);
     while (n > 9){
         n = sumstr(n+"") + "";
         n = parseInt(n);
     }
     return n;
-}
-function tablerow(row){
+},
+tablerow(row){
     r = "<tr>"
     for (i=0;i<row.length;i++){
         r += "<td align='center'>"+row[i]+"</td>"
     }
     r += "</tr>";
     return r;
-}
-function addstr(s1,s2){
+},
+addstr(s1,s2){
     r = "";
     for (i=0;i<s1.length;i++){
         r+= "" + ((parseInt(s1[i]) + parseInt(s2[i]))%10);
     }
     return r;
-}
-function subarr(a1,a2){
+},
+subarr(a1,a2){
     r = [];
     for (i=0;i<a1.length;i++){
         r.push(parseInt(a1[i]) - parseInt(a2[i]));
     }
     return r;
-}
-function addarr(a1, a2){
+},
+addarr(a1, a2){
     r = [];
     for (i=0;i<a1.length;i++){
         r.push(parseInt(a1[i]) + parseInt(a2[i]));
     }
     return r; 
-}
-function bracket_if_match(str,n){
+},
+bracket_if_match(str,n){
     r = [];
     for (var i=0;i<str.length;i++){
         if (parseInt(str[i]) == parseInt(n)){
@@ -95,63 +137,58 @@ function bracket_if_match(str,n){
         }
     }
     return r;
-}
-
-function mirror(n){
+},
+mirror(n){
     n = "" + n;
     r = "";
     for (var i=0;i<n.length;i++){
         r += ((parseInt(n[i])+5)%10) + "";
     }
     return r;
-}
-function mirrorarr(ar){
+},
+mirrorarr(ar){
     var r = [];
     for (var i=0;i<ar.length;i++){
         r.push(mirror(ar[i]));
     }
     return r;
-}
-
-function intarr(ar){
+},
+intarr(ar){
     var re = [];
     for (var i=0;i<ar.length;i++){
         re.push(parseInt(ar[i]));
     }
     return re;
-}
-function lotmat(ar){
+},
+lotmat(ar){
     re = 0;
     for (i=0;i<ar.length;i++){
         re += parseInt(ar[i]);
     }
     re = re % 10;
     return re;
-}
+},
 
 
-var net = 0;
-var tD = 0;
-var lastDraw = 0;
-var lastResult = 0;
 
 
-function createnetwork(){
-    hidlayers = eval("["+document.getElementById("layers").value+"]");
-    net = new brain.NeuralNetwork({ hiddenLayers: hidlayers});
+
+createnetwork(){
+    hidlayers = eval("["+this.layers+"]");
+    this.net = new brain.NeuralNetwork({ hiddenLayers: hidlayers});
     outputt = "Neural Net created with Hidden Layers Shape ["+ hidlayers.join(",") +"]<br/>";
-    document.getElementById('output').innerHTML = outputt;
+    this.output = outputt;
 
-}
-function reverseInputLines(){
-    input = document.getElementById('input').value;
+},
+reverseInputLines(){
+    input = this.inputData;
     input = input.split("\n");
     input = input.reverse();
     input = input.join("\n");
-    document.getElementById('input').value = input;
-}  
+    this.inputData = input;
+},  
 
-function highestProb(result,print=1){
+highestProb(result,print=1){
     orderlst = [];
     for (var i=0;i<result.length;i++){
         orderlst.push([i+1,result[i]]);
@@ -159,69 +196,64 @@ function highestProb(result,print=1){
     orderlst = orderlst.sort(function(a,b){return b[1]-a[1]});
     lst = [];
     if (print==1){
-        document.getElementById('output').innerHTML += "Highest probability is: " + orderlst[0][1] + "<br/>";
-        document.getElementById('output').innerHTML += "Lowest probability is: " + orderlst[orderlst.length-1][1] + "<br/>";
+        this.output += "Highest probability is: " + orderlst[0][1] + "<br/>";
+        this.output += "Lowest probability is: " + orderlst[orderlst.length-1][1] + "<br/>";
     }
     for (var i=0;i<orderlst.length;i++){
         lst.push(orderlst[i][0]);
     }
     return lst;
-}
-function trainnetwork(){
+},
+trainnetwork(){
     //for (var i=0;i<1;i++){
-    stats = net.train(tD);
-    document.getElementById('output').innerHTML = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
-    document.getElementById('output').innerHTML += "<br/>Trained.<br/>Run with last Draw result: " + lastDraw.join(", ") +"<br/>";
+    stats = this.net.train(this.tD);
+    this.output = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
+    this.output += "<br/>Trained.<br/>Run with last Draw result: " + this.lastDraw.join(", ") +"<br/>";
 
-    const diagram = document.getElementById('networkd')
-    diagram.innerHTML = brain.utilities.toSVG(net)
+    this.diagram = brain.utilities.toSVG(this.net)
 
-    runthrough();
-}
+    this.runthrough();
+},
 
-function runthrough(){
-    result = net.run(lastResult);
-    ordlst = highestProb(result);
+runthrough(){
+    result = this.net.run(this.lastResult);
+    ordlst = this.highestProb(result);
     numbersToPlay = ordlst.slice(0,7);
-    document.getElementById('output').innerHTML += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
-    document.getElementById('output').innerHTML += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
-    document.getElementById('output').innerHTML += "Here are 10 sets ran in series:<br/>";
-    nextResult = lastResult;
+    this.output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
+    this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
+    this.output += "Here are 10 sets ran in series:<br/>";
+    nextResult = this.lastResult;
     balls = ordlst.length;
     numbers = numbersToPlay.length;
     for (var i=0;i<5;i++){
-        result = net.run(nextResult);
-        ordlst = highestProb(result,print=0);
+        result = this.net.run(nextResult);
+        ordlst = this.highestProb(result,print=0);
         thisSet = ordlst.slice(0,numbers);
-        document.getElementById('output').innerHTML += "<b>"+thisSet.join(" ")+"</b><br/>";
-        nextResult = tD_Ones(balls,thisSet);
+        this.output += "<b>"+thisSet.join(" ")+"</b><br/>";
+        nextResult = this.tD_Ones(balls,thisSet);
     }
 
-}
-function trainnetwork100(){
+},
+trainnetwork100(){
     for (var i=0;i<100;i++){
-        net.train(tD);
+        this.net.train(this.tD);
 
     }
-    document.getElementById('output').innerHTML = "<br/>Trained 100x.<br/>Run with last Draw result: " + lastDraw.join(", ") +"<br/>";
-    runthrough();
-}
-
-function trainnetwork1000(){
+    this.output = "<br/>Trained 100x.<br/>Run with last Draw result: " + this.lastDraw.join(", ") +"<br/>";
+    this.runthrough();
+},
+trainnetwork1000(){
     for (var i=0;i<1000;i++){
-        net.train(tD);
+        this.net.train(this.tD);
 
     }
-    document.getElementById('output').innerHTML = "<br/>Trained 1000x.<br/>Run with last Draw result: " + lastDraw.join(", ") +"<br/>";
-    runthrough();
-}
-
-function readtrainingdata(){
-    run();
-}
-
-
-function tD_Ones(size,row){
+    this.output = "<br/>Trained 1000x.<br/>Run with last Draw result: " + this.lastDraw.join(", ") +"<br/>";
+    this.runthrough();
+},
+readtrainingdata(){
+    this.run();
+},
+tD_Ones(size,row){
     var res = [];
     for (var i=0;i<size;i++){
         res.push(0);
@@ -231,14 +263,13 @@ function tD_Ones(size,row){
         res[curindex] = 1;
     }
     return res;
-}
-
-function run(){
+},
+run(){
     outputt = "";
     //check these numbers in 'check' element
-    //lastdraw =  document.getElementById('draw').value;
-    check = document.getElementById('input').value;
-    check = clean(check);
+    //lastdraw =  .getElementById('draw').value;
+    check = this.inputData;
+    check = this.clean(check);
     checks = check.split(" ");
     var filtered = checks.filter(function (el) {//filter out empty
         return el != "";
@@ -249,7 +280,7 @@ function run(){
     inputs = checks;
 
     //get row length
-    lengthrow = document.getElementById('lengthrow').value;
+    lengthrow = this.lengthrow;
     
 
     //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
@@ -265,16 +296,23 @@ function run(){
     inputs = finputs;
 
     inputs = inputs.reverse(); //reverse so that it's from oldest to newest
-    balls = document.getElementById('numberballs').value;
+    balls = this.numberballs;
 
-    tD = [];
+    this.tD = [];
     for (var i=0;i<inputs.length-1;i++){
-        tDin = tD_Ones(balls,inputs[i].slice(0,len));
-        tDout = tD_Ones(balls,inputs[i+1].slice(0,len));
-        tD.push({input:tDin,output:tDout});
+        tDin = this.tD_Ones(balls,inputs[i].slice(0,len));
+        tDout = this.tD_Ones(balls,inputs[i+1].slice(0,len));
+        this.tD.push({input:tDin,output:tDout});
     }
-    lastDraw = inputs[inputs.length-1];
-    lastResult = tD_Ones(balls,lastDraw.slice(0,len));
+    this.lastDraw = inputs[inputs.length-1];
+    this.lastResult = this.tD_Ones(balls,this.lastDraw.slice(0,len));
     outputt+="Read training data!";
-    document.getElementById('output').innerHTML = outputt;
+    this.output = outputt;
 }
+
+
+
+    }
+})
+
+
