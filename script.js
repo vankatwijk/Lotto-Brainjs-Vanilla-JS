@@ -1,6 +1,7 @@
 var app = new Vue({
     el: '#app',
     data: {
+        refDate: true,
         message: 'Hello Vue!',
         net: 0,
         tD :0,
@@ -8,9 +9,10 @@ var app = new Vue({
         lastResult :0,
         lengthrow :5,
         numberballs :50,
-        layers :70,
+        layers :'5,5,6',
 
         result_group :"",
+        result_group_data : "",
         diagram : "",
         output : "",
         inputData : `
@@ -39,7 +41,8 @@ var app = new Vue({
         7 19 26 42 50
         14 25 39 41 44
         `,
-        subgroups : {}
+        subgroups : {'All':[]},
+        subKeys : []
     },
     methods: {
 
@@ -174,6 +177,8 @@ var app = new Vue({
         changeResultGroup(values){
 
             this.result_group = values;
+
+            this.result_group_data = values.join(" ");
         },
 
 
@@ -269,37 +274,65 @@ var app = new Vue({
             }
             return res;
         },
-        create_sub_groups(inputrow){
-            let subname = [0,0,0,0,0]
-            
-            inputrow.forEach(element => {
+        createGroups(){
 
-                if(element < 9){
-                    subname[0] += 1;
-                }else if(element < 19){
-                    subname[1] += 1;
-                }else if(element < 29){
-                    subname[2] += 1;
-                }else if(element < 39){
-                    subname[3] += 1;
-                }else if(element < 49){
-                    subname[4] += 1;
-                }
+            //clear previous groups
+            this.subgroups = {'All':[]};
 
+            // put them in groups of 6 for each item
+            //create rows here
+            check = this.inputData;
+            check = this.clean(check);
+            checks = check.split(" ");
+            var filtered = checks.filter(function (el) {//filter out empty
+                return el != "";
             });
+            inputs = filtered;
+            for (var i=0;i<(Math.floor(inputs.length/(this.lengthrow+(this.refDate?1:0) )));i++){
+
+                if(i === 0 || this.refDate === false){
+                    input = inputs.slice(i*this.lengthrow,i*this.lengthrow+this.lengthrow);
+                }else{
+                    input = inputs.slice((i*this.lengthrow)+i,i*this.lengthrow+(this.lengthrow+i));
+                }
+                //input = inputs.slice(i*this.lengthrow,i*this.lengthrow+this.lengthrow);
+
+                let subname = [0,0,0,0,0]
+                input.forEach(element => {
+
+                    if(element < 10){50
+                        subname[0] += 1;
+                    }else if(element < 20){
+                        subname[1] += 1;
+                    }else if(element < 30){
+                        subname[2] += 1;
+                    }else if(element < 40){
+                        subname[3] += 1;
+                    }else if(element < 50){
+                        subname[4] += 1;
+                    }
+
+                });
 
 
-            subname = subname.join("-");
-            if(this.subgroups[subname] === undefined){
-                this.subgroups[subname] = [];
+                subname = subname.join("-");
+                if(this.subgroups[subname] === undefined){
+                    this.subgroups[subname] = [];
+                }
+                this.subgroups[subname].push(input)
+                this.subKeys.push(subname);
+
+                this.subgroups.All.push(input);
             }
-            this.subgroups[subname].push(inputrow)
+
+            this.result_group_data =this.subKeys.join(" ");
+            console.log(this.result_group_data);
         },
         run(){
             outputt = "";
             //check these numbers in 'check' element
             //lastdraw =  .getElementById('draw').value;
-            check = this.inputData;
+            check = this.result_group_data;
             check = this.clean(check);
             checks = check.split(" ");
             var filtered = checks.filter(function (el) {//filter out empty
@@ -315,15 +348,19 @@ var app = new Vue({
             
 
             //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
-            len = 7;
+            len = 5;
 
             // put them in groups of 6 for each item
             //create rows here
             finputs = [];
             for (var i=0;i<(Math.floor(inputs.length/lengthrow));i++){
-                input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
-                finputs.push(input);
-                this.create_sub_groups(input)
+                if(i === 0 || this.refDate === false){
+                    input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
+                    finputs.push(input);
+                }else{
+                    input = inputs.slice(i*lengthrow+1,i*lengthrow+(lengthrow+1));
+                    finputs.push(input);
+                }
             }
             inputs = finputs;
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,51 +17,69 @@
 
 
 </head>
+
 <body>
 
     <div id="app">
         <div class="header">
-            <h1>Lotto</h1>
+            <h2>Lotto</h2>
         </div>
         <div class="row">
-            <div class="col-4">
+            <div class="col-3">
                 <p>
-                Load the network with previous winnings to generate a model<br>
-                1. First, click on [Create Neural Network] button.<br>
-                2. Then, click [Read Training Data].<br>
-                3. Then, click [Train =&gt; Run] button as many times as you like to see trained network and results of run.
+                    Load the network with previous winnings to generate a model<br>
+                    1. First, click on [Create Groups] button.<br>
+                    2. Then, Select a group you want to use<br>
+                    3. Then, click on [Create Neural Network] button.<br>
+                    4. Then, click [Read Training Data].<br>
+                    5. Then, click [Train =&gt; Run] button as many times as you like to see trained network and results
+                    of run.
                 </p>
 
-                <button @click="inputData='';">Clear Input</button>
-                <button @click="reverseInputLines();">Reverse Input Lines</button>
+                <button class="button5" @click="inputData='';">Clear Input</button>
+                <button class="button5" @click="reverseInputLines();">Reverse Input Lines</button>
                 <br>
                 <div>
-                        Enter your previous draw data below (ordered from most recent to oldest):<br>
-                        <textarea class="myowntextarea auto-resized" v-model="inputData" rows="2" cols="40" style="height: 246px; resize: none;" spellcheck="false">
+                    Enter your previous draw data below (ordered from most recent to oldest):<br>
+                    <textarea class="myowntextarea auto-resized" v-model="inputData" rows="2" cols="40"
+                        style="height: 246px; resize: none;" spellcheck="false">
 
                     </textarea>
                 </div>
-                <p>Number columns in a winning : </p>
-                <input size="4" type="text" v-model="lengthrow"/>
-                <p>Number of balls(0 is detected automatically) : </p>
-                <input size="4" type="text" v-model="numberballs"/>
-                <p>Hidden Layers first learning Shape: </p>
-                <input size="4" type="text" v-model="layers"/>
+                <label for="refDate">Reference date (in last column of row) : </label>
+                <input type="checkbox" id="refDate"  v-model="refDate"><br><br>
+
+                <label for="lengthrow">Number of columns in a row : </label>
+                <input size="4" type="text" v-model="lengthrow" id="lengthrow" /><br><br>
+
+                <label for="numberballs">Number on balls go to : </label>
+                <input size="4" type="text" v-model="numberballs" id="numberballs" /><br><br>
+
+                <label for="layers">Hidden Layers first learning Shape : </label>
+                <input size="4" type="text" v-model="layers" id="layers" /><br><br>
                 <p>
-                    <button @click="createnetwork();">Create Neural Network</button>
-                    <button @click="readtrainingdata();">Read Training Data</button>
-                    <button @click="trainnetwork();">Train => Run</button>
+                    <button class="button5" @click="createGroups();">Create Groups</button>
                 </p>
 
             </div>
-            <div class="col-2 special">
-                <div class="sub-button"  v-for="(value, name) in subgroups"@click="changeResultGroup(value)">
-                    <span >{{name}}</span>
-                    <span class="sub-button-length" >{{value.length}}</span>
+            <div class="col-2 special col-fill">
+                <div class="sub-button" v-for="(value, name) in subgroups"
+                    @click="changeResultGroup(value);output='';diagram=''">
+                    <span class="sub-button-length" style="display: inline-block;width: 40px;padding: 10px;">{{value.length}}</span>
+                    <span>{{name}}</span>
                 </div>
-            </div>            
-            <div class="col-6 result">
-                <div >{{result_group}}</div>
+            </div>
+            <div class="col-2 special col-fill">
+                <div v-for="rgroup in result_group" class="badges">
+                    {{rgroup.join(" ")}}
+                </div>
+            </div>
+            <div class="col-5 result col-fill" v-if="result_group">
+                <p v-if="result_group.length > 1">
+                    <button class="button5" @click="createnetwork();">Create Neural Network</button>
+                    <button class="button5" @click="readtrainingdata();">Read Training Data</button>
+                    <button class="button5" @click="trainnetwork();">Train => Run</button>
+                </p>
 
                 <b>Output will show below:</b><br>
                 <div v-html="output"></div>
@@ -68,19 +87,20 @@
 
                 <div v-html="diagram"></div>
             </div>
-    </div>
+        </div>
 
     </div>
-        
+
 </body>
 
 
 <style>
-    body{
+    body {
         margin: 0px;
-        background-color: rgb(40,44,52);
+        background-color: #127475;
         color: white;
     }
+
     /* .row{
         width:100%;
         background-color: rgb(40,44,52);
@@ -90,9 +110,12 @@
         float: left;
         width: 50%;
         padding: 30px;
-        -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-        -moz-box-sizing: border-box;    /* Firefox, other Gecko */
-        box-sizing: border-box;         /* Opera/IE 8+ */
+        -webkit-box-sizing: border-box;
+        /* Safari/Chrome, other WebKit */
+        -moz-box-sizing: border-box;
+        /* Firefox, other Gecko */
+        box-sizing: border-box;
+        /* Opera/IE 8+ */
     }
 
     /* Clear floats after the columns */
@@ -102,98 +125,178 @@
         clear: both;
     } */
     textarea.myowntextarea {
-      /*width: 200px;*/
-      height: 80px;
+        /*width: 200px;*/
+        height: 80px;
     }
 
-    table.beta, table.beta th, table.beta td{
-      border-spacing:0px;
-      border:1px solid black;
+    table.beta,
+    table.beta th,
+    table.beta td {
+        border-spacing: 0px;
+        border: 1px solid black;
     }
-    table.beta th, table.beta td {
-      padding: 3px;
+
+    table.beta th,
+    table.beta td {
+        padding: 3px;
     }
 
+    * {
+        box-sizing: border-box;
+    }
 
+    .row::after {
+        content: "";
+        clear: both;
+        display: table;
+    }
 
-* {
-  box-sizing: border-box;
-}
+    [class*="col-"] {
+        float: left;
+        padding: 15px;
+    }
 
-.row::after {
-  content: "";
-  clear: both;
-  display: table;
-}
+    .col-fill {
+        height: 100%;
+    }
 
-[class*="col-"] {
-  float: left;
-  padding: 15px;
-}
+    .col-1 {
+        width: 8.33%;
+    }
 
-.col-1 {width: 8.33%;}
-.col-2 {width: 16.66%;}
-.col-3 {width: 25%;}
-.col-4 {width: 33.33%;}
-.col-5 {width: 41.66%;}
-.col-6 {width: 50%;}
-.col-7 {width: 58.33%;}
-.col-8 {width: 66.66%;}
-.col-9 {width: 75%;}
-.col-10 {width: 83.33%;}
-.col-11 {width: 91.66%;}
-.col-12 {width: 100%;}
+    .col-2 {
+        width: 16.66%;
+    }
 
-html {
-  font-family: "Lucida Sans", sans-serif;
-}
-.result {
+    .col-3 {
+        width: 25%;
+    }
 
-  background-color: #9933cc;
-  color: #ffffff;
-}
-.sub-button-length{
+    .col-4 {
+        width: 33.33%;
+    }
 
-  background-color: black;
-  color: #ffffff;
-}
-.sub-button {
-  cursor: pointer;
-  background-color: green;
-  color: #ffffff;
-  border: 2px solid gold;
-  padding: 10px;
-  margin: 2px;
-}
-.special {
-  background-color: #9933cc;
-  color: #ffffff;
-  padding: 15px;
-}
-.header {
-  background-color: #9933cc;
-  color: #ffffff;
-  padding: 15px;
-}
+    .col-5 {
+        width: 41.66%;
+    }
 
-.menu ul {
-  list-style-type: none;
-  margin: 0;
-  padding: 0;
-}
+    .col-6 {
+        width: 50%;
+    }
 
-.menu li {
-  padding: 8px;
-  margin-bottom: 7px;
-  background-color: #33b5e5;
-  color: #ffffff;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
+    .col-7 {
+        width: 58.33%;
+    }
 
-.menu li:hover {
-  background-color: #0099cc;
-}
+    .col-8 {
+        width: 66.66%;
+    }
 
+    .col-9 {
+        width: 75%;
+    }
 
+    .col-10 {
+        width: 83.33%;
+    }
+
+    .col-11 {
+        width: 91.66%;
+    }
+
+    .col-12 {
+        width: 100%;
+    }
+
+    html {
+        font-family: "Lucida Sans", sans-serif;
+    }
+
+    .result {
+
+        background-color: #0E9594;
+        color: #ffffff;
+    }
+
+    .sub-button-length {
+
+        background-color: black;
+        color: #ffffff;
+    }
+    .badges {
+        background-color: black;
+        color: white;
+        padding: 3px;
+        margin: 3px;
+    }
+
+    .sub-button {
+        cursor: pointer;
+        background-color: #562C2C;
+        color: #ffffff;
+        border: 2px solid #F2542D;
+        padding: 10px;
+        margin: 2px;
+    }
+
+    .special {
+        background-color: #0E9594;
+        color: #ffffff;
+        padding: 15px;
+    }
+
+    .header {
+        background-color: #F2542D;
+        color: #ffffff;
+        padding: 5px;
+    }
+
+    .menu ul {
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+    }
+
+    .menu li {
+        padding: 8px;
+        margin-bottom: 7px;
+        background-color: #33b5e5;
+        color: #ffffff;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+    }
+
+    .menu li:hover {
+        background-color: #0099cc;
+    }
+
+    .button5 {
+        display: inline-block;
+        padding: 0.7em 1.4em;
+        margin: 0 0.3em 0.3em 0;
+        border-radius: 0.15em;
+        box-sizing: border-box;
+        text-decoration: none;
+        font-family: 'Roboto', sans-serif;
+        text-transform: uppercase;
+        font-weight: 400;
+        color: #FFFFFF;
+        background-color: #3369ff;
+        box-shadow: inset 0 -0.6em 0 -0.35em rgba(0, 0, 0, 0.17);
+        text-align: center;
+        position: relative;
+        cursor: pointer;
+    }
+
+    .button5:active {
+        top: 0.1em;
+    }
+
+    @media all and (max-width:30em) {
+        .button5 {
+            display: block;
+            margin: 0.4em auto;
+        }
+    }
 </style>
+
 </html>
