@@ -40,7 +40,7 @@
                 <button class="button5" @click="reverseInputLines();">Reverse Input Lines</button>
                 <br>
                 <div>
-                    Enter your previous draw data below (ordered from most recent to oldest):<br>
+                    Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
                     <textarea class="myowntextarea auto-resized" v-model="inputData" rows="2" cols="40"
                         style="height: 246px; resize: none;" spellcheck="false">
 
@@ -63,15 +63,16 @@
 
             </div>
             <div class="col-2 special col-fill">
-                <div class="sub-button" v-for="(value, name) in subgroups"
-                    @click="changeResultGroup(value);output='';diagram=''">
-                    <span class="sub-button-length" style="display: inline-block;width: 40px;padding: 10px;">{{value.length}}</span>
+                <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'" v-for="(value, name) in subgroups"
+                    @click="changeResultGroup(name,value);output='';diagram=''">
+                    <span class="sub-button-length" style="display: inline-block;width: 40px;padding: 10px;">{{value.winning.length}}</span>
                     <span>{{name}}</span>
                 </div>
             </div>
             <div class="col-2 special col-fill">
-                <div v-for="rgroup in result_group" class="badges">
-                    {{rgroup.join(" ")}}
+                <div v-for="(item, index) in result_group_winningAndRef"  :key="index">
+                    <div class="badges-red">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</div>
+                    <div class="badges-black">{{item}}</div>
                 </div>
             </div>
             <div class="col-5 result col-fill" v-if="result_group">
@@ -223,11 +224,28 @@
         background-color: black;
         color: #ffffff;
     }
-    .badges {
+    .badges-red {
+        background-color: red;
+        color: white;
+        padding: 3px;
+        margin: 3px;
+    }
+
+    .badges-black {
         background-color: black;
         color: white;
         padding: 3px;
         margin: 3px;
+    }
+
+    .sub-button-selected{
+        cursor: pointer;
+        background-color: green;
+        color: #ffffff;
+        border: 2px solid #F2542D;
+        padding: 10px;
+        margin: 2px;
+
     }
 
     .sub-button {

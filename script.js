@@ -12,37 +12,27 @@ var app = new Vue({
         layers :'5,5,6',
 
         result_group :"",
-        result_group_data : "",
+        result_group_winning : "",
+        result_group_winningAndRef : "",
+        result_group_refs : "",
         diagram : "",
         output : "",
         inputData : `
-        3 8 16 40 43
-        1 29 33 45 47
-        14 27 39 46 48
-        5 25 34 48 50
-        15 27 33 39 50
-        3 16 25 39 44
-        20 23 28 30 44
-        12 24 40 41 46
-        6 15 17 42 48
-        6 12 23 39 45
-        17 25 35 39 44
-        3 22 34 49 50
-        4 16 20 31 39
-        5 8 10 13 31
-        1 11 37 41 48
-        13 15 16 28 41
-        6 11 20 38 43
-        17 18 24 29 40
-        9 15 22 39 46
-        8 19 32 43 46
-        7 21 23 36 38
-        23 26 33 38 49
-        7 19 26 42 50
-        14 25 39 41 44
+        3	8	16	40	43	1
+        1	29	33	45	47	2
+        14	27	39	46	48	3
+        5	25	34	48	50	4
+        15	27	33	39	50	5
         `,
-        subgroups : {'All':[]},
-        subKeys : []
+        subgroups : {
+            'All':{
+                winning:[],
+                winningAndRef:[],
+                refs:[]
+            }
+        },
+        selectedGroup:'',
+        groupKeys : []
     },
     methods: {
 
@@ -68,7 +58,6 @@ var app = new Vue({
             return permutations;
         },
         clean(s){
-            console.log('clean: '+s);
             r = s.replace(/\D/g,' ');
             r = r.replace(/\s\s+/g, ' ');
             return r;
@@ -174,13 +163,6 @@ var app = new Vue({
             return re;
         },
 
-        changeResultGroup(values){
-
-            this.result_group = values;
-
-            this.result_group_data = values.join(" ");
-        },
-
 
 
         createnetwork(){
@@ -274,10 +256,28 @@ var app = new Vue({
             }
             return res;
         },
+
+        changeResultGroup(name, values){
+
+            this.selectedGroup = name;
+
+            this.result_group = values.winning;
+
+            this.result_group_winning = values.winning.join(" ");
+            this.result_group_winningAndRef = values.winningAndRef;
+            this.result_group_refs = values.refs;
+        },
+
         createGroups(){
 
             //clear previous groups
-            this.subgroups = {'All':[]};
+            this.subgroups = {
+                'All':{
+                    winning:[],
+                    winningAndRef:[],
+                    refs:[]
+                }
+            };
 
             // put them in groups of 6 for each item
             //create rows here
@@ -290,12 +290,27 @@ var app = new Vue({
             inputs = filtered;
             for (var i=0;i<(Math.floor(inputs.length/(this.lengthrow+(this.refDate?1:0) )));i++){
 
+                //use last column as date ref column filter out the other numbers as winnings
                 if(i === 0 || this.refDate === false){
                     input = inputs.slice(i*this.lengthrow,i*this.lengthrow+this.lengthrow);
                 }else{
                     input = inputs.slice((i*this.lengthrow)+i,i*this.lengthrow+(this.lengthrow+i));
                 }
                 //input = inputs.slice(i*this.lengthrow,i*this.lengthrow+this.lengthrow);
+
+                if(this.refDate === true){
+                    inputWithRef = inputs.slice((i*this.lengthrow)+i,i*this.lengthrow+(this.lengthrow+i)+1);
+                    ref = inputs[i*this.lengthrow+(this.lengthrow+i)];
+
+                }else{
+                    inputWithRef = inputs.slice(i*this.lengthrow,i*this.lengthrow+this.lengthrow);
+                    ref = i;
+                }
+
+                //get the ref column
+                if(this.refDate === true){
+                    inputRef = inputs[i*this.lengthrow];
+                }
 
                 let subname = [0,0,0,0,0]
                 input.forEach(element => {
@@ -318,21 +333,28 @@ var app = new Vue({
                 subname = subname.join("-");
                 if(this.subgroups[subname] === undefined){
                     this.subgroups[subname] = [];
+                    this.subgroups[subname]['winning'] = [];
+                    this.subgroups[subname]['winningAndRef'] = [];
+                    this.subgroups[subname]['refs'] = [];
                 }
-                this.subgroups[subname].push(input)
-                this.subKeys.push(subname);
+                this.subgroups[subname]['winning'].push(input);
+                this.subgroups[subname]['winningAndRef'].push(inputWithRef.join(" "));
+                this.subgroups[subname]['refs'].push(ref);
+                this.groupKeys.push(subname);
 
-                this.subgroups.All.push(input);
+                this.subgroups.All.winning.push(input);
+                this.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+                this.subgroups.All.refs.push(ref);
             }
 
-            this.result_group_data =this.subKeys.join(" ");
-            console.log(this.result_group_data);
+            //this.result_group_winning =this.groupKeys.join(" ");
+            console.log(this.subgroups.All);
         },
         run(){
             outputt = "";
             //check these numbers in 'check' element
             //lastdraw =  .getElementById('draw').value;
-            check = this.result_group_data;
+            check = this.result_group_winning;
             check = this.clean(check);
             checks = check.split(" ");
             var filtered = checks.filter(function (el) {//filter out empty
@@ -354,6 +376,8 @@ var app = new Vue({
             //create rows here
             finputs = [];
             for (var i=0;i<(Math.floor(inputs.length/lengthrow));i++){
+
+                //use last column as date ref column filter out the other numbers as winnings
                 if(i === 0 || this.refDate === false){
                     input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
                     finputs.push(input);
@@ -364,7 +388,7 @@ var app = new Vue({
             }
             inputs = finputs;
 
-            inputs = inputs.reverse(); //reverse so that it's from oldest to newest
+            //inputs = inputs.reverse(); //reverse so that it's from oldest to newest
             balls = this.numberballs;
 
             this.tD = [];
