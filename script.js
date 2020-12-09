@@ -90,11 +90,11 @@ var app = new Vue({
         },
         changeWorkPlace(item){
             this.selectedWorkplace = item;
+            setTimeout(this.createGroups(),5000);
+            
         },
         saveWorkPlace(){
             var foundIndex = this.workplaces.findIndex(x => x.name == this.selectedWorkplace.name);
-            console.log('index',foundIndex);
-            console.log('workplace',this.workplaces[foundIndex]);
             this.workplaces[foundIndex] = this.selectedWorkplace;
             localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
         },
@@ -360,8 +360,6 @@ var app = new Vue({
             this.result_group_winning = values.winning.join(" ");
             this.result_group_winningAndRef = values.winningAndRef;
             this.result_group_refs = values.refs;
-
-            console.log('winning',this.result_group_winning)
         },
 
         createGroups(){
@@ -396,7 +394,6 @@ var app = new Vue({
                 }else{
                     input = inputs.slice(i*(lengthrow+1),i*(lengthrow+1)+(lengthrow));
                 }
-                console.log('input',input)
                 //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
                 if(this.selectedWorkplace.refDate === true){
@@ -434,22 +431,25 @@ var app = new Vue({
                 subname = subname.join("-");
                 if(this.subgroups[subname] === undefined){
                     this.subgroups[subname] = [];
+                    this.subgroups[subname]['name'] = '';
                     this.subgroups[subname]['winning'] = [];
                     this.subgroups[subname]['winningAndRef'] = [];
                     this.subgroups[subname]['refs'] = [];
                 }
+                this.subgroups[subname]['name'] = subname;
                 this.subgroups[subname]['winning'].push(input);
                 this.subgroups[subname]['winningAndRef'].push(inputWithRef.join(" "));
                 this.subgroups[subname]['refs'].push(ref);
                 this.groupKeys.push(subname);
 
+
+
+                this.subgroups.All.name = '';
                 this.subgroups.All.winning.push(input);
                 this.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
                 this.subgroups.All.refs.push(ref);
             }
-
             //this.result_group_winning =this.groupKeys.join(" ");
-            console.log(this.subgroups.All);
         },
         run(){
             outputt = "";

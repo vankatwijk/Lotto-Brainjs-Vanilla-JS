@@ -74,6 +74,7 @@ var app = new Vue({
     },
     changeWorkPlace: function changeWorkPlace(item) {
       this.selectedWorkplace = item;
+      setTimeout(this.createGroups(), 5000);
     },
     saveWorkPlace: function saveWorkPlace() {
       var _this = this;
@@ -81,8 +82,6 @@ var app = new Vue({
       var foundIndex = this.workplaces.findIndex(function (x) {
         return x.name == _this.selectedWorkplace.name;
       });
-      console.log('index', foundIndex);
-      console.log('workplace', this.workplaces[foundIndex]);
       this.workplaces[foundIndex] = this.selectedWorkplace;
       localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
     },
@@ -407,7 +406,6 @@ var app = new Vue({
       this.result_group_winning = values.winning.join(" ");
       this.result_group_winningAndRef = values.winningAndRef;
       this.result_group_refs = values.refs;
-      console.log('winning', this.result_group_winning);
     },
     createGroups: function createGroups() {
       var _this4 = this;
@@ -439,9 +437,8 @@ var app = new Vue({
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
-        }
+        } //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
-        console.log('input', input); //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
         if (_this4.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
@@ -475,10 +472,13 @@ var app = new Vue({
 
         if (_this4.subgroups[subname] === undefined) {
           _this4.subgroups[subname] = [];
+          _this4.subgroups[subname]['name'] = '';
           _this4.subgroups[subname]['winning'] = [];
           _this4.subgroups[subname]['winningAndRef'] = [];
           _this4.subgroups[subname]['refs'] = [];
         }
+
+        _this4.subgroups[subname]['name'] = subname;
 
         _this4.subgroups[subname]['winning'].push(input);
 
@@ -487,6 +487,8 @@ var app = new Vue({
         _this4.subgroups[subname]['refs'].push(ref);
 
         _this4.groupKeys.push(subname);
+
+        _this4.subgroups.All.name = '';
 
         _this4.subgroups.All.winning.push(input);
 
@@ -499,8 +501,6 @@ var app = new Vue({
         _loop();
       } //this.result_group_winning =this.groupKeys.join(" ");
 
-
-      console.log(this.subgroups.All);
     },
     run: function run() {
       outputt = ""; //check these numbers in 'check' element
