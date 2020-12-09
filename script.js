@@ -1,6 +1,7 @@
 var app = new Vue({
     el: '#app',
     data: {
+        loading:false,
         refDate: true,
         message: 'Hello Vue!',
         net: 0,
@@ -32,9 +33,101 @@ var app = new Vue({
             }
         },
         selectedGroup:'',
-        groupKeys : []
+        groupKeys : [],
+        workplaces : [],
+        selectedWorkplace : {}
+    },
+    mounted() {
+        const workplaces = JSON.parse(localStorage.getItem('workplaces'));
+        console.log('work', workplaces)
+        if(workplaces === null){
+            this.workplaces.push(
+                {
+                    name:'General',
+                    refDate:true,
+                    inputData : `
+                    3	8	16	40	43	1
+                    1	29	33	45	47	2
+                    14	27	39	46	48	3
+                    5	25	34	48	50	4
+                    15	27	33	39	50	5
+                    `,
+                    layers : '5,5,6',
+                    lengthrow :5,
+                    numberballs :50
+                }
+            );
+
+            localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        }else{
+            this.workplaces = workplaces;
+        }
+        
     },
     methods: {
+
+        addWorkPlace(){
+            var workplaceName = prompt("Please enter a name For the Workplace:", "");
+            if (workplaceName == null || workplaceName == "") {
+              alert("the name can not be empty !");
+            }else if(this.workplaces.find(o => o.name === workplaceName)){
+
+                alert("Name already exist !");
+
+            }else {
+
+                this.workplaces.push({
+                    name:workplaceName,
+                    refDate:true,
+                    inputData : "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
+                    layers : '5,5,6',
+                    lengthrow :5,
+                    numberballs :50
+                })
+                localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                
+            }
+        },
+        changeWorkPlace(item){
+            this.selectedWorkplace = item;
+        },
+        saveWorkPlace(){
+            var foundIndex = this.workplaces.findIndex(x => x.name == this.selectedWorkplace.name);
+            console.log('index',foundIndex);
+            console.log('workplace',this.workplaces[foundIndex]);
+            this.workplaces[foundIndex] = this.selectedWorkplace;
+            localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        },
+        renameWorkPlace(){
+            var workplaceName = prompt("Please enter a name For the Workplace:", this.selectedWorkplace.name);
+            if (workplaceName == null || workplaceName == "") {
+              alert("the name can not be empty !");
+            }else if(this.workplaces.find(o => o.name === workplaceName)){
+
+                alert("Name already exist !");
+
+            }else {
+
+                var foundIndex = this.workplaces.findIndex(x => x.name == this.selectedWorkplace.name);
+                this.workplaces[foundIndex].name = workplaceName;
+                localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+            }
+        },
+        removeWorkPlace(){
+            if (confirm("Are you sure you want to delete this workplace")) {
+                txt = "You pressed OK!";
+                if (this.workplaces.length === 1) {
+                  alert("You can not remove the last workplace !");
+                }else {
+                    var filteredWorkplaces = this.workplaces.filter(x => x.name !== this.selectedWorkplace.name);
+                    this.workplaces = filteredWorkplaces;
+                    localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                }
+              } else {
+                txt = "You pressed Cancel!";
+              }
+        },
+
 
         //https://stackoverflow.com/questions/39927452/recursively-print-all-permutations-of-a-string-javascript
         permut(string) {
@@ -166,18 +259,18 @@ var app = new Vue({
 
 
         createnetwork(){
-            hidlayers = eval("["+this.layers+"]");
+            hidlayers = eval("["+this.selectedWorkplace.layers+"]");
             this.net = new brain.NeuralNetwork({ hiddenLayers: hidlayers});
             outputt = "Neural Net created with Hidden Layers Shape ["+ hidlayers.join(",") +"]<br/>";
             this.output = outputt;
 
         },
         reverseInputLines(){
-            input = this.inputData;
+            input = this.selectedWorkplace.inputData;
             input = input.split("\n");
             input = input.reverse();
             input = input.join("\n");
-            this.inputData = input;
+            this.selectedWorkplace.inputData = input;
         },  
 
         highestProb(result,print=1){
@@ -197,6 +290,7 @@ var app = new Vue({
             return lst;
         },
         trainnetwork(){
+            
             //for (var i=0;i<1;i++){
             stats = this.net.train(this.tD);
             this.output = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
@@ -272,6 +366,8 @@ var app = new Vue({
 
         createGroups(){
 
+            this.saveWorkPlace();
+
             //clear previous groups
             this.subgroups = {
                 'All':{
@@ -283,19 +379,19 @@ var app = new Vue({
 
             // put them in groups of 6 for each item
             //create rows here
-            check = this.inputData;
+            check = this.selectedWorkplace.inputData;
             check = this.clean(check);
             checks = check.split(" ");
             var filtered = checks.filter(function (el) {//filter out empty
                 return el != "";
             });
             inputs = filtered;
-            lengthrow = +this.lengthrow;
+            lengthrow = +this.selectedWorkplace.lengthrow;
 
-            for (var i=0;i<(Math.floor(inputs.length/(lengthrow+(this.refDate?1:0) )));i++){
+            for (var i=0;i<(Math.floor(inputs.length/(lengthrow+(this.selectedWorkplace.refDate?1:0) )));i++){
 
                 //use last column as date ref column filter out the other numbers as winnings
-                if(i === 0 || this.refDate === false){
+                if(i === 0 || this.selectedWorkplace.refDate === false){
                     input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
                 }else{
                     input = inputs.slice(i*(lengthrow+1),i*(lengthrow+1)+(lengthrow));
@@ -303,7 +399,7 @@ var app = new Vue({
                 console.log('input',input)
                 //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
-                if(this.refDate === true){
+                if(this.selectedWorkplace.refDate === true){
                     inputWithRef = inputs.slice(i*(lengthrow+1),i*(lengthrow+1)+(lengthrow+1));
                     ref = inputs[i*lengthrow+(lengthrow+i)];
 
@@ -313,7 +409,7 @@ var app = new Vue({
                 }
 
                 //get the ref column
-                if(this.refDate === true){
+                if(this.selectedWorkplace.refDate === true){
                     inputRef = inputs[i*lengthrow];
                 }
 
@@ -371,7 +467,7 @@ var app = new Vue({
             inputs = checks;
 
             //get row length
-            lengthrow = +this.lengthrow;
+            lengthrow = +this.selectedWorkplace.lengthrow;
             
 
             //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
@@ -390,7 +486,7 @@ var app = new Vue({
             inputs = finputs;
 
             //inputs = inputs.reverse(); //reverse so that it's from oldest to newest
-            balls = this.numberballs;
+            balls = this.selectedWorkplace.numberballs;
 
             this.tD = [];
             for (var i=0;i<inputs.length-1;i++){
@@ -402,6 +498,7 @@ var app = new Vue({
             console.log('[lastDraw]',inputs);
             this.lastResult = this.tD_Ones(balls,this.lastDraw.slice(0,len));
             outputt+="Read training data!";
+
             this.output = outputt;
         }
 

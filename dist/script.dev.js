@@ -3,6 +3,7 @@
 var app = new Vue({
   el: '#app',
   data: {
+    loading: false,
     refDate: true,
     message: 'Hello Vue!',
     net: 0,
@@ -27,9 +28,102 @@ var app = new Vue({
       }
     },
     selectedGroup: '',
-    groupKeys: []
+    groupKeys: [],
+    workplaces: [],
+    selectedWorkplace: {}
+  },
+  mounted: function mounted() {
+    var workplaces = JSON.parse(localStorage.getItem('workplaces'));
+    console.log('work', workplaces);
+
+    if (workplaces === null) {
+      this.workplaces.push({
+        name: 'General',
+        refDate: true,
+        inputData: "\n                    3\t8\t16\t40\t43\t1\n                    1\t29\t33\t45\t47\t2\n                    14\t27\t39\t46\t48\t3\n                    5\t25\t34\t48\t50\t4\n                    15\t27\t33\t39\t50\t5\n                    ",
+        layers: '5,5,6',
+        lengthrow: 5,
+        numberballs: 50
+      });
+      localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+    } else {
+      this.workplaces = workplaces;
+    }
   },
   methods: {
+    addWorkPlace: function addWorkPlace() {
+      var workplaceName = prompt("Please enter a name For the Workplace:", "");
+
+      if (workplaceName == null || workplaceName == "") {
+        alert("the name can not be empty !");
+      } else if (this.workplaces.find(function (o) {
+        return o.name === workplaceName;
+      })) {
+        alert("Name already exist !");
+      } else {
+        this.workplaces.push({
+          name: workplaceName,
+          refDate: true,
+          inputData: "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
+          layers: '5,5,6',
+          lengthrow: 5,
+          numberballs: 50
+        });
+        localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+      }
+    },
+    changeWorkPlace: function changeWorkPlace(item) {
+      this.selectedWorkplace = item;
+    },
+    saveWorkPlace: function saveWorkPlace() {
+      var _this = this;
+
+      var foundIndex = this.workplaces.findIndex(function (x) {
+        return x.name == _this.selectedWorkplace.name;
+      });
+      console.log('index', foundIndex);
+      console.log('workplace', this.workplaces[foundIndex]);
+      this.workplaces[foundIndex] = this.selectedWorkplace;
+      localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+    },
+    renameWorkPlace: function renameWorkPlace() {
+      var _this2 = this;
+
+      var workplaceName = prompt("Please enter a name For the Workplace:", this.selectedWorkplace.name);
+
+      if (workplaceName == null || workplaceName == "") {
+        alert("the name can not be empty !");
+      } else if (this.workplaces.find(function (o) {
+        return o.name === workplaceName;
+      })) {
+        alert("Name already exist !");
+      } else {
+        var foundIndex = this.workplaces.findIndex(function (x) {
+          return x.name == _this2.selectedWorkplace.name;
+        });
+        this.workplaces[foundIndex].name = workplaceName;
+        localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+      }
+    },
+    removeWorkPlace: function removeWorkPlace() {
+      var _this3 = this;
+
+      if (confirm("Are you sure you want to delete this workplace")) {
+        txt = "You pressed OK!";
+
+        if (this.workplaces.length === 1) {
+          alert("You can not remove the last workplace !");
+        } else {
+          var filteredWorkplaces = this.workplaces.filter(function (x) {
+            return x.name !== _this3.selectedWorkplace.name;
+          });
+          this.workplaces = filteredWorkplaces;
+          localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        }
+      } else {
+        txt = "You pressed Cancel!";
+      }
+    },
     //https://stackoverflow.com/questions/39927452/recursively-print-all-permutations-of-a-string-javascript
     permut: function (_permut) {
       function permut(_x) {
@@ -209,7 +303,7 @@ var app = new Vue({
       return re;
     },
     createnetwork: function createnetwork() {
-      hidlayers = eval("[" + this.layers + "]");
+      hidlayers = eval("[" + this.selectedWorkplace.layers + "]");
       this.net = new brain.NeuralNetwork({
         hiddenLayers: hidlayers
       });
@@ -217,11 +311,11 @@ var app = new Vue({
       this.output = outputt;
     },
     reverseInputLines: function reverseInputLines() {
-      input = this.inputData;
+      input = this.selectedWorkplace.inputData;
       input = input.split("\n");
       input = input.reverse();
       input = input.join("\n");
-      this.inputData = input;
+      this.selectedWorkplace.inputData = input;
     },
     highestProb: function highestProb(result) {
       var print = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 1;
@@ -316,9 +410,10 @@ var app = new Vue({
       console.log('winning', this.result_group_winning);
     },
     createGroups: function createGroups() {
-      var _this = this;
+      var _this4 = this;
 
-      //clear previous groups
+      this.saveWorkPlace(); //clear previous groups
+
       this.subgroups = {
         'All': {
           winning: [],
@@ -328,7 +423,7 @@ var app = new Vue({
       }; // put them in groups of 6 for each item
       //create rows here
 
-      check = this.inputData;
+      check = this.selectedWorkplace.inputData;
       check = this.clean(check);
       checks = check.split(" ");
       var filtered = checks.filter(function (el) {
@@ -336,11 +431,11 @@ var app = new Vue({
         return el != "";
       });
       inputs = filtered;
-      lengthrow = +this.lengthrow;
+      lengthrow = +this.selectedWorkplace.lengthrow;
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || _this.refDate === false) {
+        if (i === 0 || _this4.selectedWorkplace.refDate === false) {
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
@@ -348,7 +443,7 @@ var app = new Vue({
 
         console.log('input', input); //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
-        if (_this.refDate === true) {
+        if (_this4.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
           ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
@@ -357,7 +452,7 @@ var app = new Vue({
         } //get the ref column
 
 
-        if (_this.refDate === true) {
+        if (_this4.selectedWorkplace.refDate === true) {
           inputRef = inputs[i * lengthrow];
         }
 
@@ -378,29 +473,29 @@ var app = new Vue({
         });
         subname = subname.join("-");
 
-        if (_this.subgroups[subname] === undefined) {
-          _this.subgroups[subname] = [];
-          _this.subgroups[subname]['winning'] = [];
-          _this.subgroups[subname]['winningAndRef'] = [];
-          _this.subgroups[subname]['refs'] = [];
+        if (_this4.subgroups[subname] === undefined) {
+          _this4.subgroups[subname] = [];
+          _this4.subgroups[subname]['winning'] = [];
+          _this4.subgroups[subname]['winningAndRef'] = [];
+          _this4.subgroups[subname]['refs'] = [];
         }
 
-        _this.subgroups[subname]['winning'].push(input);
+        _this4.subgroups[subname]['winning'].push(input);
 
-        _this.subgroups[subname]['winningAndRef'].push(inputWithRef.join(" "));
+        _this4.subgroups[subname]['winningAndRef'].push(inputWithRef.join(" "));
 
-        _this.subgroups[subname]['refs'].push(ref);
+        _this4.subgroups[subname]['refs'].push(ref);
 
-        _this.groupKeys.push(subname);
+        _this4.groupKeys.push(subname);
 
-        _this.subgroups.All.winning.push(input);
+        _this4.subgroups.All.winning.push(input);
 
-        _this.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+        _this4.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
-        _this.subgroups.All.refs.push(ref);
+        _this4.subgroups.All.refs.push(ref);
       };
 
-      for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.refDate ? 1 : 0))); i++) {
+      for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {
         _loop();
       } //this.result_group_winning =this.groupKeys.join(" ");
 
@@ -421,7 +516,7 @@ var app = new Vue({
       checks = filtered;
       inputs = checks; //get row length
 
-      lengthrow = +this.lengthrow; //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
+      lengthrow = +this.selectedWorkplace.lengthrow; //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
 
       len = lengthrow; // put them in groups of 6 for each item
       //create rows here
@@ -436,7 +531,7 @@ var app = new Vue({
 
       inputs = finputs; //inputs = inputs.reverse(); //reverse so that it's from oldest to newest
 
-      balls = this.numberballs;
+      balls = this.selectedWorkplace.numberballs;
       this.tD = [];
 
       for (var i = 0; i < inputs.length - 1; i++) {
