@@ -313,6 +313,7 @@ var app = new Vue({
       this.result_group_winning = values.winning.join(" ");
       this.result_group_winningAndRef = values.winningAndRef;
       this.result_group_refs = values.refs;
+      console.log('winning', this.result_group_winning);
     },
     createGroups: function createGroups() {
       var _this = this;
@@ -335,27 +336,29 @@ var app = new Vue({
         return el != "";
       });
       inputs = filtered;
+      lengthrow = +this.lengthrow;
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
         if (i === 0 || _this.refDate === false) {
-          input = inputs.slice(i * _this.lengthrow, i * _this.lengthrow + _this.lengthrow);
+          input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
         } else {
-          input = inputs.slice(i * _this.lengthrow + i, i * _this.lengthrow + (_this.lengthrow + i));
-        } //input = inputs.slice(i*this.lengthrow,i*this.lengthrow+this.lengthrow);
+          input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
+        }
 
+        console.log('input', input); //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
         if (_this.refDate === true) {
-          inputWithRef = inputs.slice(i * _this.lengthrow + i, i * _this.lengthrow + (_this.lengthrow + i) + 1);
-          ref = inputs[i * _this.lengthrow + (_this.lengthrow + i)];
+          inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
+          ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
-          inputWithRef = inputs.slice(i * _this.lengthrow, i * _this.lengthrow + _this.lengthrow);
+          inputWithRef = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
           ref = i;
         } //get the ref column
 
 
         if (_this.refDate === true) {
-          inputRef = inputs[i * _this.lengthrow];
+          inputRef = inputs[i * lengthrow];
         }
 
         var subname = [0, 0, 0, 0, 0];
@@ -397,7 +400,7 @@ var app = new Vue({
         _this.subgroups.All.refs.push(ref);
       };
 
-      for (var i = 0; i < Math.floor(inputs.length / (this.lengthrow + (this.refDate ? 1 : 0))); i++) {
+      for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.refDate ? 1 : 0))); i++) {
         _loop();
       } //this.result_group_winning =this.groupKeys.join(" ");
 
@@ -418,22 +421,17 @@ var app = new Vue({
       checks = filtered;
       inputs = checks; //get row length
 
-      lengthrow = this.lengthrow; //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
+      lengthrow = +this.lengthrow; //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
 
-      len = 5; // put them in groups of 6 for each item
+      len = lengthrow; // put them in groups of 6 for each item
       //create rows here
 
       finputs = [];
 
       for (var i = 0; i < Math.floor(inputs.length / lengthrow); i++) {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || this.refDate === false) {
-          input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
-          finputs.push(input);
-        } else {
-          input = inputs.slice(i * lengthrow + 1, i * lengthrow + (lengthrow + 1));
-          finputs.push(input);
-        }
+        input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
+        finputs.push(input);
       }
 
       inputs = finputs; //inputs = inputs.reverse(); //reverse so that it's from oldest to newest
@@ -451,6 +449,7 @@ var app = new Vue({
       }
 
       this.lastDraw = inputs[inputs.length - 1];
+      console.log('[lastDraw]', inputs);
       this.lastResult = this.tD_Ones(balls, this.lastDraw.slice(0, len));
       outputt += "Read training data!";
       this.output = outputt;

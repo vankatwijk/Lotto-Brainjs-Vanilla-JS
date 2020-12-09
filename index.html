@@ -74,6 +74,7 @@
                     <div class="badges-red">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</div>
                     <div class="badges-black">{{item}}</div>
                 </div>
+                <div class="badges-red">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</div>
             </div>
             <div class="col-5 result col-fill" v-if="result_group">
                 <p v-if="result_group.length > 1">
