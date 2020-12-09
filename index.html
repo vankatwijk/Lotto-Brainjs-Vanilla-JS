@@ -9,7 +9,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
 
     <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
@@ -27,13 +28,13 @@
     <div id="app">
         <div class="container-fluid">
             <div class="row header">
-                    <h2>Lotto</h2>
+                <h2>Lotto</h2>
             </div>
-            <div class="row main" >
-                <div class="col workspaces">                    
+            <div class="row main">
+                <div class="col workspaces">
                     <div>
-                        <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected':'workplace-button'" v-for="item in workplaces"
-                            @click="changeWorkPlace(item);output='';diagram=''">
+                        <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected':'workplace-button'"
+                            v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
                             <span>{{item.name}}</span>
                         </div>
                         <div class="workplace-button" @click="addWorkPlace();">
@@ -42,7 +43,7 @@
                     </div>
                 </div>
                 <div class="col-4 data-insert-container">
-                    <div v-if="selectedWorkplace.name" >
+                    <div v-if="selectedWorkplace.name">
                         <div class="workplace-setting">
                             <button class="btn btn-success" @click="saveWorkPlace()">Save</button>
                             <button class="btn btn-secondary" @click="renameWorkPlace()">Rename</button>
@@ -55,71 +56,79 @@
                             2. Then, Select a group you want to use<br>
                             3. Then, click on [Create Neural Network] button.<br>
                             4. Then, click [Read Training Data].<br>
-                            5. Then, click [Train =&gt; Run] button as many times as you like to see trained network and results
+                            5. Then, click [Train =&gt; Run] button as many times as you like to see trained network and
+                            results
                             of run.
                         </p>
-        
+
                         <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear Input</button>
                         <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input Lines</button>
                         <br>
                         <div>
                             Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
                             <div class="form-floating">
-                                <textarea class="form-control" v-model="selectedWorkplace.inputData" placeholder="Insert winnings" id="floatingTextarea2" style="height: 100px"></textarea>
+                                <textarea class="form-control" v-model="selectedWorkplace.inputData"
+                                    placeholder="Insert winnings" id="floatingTextarea2"
+                                    style="height: 100px"></textarea>
                                 <label for="floatingTextarea2">Winnings</label>
-                              </div>
+                            </div>
                         </div>
                         <label for="refDate">Reference date (in last column of row) : </label>
-                        <input type="checkbox" id="refDate"  v-model="selectedWorkplace.refDate"><br><br>
-        
+                        <input type="checkbox" id="refDate" v-model="selectedWorkplace.refDate"><br><br>
+
                         <label for="lengthrow">Number of columns in a row : </label>
                         <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" /><br><br>
-        
+
                         <label for="numberballs">Number on balls go to : </label>
                         <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" /><br><br>
-        
+
                         <label for="layers">Hidden Layers first learning Shape : </label>
                         <input size="4" type="text" v-model="selectedWorkplace.layers" id="layers" /><br><br>
                         <p>
                             <button class="btn btn-primary" @click="createGroups();">Create Groups</button>
                         </p>
-        
+
                     </div>
                 </div>
                 <div class="col groups-container">
-                    <div v-if="selectedWorkplace.name" >
-                        <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'" v-for="(value, name) in subgroups"
+                    <div v-if="selectedWorkplace.name">
+                        <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
+                            v-for="(value, name) in subgroups"
                             @click="changeResultGroup(name,value);output='';diagram=''">
-                            <span class="sub-button-length" style="display: inline-block;width: 40px;padding: 10px;">{{value.winning.length}}</span>
+                            <span class="sub-button-length"
+                                style="display: inline-block;width: 40px;padding: 10px;">{{value.winning.length}}</span>
                             <span>{{name}}</span>
                         </div>
                     </div>
                 </div>
                 <div class="col results-container">
-                    <div v-if="selectedWorkplace.name" >
-                        <div v-for="(item, index) in result_group_winningAndRef"  :key="index">
-                            <div class="badges-red">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</div>
+                    <div v-if="selectedWorkplace.name">
+                        <div v-for="(item, index) in result_group_winningAndRef" :key="index">
+                            <div class="badges-red">
+                                {{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</div>
                             <div class="badges-black">{{item}}</div>
                         </div>
-                        <div class="badges-red">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</div>
+                        <div class="badges-red">
+                            {{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}
+                        </div>
                     </div>
                 </div>
                 <div class="col-4 results-container">
-                    <div v-if="selectedWorkplace.name" >
+                    <div v-if="selectedWorkplace.name">
                         <p v-if="result_group.length > 1">
                             <button class="btn btn-primary" @click="createnetwork();">Create Neural Network</button>
                             <button class="btn btn-primary" @click="readtrainingdata();">Read Training Data</button>
                             <button class="btn btn-primary" @click="trainnetwork();">Train => Run</button>
                         </p>
-        
+
                         <b>Output will show below:</b><br>
                         <div v-html="output"></div>
-        
-        
+
+
                         <div v-html="diagram"></div>
                     </div>
                 </div>
-              </div>
+            </div>
         </div>
         <div class="row">
 
@@ -136,6 +145,7 @@
         background-color: #127475;
         color: white;
     }
+
     .hide {
         display: none;
     }
@@ -151,19 +161,19 @@
         padding: 5px;
     }
 
-    .workspaces{
+    .workspaces {
         background-color: #D8CBC7;
         max-width: 200px;
         min-width: 100px;
         padding: 0;
     }
 
-    .data-insert-container{
+    .data-insert-container {
         background-color: #9A6D38;
 
     }
 
-    .groups-container{
+    .groups-container {
         background-color: #33673B;
         max-width: 300px;
         min-width: 200px;
@@ -171,7 +181,8 @@
         overflow: auto;
         padding: 0px;
     }
-    .results-container{
+
+    .results-container {
         background-color: #19231A;
         height: 100%;
         overflow: auto;
@@ -179,22 +190,22 @@
 
     .badges-red {
         background-color: #562c2c;
-    color: white;
-    padding: 8px;
-    margin: 3px;
-    border-radius: 15px;
-    text-align: center;
+        color: white;
+        padding: 8px;
+        margin: 3px;
+        border-radius: 15px;
+        text-align: center;
     }
 
     .badges-black {
         background-color: black;
-    color: white;
-    padding: 8px;
-    margin: 3px;
-    border-radius: 15px;
+        color: white;
+        padding: 8px;
+        margin: 3px;
+        border-radius: 15px;
     }
 
-    .sub-button-selected{
+    .sub-button-selected {
         cursor: pointer;
         background-color: #19231a;
         color: #ffffff;
@@ -215,7 +226,7 @@
     }
 
 
-    .workplace-button-selected{
+    .workplace-button-selected {
         cursor: pointer;
         background-color: #9A6D38;
         color: #ffffff;
@@ -234,12 +245,37 @@
         padding: 10px;
         margin: 10px;
     }
+
     .workplace-setting {
         background-color: rgb(0, 0, 0);
         padding: 15px;
         width: 100%;
 
     }
+
+    /* width */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #19231A;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #000000;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #000000;
+    }
+
+
+
+
 
 
 
@@ -298,7 +334,6 @@
     .menu li:hover {
         background-color: #0099cc;
     }
-
 </style>
 
 </html>
