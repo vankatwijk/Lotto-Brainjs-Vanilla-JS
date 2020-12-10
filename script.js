@@ -54,7 +54,8 @@ var app = new Vue({
                     `,
                     layers : '5,5,6',
                     lengthrow :5,
-                    numberballs :50
+                    numberballs :50,
+                    groupsConfig : '10,20,30,40,50'
                 }
             );
 
@@ -100,7 +101,8 @@ var app = new Vue({
                     inputData : "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
                     layers : '5,5,6',
                     lengthrow :5,
-                    numberballs :50
+                    numberballs :50,
+                    groupsConfig : '10,20,30,40,50'
                 })
                 localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
                 
@@ -407,7 +409,7 @@ var app = new Vue({
             }
             
 
-            console.log(this.matrix);
+            console.log('[matrix]',this.matrix);
         },
 
         createGroups(){
@@ -433,6 +435,7 @@ var app = new Vue({
             });
             inputs = filtered;
             lengthrow = +this.selectedWorkplace.lengthrow;
+            console.log('[lengthrow]',lengthrow)
 
             for (var i=0;i<(Math.floor(inputs.length/(lengthrow+(this.selectedWorkplace.refDate?1:0) )));i++){
 
@@ -460,24 +463,44 @@ var app = new Vue({
                     inputRef = inputs[i*lengthrow];
                 }
 
+
+                var groupsConfig1 = this.selectedWorkplace.groupsConfig;
+                var groupsConfig = groupsConfig1.split(",");
+                console.log("[groupsConfig]",groupsConfig)
+
                 let subname = [];
-                for (var j=0;j<lengthrow;j++){
+                //for (var j=0;j<lengthrow;j++){
+                for (var j=0;j<groupsConfig.length;j++){
                     subname.push(0)
                 }
 
+
                 input.forEach(element => {
 
-                    if(element < 10){
-                        subname[0] += 1;
-                    }else if(element < 20){
-                        subname[1] += 1;
-                    }else if(element < 30){
-                        subname[2] += 1;
-                    }else if(element < 40){
-                        subname[3] += 1;
-                    }else if(element <= 50){
-                        subname[4] += 1;
+                    let triggered = false;
+
+                    for (let [index, val] of groupsConfig.entries()) {
+                        if(triggered === false){
+                            console.log("[groupsConfig - index]",index)
+                            console.log("[groupsConfig - val]",val)
+                            console.log("[groupsConfig - element]",element)
+                            if(+element <= +val){
+                                subname[+index] += 1;
+                                triggered = true;
+                            }
+                        }
                     }
+                    // if(element < 10){
+                    //     subname[0] += 1;
+                    // }else if(element < 20){
+                    //     subname[1] += 1;
+                    // }else if(element < 30){
+                    //     subname[2] += 1;
+                    // }else if(element < 40){
+                    //     subname[3] += 1;
+                    // }else if(element <= 50){
+                    //     subname[4] += 1;
+                    // }
 
                 });
 

@@ -1,5 +1,13 @@
 "use strict";
 
+function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
+
+function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
+
+function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) || Object.prototype.toString.call(arr) === "[object Arguments]")) { return; } var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"] != null) _i["return"](); } finally { if (_d) throw _e; } } return _arr; }
+
+function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
+
 var app = new Vue({
   el: '#app',
   data: {
@@ -43,7 +51,8 @@ var app = new Vue({
         inputData: "\n                    3\t8\t16\t40\t43\t1\n                    1\t29\t33\t45\t47\t2\n                    14\t27\t39\t46\t48\t3\n                    5\t25\t34\t48\t50\t4\n                    15\t27\t33\t39\t50\t5\n                    ",
         layers: '5,5,6',
         lengthrow: 5,
-        numberballs: 50
+        numberballs: 50,
+        groupsConfig: '10,20,30,40,50'
       });
       localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
     } else {
@@ -83,7 +92,8 @@ var app = new Vue({
           inputData: "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
           layers: '5,5,6',
           lengthrow: 5,
-          numberballs: 50
+          numberballs: 50,
+          groupsConfig: '10,20,30,40,50'
         });
         localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
       }
@@ -442,7 +452,7 @@ var app = new Vue({
         }
       }
 
-      console.log(this.matrix);
+      console.log('[matrix]', this.matrix);
     },
     createGroups: function createGroups() {
       var _this4 = this;
@@ -467,6 +477,7 @@ var app = new Vue({
       });
       inputs = filtered;
       lengthrow = +this.selectedWorkplace.lengthrow;
+      console.log('[lengthrow]', lengthrow);
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
@@ -494,23 +505,62 @@ var app = new Vue({
           inputRef = inputs[i * lengthrow];
         }
 
-        var subname = [];
+        groupsConfig1 = _this4.selectedWorkplace.groupsConfig;
+        groupsConfig = groupsConfig1.split(",");
+        console.log("[groupsConfig]", groupsConfig);
+        var subname = []; //for (var j=0;j<lengthrow;j++){
 
-        for (j = 0; j < lengthrow; j++) {
+        for (j = 0; j < groupsConfig.length; j++) {
           subname.push(0);
         }
 
         input.forEach(function (element) {
-          if (element < 10) {
-            subname[0] += 1;
-          } else if (element < 20) {
-            subname[1] += 1;
-          } else if (element < 30) {
-            subname[2] += 1;
-          } else if (element < 40) {
-            subname[3] += 1;
-          } else if (element <= 50) {
-            subname[4] += 1;
+          var triggered = false;
+          var _iteratorNormalCompletion2 = true;
+          var _didIteratorError2 = false;
+          var _iteratorError2 = undefined;
+
+          try {
+            for (var _iterator2 = groupsConfig.entries()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+              var _step2$value = _slicedToArray(_step2.value, 2),
+                  index = _step2$value[0],
+                  val = _step2$value[1];
+
+              if (triggered === false) {
+                console.log("[groupsConfig - index]", index);
+                console.log("[groupsConfig - val]", val);
+                console.log("[groupsConfig - element]", element);
+
+                if (+element <= +val) {
+                  subname[+index] += 1;
+                  triggered = true;
+                }
+              }
+            } // if(element < 10){
+            //     subname[0] += 1;
+            // }else if(element < 20){
+            //     subname[1] += 1;
+            // }else if(element < 30){
+            //     subname[2] += 1;
+            // }else if(element < 40){
+            //     subname[3] += 1;
+            // }else if(element <= 50){
+            //     subname[4] += 1;
+            // }
+
+          } catch (err) {
+            _didIteratorError2 = true;
+            _iteratorError2 = err;
+          } finally {
+            try {
+              if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+                _iterator2["return"]();
+              }
+            } finally {
+              if (_didIteratorError2) {
+                throw _iteratorError2;
+              }
+            }
           }
         });
         subname = subname.join("-");
@@ -543,6 +593,8 @@ var app = new Vue({
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {
+        var groupsConfig1;
+        var groupsConfig;
         var j;
 
         _loop();
