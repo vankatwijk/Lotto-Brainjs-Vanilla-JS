@@ -3,7 +3,6 @@ var app = new Vue({
     data: {
         loading:false,
         refDate: true,
-        message: 'Hello Vue!',
         net: 0,
         tD :0,
         lastDraw :0,
@@ -35,7 +34,8 @@ var app = new Vue({
         selectedGroup:'',
         groupKeys : [],
         workplaces : [],
-        selectedWorkplace : {}
+        selectedWorkplace : {},
+        matrix : []
     },
     mounted() {
         const workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -63,9 +63,27 @@ var app = new Vue({
             this.workplaces = workplaces;
         }
         
+    },  
+    computed: {
     },
     methods: {
 
+        getMatrixValueWithTableFormate(row,col) {
+
+            const value = this.getMatrixValue(row,col);
+
+            return (value > 0 ? "<b style='color:red'>"+value+"</b>" : "<span style='color:lightgrey'>"+value+"</span>");
+        },
+        getMatrixValue(row,col) {
+            if(this.matrix[row] === undefined){
+                return 0;
+            }
+            if(this.matrix[row][col] === undefined){
+                return 0;
+            }
+
+            return this.matrix[row][col];
+        },
         addWorkPlace(){
             var workplaceName = prompt("Please enter a name For the Workplace:", "");
             if (workplaceName == null || workplaceName == "") {
@@ -90,6 +108,12 @@ var app = new Vue({
         },
         changeWorkPlace(item){
             this.selectedWorkplace = item;
+
+
+            this.diagram = "";
+            this.output = "";
+            this.selectedGroup = "";
+
             setTimeout(this.createGroups(),5000);
             
         },
@@ -362,6 +386,30 @@ var app = new Vue({
             this.result_group_refs = values.refs;
         },
 
+        generateProportionTable(){
+        },
+
+        generateProportionMatrix(winningRow){
+
+
+            lengthrow = +this.selectedWorkplace.lengthrow;
+            for (var m=0;m<lengthrow;m++){
+
+                if(this.matrix[winningRow[m]] === undefined){
+                    this.matrix[winningRow[m]] = [];
+
+                }
+                if(this.matrix[winningRow[m]][m] === undefined){
+                    this.matrix[winningRow[m]][m] = 1;
+                }else{
+                    this.matrix[winningRow[m]][m] += 1;
+                }
+            }
+            
+
+            console.log(this.matrix);
+        },
+
         createGroups(){
 
             this.saveWorkPlace();
@@ -391,8 +439,10 @@ var app = new Vue({
                 //use last column as date ref column filter out the other numbers as winnings
                 if(i === 0 || this.selectedWorkplace.refDate === false){
                     input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
+                    this.generateProportionMatrix(input);
                 }else{
                     input = inputs.slice(i*(lengthrow+1),i*(lengthrow+1)+(lengthrow));
+                    this.generateProportionMatrix(input);
                 }
                 //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
@@ -410,10 +460,14 @@ var app = new Vue({
                     inputRef = inputs[i*lengthrow];
                 }
 
-                let subname = [0,0,0,0,0]
+                let subname = [];
+                for (var j=0;j<lengthrow;j++){
+                    subname.push(0)
+                }
+
                 input.forEach(element => {
 
-                    if(element < 10){50
+                    if(element < 10){
                         subname[0] += 1;
                     }else if(element < 20){
                         subname[1] += 1;
@@ -421,7 +475,7 @@ var app = new Vue({
                         subname[2] += 1;
                     }else if(element < 40){
                         subname[3] += 1;
-                    }else if(element < 50){
+                    }else if(element <= 50){
                         subname[4] += 1;
                     }
 

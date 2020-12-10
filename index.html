@@ -38,7 +38,7 @@
                             <span>{{item.name}}</span>
                         </div>
                         <div class="workplace-button" @click="addWorkPlace();">
-                            <span>+ Add</span>
+                            <span>+ Add Tab</span>
                         </div>
                     </div>
                 </div>
@@ -102,7 +102,7 @@
                     </div>
                 </div>
                 <div class="col results-container">
-                    <div v-if="selectedWorkplace.name">
+                    <div v-if="selectedWorkplace.name && selectedGroup">
                         <div v-for="(item, index) in result_group_winningAndRef" :key="index">
                             <div class="badges-red">
                                 {{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</div>
@@ -114,7 +114,7 @@
                     </div>
                 </div>
                 <div class="col-4 results-container">
-                    <div v-if="selectedWorkplace.name">
+                    <div v-if="selectedWorkplace.name && selectedGroup">
                         <p v-if="result_group.length > 1">
                             <button class="btn btn-primary" @click="createnetwork();">Create Neural Network</button>
                             <button class="btn btn-primary" @click="readtrainingdata();">Read Training Data</button>
@@ -126,6 +126,21 @@
 
 
                         <div v-html="diagram"></div>
+
+                        <table class="table" style="background-color:white" :key="selectedGroup">
+                            <thead>
+                              <tr>
+                                <th scope="col">#</th>
+                                <th scope="col" v-for="colHead in +selectedWorkplace.lengthrow" :key="colHead">{{colHead}}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr v-for="(item, index) in matrix">
+                                <th scope="row" v-if="item">{{index}}</th>
+                                <td v-for="colcount in +selectedWorkplace.lengthrow" :key="colcount+'colrow'" v-if="item"  v-html="getMatrixValueWithTableFormate(index,colcount-1)"></td>
+                              </tr>
+                            </tbody>
+                          </table>
                     </div>
                 </div>
             </div>
