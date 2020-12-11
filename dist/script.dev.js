@@ -1,5 +1,13 @@
 "use strict";
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
+
+function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance"); }
@@ -24,6 +32,8 @@ var app = new Vue({
     result_group_winning: "",
     result_group_winningAndRef: "",
     result_group_refs: "",
+    result_group_numbers: [],
+    result_group_numbersToPlay: [],
     diagram: "",
     output: "",
     inputData: "\n        3\t8\t16\t40\t43\t1\n        1\t29\t33\t45\t47\t2\n        14\t27\t39\t46\t48\t3\n        5\t25\t34\t48\t50\t4\n        15\t27\t33\t39\t50\t5\n        ",
@@ -63,7 +73,7 @@ var app = new Vue({
   methods: {
     getMatrixValueWithTableFormate: function getMatrixValueWithTableFormate(row, col) {
       var value = this.getMatrixValue(row, col);
-      return value > 0 ? "<b style='color:red'>" + value + "</b>" : "<span style='color:lightgrey'>" + value + "</span>";
+      return value > 0 ? "<b style='color:red'>" + value + "</b>" : "<span style='color:grey'>" + value + "</span>";
     },
     getMatrixValue: function getMatrixValue(row, col) {
       if (this.matrix[row] === undefined) {
@@ -380,7 +390,8 @@ var app = new Vue({
     runthrough: function runthrough() {
       result = this.net.run(this.lastResult);
       ordlst = this.highestProb(result);
-      numbersToPlay = ordlst.slice(0, 7);
+      numbersToPlay = ordlst.slice(0, this.lengthrow);
+      this.result_group_numbersToPlay = numbersToPlay;
       this.output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
       this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
       this.output += "Here are 10 sets ran in series:<br/>";
@@ -435,6 +446,8 @@ var app = new Vue({
       this.result_group_winning = values.winning.join(" ");
       this.result_group_winningAndRef = values.winningAndRef;
       this.result_group_refs = values.refs;
+      this.result_group_numbers = values.numbers;
+      this.result_group_numbersToPlay = [];
     },
     generateProportionTable: function generateProportionTable() {},
     generateProportionMatrix: function generateProportionMatrix(winningRow) {
@@ -451,19 +464,26 @@ var app = new Vue({
           this.matrix[winningRow[m]][m] += 1;
         }
       }
-
-      console.log('[matrix]', this.matrix);
     },
     createGroups: function createGroups() {
       var _this4 = this;
 
+      //reset default values
+      this.matrix = [];
+      this.result_group = "";
+      this.result_group_winning = "";
+      this.result_group_winningAndRef = "";
+      this.result_group_refs = "";
+      this.result_group_numbers = [];
+      this.result_group_numbersToPlay = [];
       this.saveWorkPlace(); //clear previous groups
 
       this.subgroups = {
         'All': {
           winning: [],
           winningAndRef: [],
-          refs: []
+          refs: [],
+          numbers: []
         }
       }; // put them in groups of 6 for each item
       //create rows here
@@ -477,7 +497,6 @@ var app = new Vue({
       });
       inputs = filtered;
       lengthrow = +this.selectedWorkplace.lengthrow;
-      console.log('[lengthrow]', lengthrow);
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
@@ -507,7 +526,7 @@ var app = new Vue({
 
         groupsConfig1 = _this4.selectedWorkplace.groupsConfig;
         groupsConfig = groupsConfig1.split(",");
-        console.log("[groupsConfig]", groupsConfig);
+        var groupNumbers = [];
         var subname = []; //for (var j=0;j<lengthrow;j++){
 
         for (j = 0; j < groupsConfig.length; j++) {
@@ -516,6 +535,7 @@ var app = new Vue({
 
         input.forEach(function (element) {
           var triggered = false;
+          groupNumbers.push(element);
           var _iteratorNormalCompletion2 = true;
           var _didIteratorError2 = false;
           var _iteratorError2 = undefined;
@@ -527,10 +547,6 @@ var app = new Vue({
                   val = _step2$value[1];
 
               if (triggered === false) {
-                console.log("[groupsConfig - index]", index);
-                console.log("[groupsConfig - val]", val);
-                console.log("[groupsConfig - element]", element);
-
                 if (+element <= +val) {
                   subname[+index] += 1;
                   triggered = true;
@@ -571,6 +587,7 @@ var app = new Vue({
           _this4.subgroups[subname]['winning'] = [];
           _this4.subgroups[subname]['winningAndRef'] = [];
           _this4.subgroups[subname]['refs'] = [];
+          _this4.subgroups[subname]['numbers'] = [];
         }
 
         _this4.subgroups[subname]['name'] = subname;
@@ -581,6 +598,8 @@ var app = new Vue({
 
         _this4.subgroups[subname]['refs'].push(ref);
 
+        _this4.subgroups[subname]['numbers'] = [].concat(_toConsumableArray(_this4.subgroups[subname]['numbers']), groupNumbers);
+
         _this4.groupKeys.push(subname);
 
         _this4.subgroups.All.name = '';
@@ -590,6 +609,8 @@ var app = new Vue({
         _this4.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
         _this4.subgroups.All.refs.push(ref);
+
+        _this4.subgroups.All.numbers = [].concat(_toConsumableArray(_this4.subgroups.All.numbers), groupNumbers);
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {

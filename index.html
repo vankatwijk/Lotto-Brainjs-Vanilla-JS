@@ -106,10 +106,10 @@
                 </div>
                 <div class="col results-container">
                     <div v-if="selectedWorkplace.name && selectedGroup">
-                        <div v-for="(item, index) in result_group_winningAndRef" :key="index">
+                        <div v-for="(item, index) in result_group" :key="index">
                             <div class="badges-red">
                                 {{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</div>
-                            <div class="badges-black">{{item}}</div>
+                            <div class="badges-black">{{item.join(" ")}} <span style="background-color:red;">{{result_group_refs[index]}}</span></div>
                         </div>
                         <div class="badges-red">
                             {{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}
@@ -130,7 +130,7 @@
 
                         <div v-html="diagram"></div>
 
-                        <table class="table" style="background-color:white" :key="selectedGroup">
+                        <table class="table" style="background-color:white;margin-top:20px" :key="selectedGroup">
                             <thead>
                               <tr>
                                 <th scope="col">#</th>
@@ -138,8 +138,8 @@
                               </tr>
                             </thead>
                             <tbody>
-                              <tr v-for="(item, index) in matrix">
-                                <th scope="row" v-if="item">{{index}}</th>
+                              <tr v-for="(item, index) in matrix" :class="(result_group_numbers.includes(index+'') ? 'table-highlight' : '' )">
+                                <th scope="row" v-if="item"><span :class="result_group_numbersToPlay.includes(index) ? 'table-number-to-play' : 'table-number-regular'">{{index}}</span></th>
                                 <td v-for="colcount in +selectedWorkplace.lengthrow" :key="colcount+'colrow'" v-if="item"  v-html="getMatrixValueWithTableFormate(index,colcount-1)"></td>
                               </tr>
                             </tbody>
@@ -188,6 +188,8 @@
 
     .data-insert-container {
         background-color: #9A6D38;
+        height: 100%;
+        overflow: auto;
 
     }
 
@@ -291,7 +293,30 @@
         background: #000000;
     }
 
-
+    .table-highlight {
+        background-color: rgb(18 116 117 / 0.6);
+        color: white;
+    }
+    .table-number-to-play {
+        background-color: red;
+        display: inline-block;
+        color: white;
+        border-radius: 10vh;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        padding: 3px;
+    }
+    .table-number-regular {
+        background-color: black;
+        display: inline-block;
+        color: white;
+        border-radius: 10vh;
+        width: 30px;
+        height: 30px;
+        text-align: center;
+        padding: 3px;
+    }
 
 
 

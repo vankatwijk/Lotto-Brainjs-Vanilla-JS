@@ -15,6 +15,9 @@ var app = new Vue({
         result_group_winning : "",
         result_group_winningAndRef : "",
         result_group_refs : "",
+        result_group_numbers : [],
+        result_group_numbersToPlay : [],
+
         diagram : "",
         output : "",
         inputData : `
@@ -73,7 +76,7 @@ var app = new Vue({
 
             const value = this.getMatrixValue(row,col);
 
-            return (value > 0 ? "<b style='color:red'>"+value+"</b>" : "<span style='color:lightgrey'>"+value+"</span>");
+            return (value > 0 ? "<b style='color:red'>"+value+"</b>" : "<span style='color:grey'>"+value+"</span>");
         },
         getMatrixValue(row,col) {
             if(this.matrix[row] === undefined){
@@ -330,7 +333,9 @@ var app = new Vue({
         runthrough(){
             result = this.net.run(this.lastResult);
             ordlst = this.highestProb(result);
-            numbersToPlay = ordlst.slice(0,7);
+            numbersToPlay = ordlst.slice(0,this.lengthrow);
+
+            this.result_group_numbersToPlay = numbersToPlay;
             this.output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
             this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
             this.output += "Here are 10 sets ran in series:<br/>";
@@ -386,6 +391,10 @@ var app = new Vue({
             this.result_group_winning = values.winning.join(" ");
             this.result_group_winningAndRef = values.winningAndRef;
             this.result_group_refs = values.refs;
+            this.result_group_numbers = values.numbers;
+
+
+            this.result_group_numbersToPlay = [];
         },
 
         generateProportionTable(){
@@ -407,12 +416,17 @@ var app = new Vue({
                     this.matrix[winningRow[m]][m] += 1;
                 }
             }
-            
-
-            console.log('[matrix]',this.matrix);
         },
 
         createGroups(){
+            //reset default values
+            this.matrix = [];
+            this.result_group = "";
+            this.result_group_winning = "";
+            this.result_group_winningAndRef = "";
+            this.result_group_refs = "";
+            this.result_group_numbers = [];
+            this.result_group_numbersToPlay = [];
 
             this.saveWorkPlace();
 
@@ -421,7 +435,8 @@ var app = new Vue({
                 'All':{
                     winning:[],
                     winningAndRef:[],
-                    refs:[]
+                    refs:[],
+                    numbers:[]
                 }
             };
 
@@ -435,7 +450,7 @@ var app = new Vue({
             });
             inputs = filtered;
             lengthrow = +this.selectedWorkplace.lengthrow;
-            console.log('[lengthrow]',lengthrow)
+            
 
             for (var i=0;i<(Math.floor(inputs.length/(lengthrow+(this.selectedWorkplace.refDate?1:0) )));i++){
 
@@ -466,7 +481,8 @@ var app = new Vue({
 
                 var groupsConfig1 = this.selectedWorkplace.groupsConfig;
                 var groupsConfig = groupsConfig1.split(",");
-                console.log("[groupsConfig]",groupsConfig)
+
+                let groupNumbers = [];
 
                 let subname = [];
                 //for (var j=0;j<lengthrow;j++){
@@ -478,12 +494,10 @@ var app = new Vue({
                 input.forEach(element => {
 
                     let triggered = false;
+                    groupNumbers.push(element);
 
                     for (let [index, val] of groupsConfig.entries()) {
                         if(triggered === false){
-                            console.log("[groupsConfig - index]",index)
-                            console.log("[groupsConfig - val]",val)
-                            console.log("[groupsConfig - element]",element)
                             if(+element <= +val){
                                 subname[+index] += 1;
                                 triggered = true;
@@ -512,11 +526,13 @@ var app = new Vue({
                     this.subgroups[subname]['winning'] = [];
                     this.subgroups[subname]['winningAndRef'] = [];
                     this.subgroups[subname]['refs'] = [];
+                    this.subgroups[subname]['numbers'] = [];
                 }
                 this.subgroups[subname]['name'] = subname;
                 this.subgroups[subname]['winning'].push(input);
                 this.subgroups[subname]['winningAndRef'].push(inputWithRef.join(" "));
                 this.subgroups[subname]['refs'].push(ref);
+                this.subgroups[subname]['numbers'] = [...this.subgroups[subname]['numbers'],...groupNumbers];
                 this.groupKeys.push(subname);
 
 
@@ -525,6 +541,7 @@ var app = new Vue({
                 this.subgroups.All.winning.push(input);
                 this.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
                 this.subgroups.All.refs.push(ref);
+                this.subgroups.All.numbers = [...this.subgroups.All.numbers,...groupNumbers];
             }
             //this.result_group_winning =this.groupKeys.join(" ");
         },
