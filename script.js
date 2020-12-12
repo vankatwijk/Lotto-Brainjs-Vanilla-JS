@@ -1,6 +1,8 @@
 var app = new Vue({
     el: '#app',
     data: {
+        darkmode:null,
+
         loading:false,
         refDate: true,
         net: 0,
@@ -41,6 +43,7 @@ var app = new Vue({
         matrix : []
     },
     mounted() {
+        this.darkmode = eval(localStorage.getItem('darkmode'));
         const workplaces = JSON.parse(localStorage.getItem('workplaces'));
         console.log('work', workplaces)
         if(workplaces === null){
@@ -598,6 +601,18 @@ var app = new Vue({
 
 
 
+    },
+    watch: {
+        darkmode: function (val) {
+            
+            localStorage.setItem('darkmode', val);
+            if (val) {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+            else {
+                document.documentElement.setAttribute('data-theme', 'light');
+            } 
+        }
     }
 })
 

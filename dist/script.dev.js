@@ -19,6 +19,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 var app = new Vue({
   el: '#app',
   data: {
+    darkmode: null,
     loading: false,
     refDate: true,
     net: 0,
@@ -51,6 +52,7 @@ var app = new Vue({
     matrix: []
   },
   mounted: function mounted() {
+    this.darkmode = eval(localStorage.getItem('darkmode'));
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
     console.log('work', workplaces);
 
@@ -668,6 +670,17 @@ var app = new Vue({
       this.lastResult = this.tD_Ones(balls, this.lastDraw.slice(0, len));
       outputt += "Read training data!";
       this.output = outputt;
+    }
+  },
+  watch: {
+    darkmode: function darkmode(val) {
+      localStorage.setItem('darkmode', val);
+
+      if (val) {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
     }
   }
 });
