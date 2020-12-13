@@ -157,8 +157,16 @@
                             <div class="reference-number-container">
                                 <span class="reference-number-line"></span>
                             </div>
-                            <div class="badges-black">{{item.join(" ")}} <span
-                                    class="ref-number-badge">{{result_group_refs[index]}}</span></div>
+                            <div class="badges-black">
+
+                                <span v-for="(item, index) in item" @click="selectnumber(item)" :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
+                                    {{item}}
+                                </span>
+
+
+
+                                
+                                <span class="ref-number-badge">{{result_group_refs[index]}}</span></div>
                             <div class="reference-number-container">
                                 <span class="reference-number-line"></span>
                             </div>
@@ -187,7 +195,7 @@
                         </div>
 
 
-                        <div v-html="diagram"></div>
+                        <div v-html="diagram" style="background-color: white;"></div>
 
                         <table class="table" style="background-color:white;margin-top:20px" :key="selectedGroup">
                             <thead>
@@ -353,6 +361,20 @@
         color: var(--font-color);
         height: 100%;
         overflow: auto;
+    }
+
+    .selected_number{    
+        background-color: red;
+        display: inline-block;
+        width: 25px;
+        height: 25px;
+        text-align: center;
+        color: white;
+        border-radius: 20px;
+    }
+
+    .selectable_number {
+        cursor: pointer;
     }
 
     .ref-number-badge {
@@ -541,10 +563,6 @@
         width: 200px;
         align-items: center;
 
-        em{
-            margin-left: 10px;
-            font-size: 1rem;
-        }
     }
 
     .theme-switch {

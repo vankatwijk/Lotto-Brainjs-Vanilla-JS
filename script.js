@@ -19,6 +19,7 @@ var app = new Vue({
         result_group_refs : "",
         result_group_numbers : [],
         result_group_numbersToPlay : [],
+        result_group_selected_number : [],
 
         diagram : "",
         output : "",
@@ -74,6 +75,16 @@ var app = new Vue({
     computed: {
     },
     methods: {
+        selectnumber(selectednumber){
+
+            if(this.result_group_selected_number.includes(selectednumber)){
+                //remove number
+                this.result_group_selected_number = this.result_group_selected_number.filter(item => item !== selectednumber)
+            }else{
+                //add number
+                this.result_group_selected_number.push(selectednumber);
+            }
+        },
 
         getMatrixValueWithTableFormate(row,col) {
 
@@ -334,24 +345,47 @@ var app = new Vue({
         },
 
         runthrough(){
+            lengthrow = +this.selectedWorkplace.lengthrow;
             result = this.net.run(this.lastResult);
             ordlst = this.highestProb(result);
-            numbersToPlay = ordlst.slice(0,this.lengthrow);
+            numbersToPlay = ordlst.slice(0,lengthrow);
 
             this.result_group_numbersToPlay = numbersToPlay;
             this.output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
-            this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
+            //this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
+            this.output += "Numbers to play: <b>";
+
+                for (let [index, val] of numbersToPlay.entries()) {
+                    this.output += "<span class='table-number-to-play'>"+val+"</span>";
+                }
+
+            this.output += "</b><br/>";
+            
+
             this.output += "Here are 10 sets ran in series:<br/>";
             nextResult = this.lastResult;
             balls = ordlst.length;
             numbers = numbersToPlay.length;
-            for (var i=0;i<5;i++){
+
+
+            this.output += "<table class='table' style='background-color: white; margin-top: 20px;'><tbody>";
+            for (var i=0;i<lengthrow;i++){
                 result = this.net.run(nextResult);
                 ordlst = this.highestProb(result,print=0);
                 thisSet = ordlst.slice(0,numbers);
-                this.output += "<b>"+thisSet.join(" ")+"</b><br/>";
+
+                // this.output += "<b>"+thisSet.join(" ")+"</b><br/>";
+                // nextResult = this.tD_Ones(balls,thisSet);
+
+                this.output += "<tr>";
+                for (let [index, val] of thisSet.entries()) {
+                    this.output += "<td>"+val+"</td>";
+                }
+                this.output += "</tr>";
                 nextResult = this.tD_Ones(balls,thisSet);
             }
+
+            this.output += "</tbody></table>";
 
         },
         trainnetwork100(){
