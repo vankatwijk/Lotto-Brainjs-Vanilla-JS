@@ -720,7 +720,7 @@ var app = new Vue({
             //save diagram inside groups to localstorage
             //console.log('diagram',this.diagram);
 
-            if(val){
+            if(val && this.selectedGroup){
 
                 this.selectedWorkplace.groups[this.selectedGroup].result_group_numbersToPlay = val;
                 this.saveWorkPlace();

@@ -137,8 +137,7 @@
                         <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
                             v-for="(value, name) in subgroups"
                             @click="changeResultGroup(name,value);output='';diagram=''">
-                            <span class="sub-button-length"
-                                style="display: inline-block;width: 40px;padding: 10px;">{{value.winning.length}}</span>
+                            <span class="sub-button-length">{{value.winning.length}}</span>
                             <span>{{name}}</span>
                         </div>
                     </div>
