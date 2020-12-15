@@ -8,6 +8,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Monoton&display=swap" rel="stylesheet">
+
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
@@ -28,7 +31,7 @@
     <div id="app">
         <div class="container-fluid">
             <div class="row header">
-                <div style="width:300px">
+                <div style="width:400px;font-family: 'Monoton', cursive;">
                     <h2>Super Orange App</h2>
                 </div>
                 <div class="theme-switch-wrapper">
@@ -46,7 +49,7 @@
                         <button class="btn btn-primary" @click="addWorkPlace();">+ Add Tab</button>
                     </div>
 
-                    <div>
+                    <div class="overflow-container">
                         <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected':'workplace-button'"
                             v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
                             <span>{{item.name}}</span>
@@ -57,82 +60,80 @@
                     </div>
                 </div>
                 <div class="col-4 data-insert-container">
-                    <div v-if="selectedWorkplace.name">
-                        <div class="options-panel">
+
+                        <div class="options-panel" v-if="selectedWorkplace.name">
                             <button class="btn btn-primary" @click="saveWorkPlace()">Save</button>
                             <button class="btn btn-primary" @click="renameWorkPlace()">Rename</button>
                             <button class="btn btn-primary" @click="removeWorkPlace()">Delete Tab</button>
 
                         </div>
 
-                        <div>
-                            Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
-                            <div class="form-floating">
-                                <textarea class="form-control text-area" v-model="selectedWorkplace.inputData"
-                                    placeholder="Insert winnings" id="floatingTextarea2"
-                                    style="height: 400px"></textarea>
-                                <label for="floatingTextarea2">Winnings</label>
+                        <div class="overflow-container" v-if="selectedWorkplace.name" style="padding: 20px;">
+                            <div>
+                                Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
+                                <div class="form-floating">
+                                    <textarea class="form-control text-area" v-model="selectedWorkplace.inputData"
+                                        placeholder="Insert winnings" id="floatingTextarea2"
+                                        style="height: 400px"></textarea>
+                                    <label for="floatingTextarea2">Winnings</label>
+                                </div>
                             </div>
-                        </div>
-                        <br>
-                        <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear Input</button>
-                        <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input Lines</button>
+                            <br>
+                            <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear Input</button>
+                            <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input Lines</button>
 
-                        <div class="form-group row">
-                            <div class="col-8">
-                                <label for="refDate">Reference date (in last column of row) : </label>
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <label for="refDate">Reference date (in last column of row) : </label>
+                                </div>
+                                <div class="col">
+                                    <input type="checkbox" id="refDate" v-model="selectedWorkplace.refDate">
+                                </div>
                             </div>
-                            <div class="col">
-                                <input type="checkbox" id="refDate" v-model="selectedWorkplace.refDate">
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <label for="lengthrow">Number of columns in a row : </label>
+                                </div>
+                                <div class="col">
+                                    <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" />
+                                </div>
                             </div>
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <label for="numberballs">Number on balls go to : </label>
+                                </div>
+                                <div class="col">
+                                    <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <label for="groupsConfig">Configure your groups (10,20,30,40,50) : </label>
+                                </div>
+                                <div class="col">
+                                    <input size="4" type="text" v-model="selectedWorkplace.groupsConfig"
+                                        id="groupsConfig" />
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <div class="col-8">
+                                    <label for="layers">Hidden Layers first learning Shape : </label>
+                                </div>
+                                <div class="col">
+                                    <input size="4" type="text" v-model="selectedWorkplace.layers" id="layers" />
+                                </div>
+                            </div>
+                            <p>
+                                <button class="btn btn-primary" @click="createGroups();">Create Groups</button>
+                            </p>
                         </div>
-                        <div class="form-group row">
-                            <div class="col-8">
-                                <label for="lengthrow">Number of columns in a row : </label>
-                            </div>
-                            <div class="col">
-                                <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-8">
-                                <label for="numberballs">Number on balls go to : </label>
-                            </div>
-                            <div class="col">
-                                <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-8">
-                                <label for="groupsConfig">Configure your groups (10,20,30,40,50) : </label>
-                            </div>
-                            <div class="col">
-                                <input size="4" type="text" v-model="selectedWorkplace.groupsConfig"
-                                    id="groupsConfig" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-8">
-                                <label for="layers">Hidden Layers first learning Shape : </label>
-                            </div>
-                            <div class="col">
-                                <input size="4" type="text" v-model="selectedWorkplace.layers" id="layers" />
-                            </div>
-                        </div>
-                        <p>
-                            <button class="btn btn-primary" @click="createGroups();">Create Groups</button>
-                        </p>
-
-
-
-                    </div>
                 </div>
                 <div class="col groups-container">
-                    <div v-if="selectedWorkplace.name">
 
-                        <div class="options-panel">
-                            <div style="height:50px;"></div>
-                        </div>
+                    <div v-if="selectedWorkplace.name" class="options-panel">
+                        <div style="height:50px;"></div>
+                    </div>
+                    <div v-if="selectedWorkplace.name" class="overflow-container">
 
                         <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
                             v-for="(value, name) in subgroups"
@@ -141,59 +142,68 @@
                             <span>{{name}}</span>
                         </div>
                     </div>
+
                 </div>
                 <div class="col results-container">
-                    <div v-if="selectedWorkplace.name && selectedGroup">
 
-                        <div class="options-panel">
+                        <div v-if="selectedWorkplace.name" class="options-panel">
                             <div style="height:50px;"></div>
                         </div>
+                        <div v-if="selectedWorkplace.name && selectedGroup" class="overflow-container" style="padding: 10px;">
 
-                        <div v-for="(item, index) in result_group" :key="index">
-
-                            <!-- <div class="diamond-container">
+                            <div v-for="(item, index) in result_group" :key="index">
+    
+                                <!-- <div class="diamond-container">
+                                    <span class="diamond-shape">
+                                      <span class="item-count">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
+                                    </span>
+                                </div> -->
+                                <div class="reference-number-container">
+                                    <span
+                                        class="reference-number-difference">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
+                                </div>
+                                <div class="reference-number-container">
+                                    <span class="reference-number-line"></span>
+                                </div>
+                                <div class="badges-black">
+    
+                                    <span v-for="(item, index) in item" @click="selectnumber(item)" :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
+                                        {{item}}
+                                    </span>
+    
+    
+    
+                                    
+                                    <span class="ref-number-badge">{{result_group_refs[index]}}</span></div>
+                                <div class="reference-number-container">
+                                    <span class="reference-number-line"></span>
+                                </div>
+                            </div>
+                            <div class="diamond-container">
                                 <span class="diamond-shape">
-                                  <span class="item-count">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
-                                </span>
-                            </div> -->
-                            <div class="reference-number-container">
-                                <span
-                                    class="reference-number-difference">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
+                                    <span
+                                        class="item-count">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</span>
+                                    <!-- .item-count -->
+                                </span><!-- .container .diamond-shape-->
                             </div>
-                            <div class="reference-number-container">
-                                <span class="reference-number-line"></span>
-                            </div>
-                            <div class="badges-black">
 
-                                <span v-for="(item, index) in item" @click="selectnumber(item)" :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
-                                    {{item}}
-                                </span>
-
-
-
-                                
-                                <span class="ref-number-badge">{{result_group_refs[index]}}</span></div>
-                            <div class="reference-number-container">
-                                <span class="reference-number-line"></span>
-                            </div>
                         </div>
-                        <div class="diamond-container">
-                            <span class="diamond-shape">
-                                <span
-                                    class="item-count">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</span>
-                                <!-- .item-count -->
-                            </span><!-- .container .diamond-shape-->
-                        </div>
-                    </div>
+
                 </div>
                 <div class="col-4 results-container" style="border-left: 0px solid #F44725;">
-                    <div v-if="selectedWorkplace.name && selectedGroup">
 
-                        <div class="options-panel" v-if="result_group.length > 1">
-                            <button class="btn btn-primary" @click="createnetwork();">Create Neural Network</button>
-                            <button class="btn btn-primary" @click="readtrainingdata();">Read Training Data</button>
-                            <button class="btn btn-primary" @click="trainnetwork();">Run</button>
-                        </div>
+                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
+                        <button class="btn btn-primary" @click="createnetwork();">Create Neural Network</button>
+                        <button class="btn btn-primary" @click="readtrainingdata();">Read Training Data</button>
+                        <button class="btn btn-primary" @click="trainnetwork();">Run</button>
+                    </div>
+                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length < 2">
+                        <div style="height:50px;"></div>
+
+                    </div>
+
+                    <div class="overflow-container" v-if="selectedWorkplace.name && selectedGroup">
+
 
                         <b>Output will show below:</b><br>
                         <div v-html="output">
@@ -223,20 +233,47 @@
                             </tbody>
                         </table>
                     </div>
-                    <div v-else>
+                    <div class="overflow-container" style="padding:20px;" v-else>
 
+                        <br>
+                        <div style="width:400px;font-family: 'Monoton', cursive;">
+                            <h2>Super</h2>
+                            <h2>Orange</h2>
+                            <h2>App</h2>
+                        </div>
+                        <br>
                         <h2>
                             How to use :
                         </h2>
                         <p>
-                            Load the network with previous winnings to generate a model<br>
+                            First select a Tab on the left, The General tab is loaded with sample data<br>
+
+                            Load the network with previous winnings to generate a model in the Large Text area<br>
                             1. First, click on [Create Groups] button.<br>
                             2. Then, Select a group you want to use<br>
                             3. Then, click on [Create Neural Network] button.<br>
                             4. Then, click [Read Training Data].<br>
-                            5. Then, click [Train =&gt; Run] button as many times as you like to see trained network and
+                            5. Then, click [Run] button as many times as you like to see trained network and
                             results
                             of run.
+
+                        </p>
+                        <br>
+                        <br>
+                        <h3>Additional options</h3>
+                        <p>
+                            Reference date - If selected it will take additional column form the winnings to identify where the winning is in the list, 
+                            if not selected the computer will set this automatically.<br><br>
+
+                            Number of columns in a row - This input tells the app how many numbers make a row of winning numbers. <br><br>
+
+                            Number on balls go to - How High do the numbers on the balls count up to.<br><br>
+
+                            Configure your groups (10,20,30,40,50) - Grouping up winning numbers into sets, this input takes a rule for how you want the sets to be created, 
+                            for example if you insert '10,50' and a winning ticket is ' 3 19 50 49 24' then the group will be '1-4' because there is only 1 number less than 
+                            or equal to 10 and the remain 4 numbers are greater than or equal to 50<br><br>
+
+                            Hidden Layers first learning Shape - Brain.js neural network model configuration, by default you can set this to 70, if you want to adjust the apps predictions you can insert more complex models ex '5,5,2,9'.
                         </p>
                     </div>
                 </div>
@@ -263,6 +300,10 @@
         --secondary-background-color: #161b22;
         --font-color: white;
     }
+    .row>* {
+    padding-right: 0;
+    padding-left: 0;
+}
 
     body {
         margin: 0px;
@@ -282,6 +323,7 @@
     .form-group {
         margin-top: 10px;
         margin-bottom: 10px;
+        padding-left: 20px;
     }
 
     .btn-primary {
@@ -336,18 +378,20 @@
         color: #ffffff;
         padding: 5px;
     }
+    .overflow-container {
+        overflow: auto;
+        height: calc(100% - 100px);
+    }
 
     .workspaces {
         background-color: var(--secondary-background-color);
         max-width: 200px;
         min-width: 100px;
-        padding: 0;
     }
 
     .data-insert-container {
         background-color: var(--primary-background-color);
         height: 100%;
-        overflow: auto;
         border-left: 4px solid #F44725;
         color: var(--font-color);
     }
@@ -357,8 +401,6 @@
         max-width: 300px;
         min-width: 200px;
         height: 100%;
-        overflow: auto;
-        padding: 0px;
     }
 
     .results-container {
