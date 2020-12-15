@@ -99,6 +99,9 @@ var app = new Vue({
             if(this.matrix[row][col] === undefined){
                 return 0;
             }
+            if(this.matrix[row][col] === null){
+                return 0;
+            }
 
             return this.matrix[row][col];
         },
@@ -129,11 +132,22 @@ var app = new Vue({
             this.selectedWorkplace = item;
 
 
+            this.selectedGroup = "";
             this.diagram = "";
             this.output = "";
-            this.selectedGroup = "";
 
+            if(item.groups !== undefined){
+                //if groups where created previously, load them
+                this.matrix = item.matrix;
+                this.subgroups = item.groups;
+
+
+            }else{
+
+            //autogenerate the groups
             setTimeout(this.createGroups(),5000);
+            }
+
             
         },
         saveWorkPlace(){
@@ -430,8 +444,20 @@ var app = new Vue({
             this.result_group_refs = values.refs;
             this.result_group_numbers = values.numbers;
 
+            console.log('change group values', values);
+            if(values.output !== undefined){
+                setTimeout(() => {
+                    console.log('change group values', values.output);
+                    this.diagram = values.diagram;
+                    this.output = values.output;
+                    this.result_group_numbersToPlay = values.result_group_numbersToPlay;
 
-            this.result_group_numbersToPlay = [];
+                },300);
+            }else{
+
+                this.result_group_numbersToPlay = [];
+
+            }
         },
 
         generateProportionTable(){
@@ -558,28 +584,36 @@ var app = new Vue({
 
                 subname = subname.join("-");
                 if(this.subgroups[subname] === undefined){
-                    this.subgroups[subname] = [];
-                    this.subgroups[subname]['name'] = '';
-                    this.subgroups[subname]['winning'] = [];
-                    this.subgroups[subname]['winningAndRef'] = [];
-                    this.subgroups[subname]['refs'] = [];
-                    this.subgroups[subname]['numbers'] = [];
+                    this.subgroups[subname] = {};
+                    this.subgroups[subname].name = '';
+                    this.subgroups[subname].winning = [];
+                    this.subgroups[subname].winningAndRef = [];
+                    this.subgroups[subname].refs = [];
+                    this.subgroups[subname].numbers = [];
                 }
-                this.subgroups[subname]['name'] = subname;
-                this.subgroups[subname]['winning'].push(input);
-                this.subgroups[subname]['winningAndRef'].push(inputWithRef.join(" "));
-                this.subgroups[subname]['refs'].push(ref);
-                this.subgroups[subname]['numbers'] = [...this.subgroups[subname]['numbers'],...groupNumbers];
+                this.subgroups[subname].name = subname;
+                this.subgroups[subname].winning.push(input);
+                this.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
+                this.subgroups[subname].refs.push(ref);
+                this.subgroups[subname].numbers = [...this.subgroups[subname]['numbers'],...groupNumbers];
                 this.groupKeys.push(subname);
 
 
 
-                this.subgroups.All.name = '';
+                this.subgroups.All.name = 'All';
                 this.subgroups.All.winning.push(input);
                 this.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
                 this.subgroups.All.refs.push(ref);
                 this.subgroups.All.numbers = [...this.subgroups.All.numbers,...groupNumbers];
+
             }
+
+
+            //save groups to localstorage
+            this.selectedWorkplace.groups = this.subgroups;
+            this.saveWorkPlace();
+
+            console.log('subgroups',this.subgroups);
             //this.result_group_winning =this.groupKeys.join(" ");
         },
         run(){
@@ -631,6 +665,8 @@ var app = new Vue({
             outputt+="Read training data!";
 
             this.output = outputt;
+
+
         }
 
 
@@ -646,6 +682,49 @@ var app = new Vue({
             else {
                 document.documentElement.setAttribute('data-theme', 'light');
             } 
+        },
+        output: function (val) {
+
+            //save groups to localstorage
+            //console.log('selectedGroup',this.selectedGroup);
+            if(val){
+
+                this.selectedWorkplace.groups[this.selectedGroup].output = this.output;
+                this.saveWorkPlace();
+            }
+        },
+        matrix: function (val) {
+
+            //save matrix inside groups in localstorage
+            //console.log('matrix',val);
+
+            if(val){
+
+                this.selectedWorkplace.matrix = this.matrix;
+                this.saveWorkPlace();
+            }
+        },
+        diagram: function (val) {
+
+            //save diagram inside groups to localstorage
+            //console.log('diagram',this.diagram);
+
+            if(val){
+
+                this.selectedWorkplace.groups[this.selectedGroup].diagram = this.diagram;
+                this.saveWorkPlace();
+            }
+        },
+        result_group_numbersToPlay :  function (val) {
+
+            //save diagram inside groups to localstorage
+            //console.log('diagram',this.diagram);
+
+            if(val){
+
+                this.selectedWorkplace.groups[this.selectedGroup].result_group_numbersToPlay = val;
+                this.saveWorkPlace();
+            }
         }
     }
 })
