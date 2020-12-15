@@ -105,7 +105,7 @@ var app = new Vue({
       return this.matrix[row][col];
     },
     addWorkPlace: function addWorkPlace() {
-      var workplaceName = prompt("Please enter a name For the Workplace:", "");
+      var workplaceName = prompt("Please enter a name For the Tab:", "");
 
       if (workplaceName == null || workplaceName == "") {
         alert("the name can not be empty !");
@@ -153,7 +153,7 @@ var app = new Vue({
     renameWorkPlace: function renameWorkPlace() {
       var _this2 = this;
 
-      var workplaceName = prompt("Please enter a name For the Workplace:", this.selectedWorkplace.name);
+      var workplaceName = prompt("Please enter a name For the Tab:", this.selectedWorkplace.name);
 
       if (workplaceName == null || workplaceName == "") {
         alert("the name can not be empty !");

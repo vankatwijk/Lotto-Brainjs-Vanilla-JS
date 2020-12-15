@@ -106,7 +106,7 @@ var app = new Vue({
             return this.matrix[row][col];
         },
         addWorkPlace(){
-            var workplaceName = prompt("Please enter a name For the Workplace:", "");
+            var workplaceName = prompt("Please enter a name For the Tab:", "");
             if (workplaceName == null || workplaceName == "") {
               alert("the name can not be empty !");
             }else if(this.workplaces.find(o => o.name === workplaceName)){
@@ -156,7 +156,7 @@ var app = new Vue({
             localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
         },
         renameWorkPlace(){
-            var workplaceName = prompt("Please enter a name For the Workplace:", this.selectedWorkplace.name);
+            var workplaceName = prompt("Please enter a name For the Tab:", this.selectedWorkplace.name);
             if (workplaceName == null || workplaceName == "") {
               alert("the name can not be empty !");
             }else if(this.workplaces.find(o => o.name === workplaceName)){
