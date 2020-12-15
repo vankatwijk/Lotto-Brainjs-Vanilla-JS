@@ -41,14 +41,19 @@
             </div>
             <div class="row main">
                 <div class="col workspaces">
+
+                    <div class="options-panel">
+                        <button class="btn btn-primary" @click="addWorkPlace();">+ Add Tab</button>
+                    </div>
+
                     <div>
                         <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected':'workplace-button'"
                             v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
                             <span>{{item.name}}</span>
                         </div>
-                        <div class="workplace-button" @click="addWorkPlace();">
+                        <!-- <div class="workplace-button" @click="addWorkPlace();">
                             <span>+ Add Tab</span>
-                        </div>
+                        </div> -->
                     </div>
                 </div>
                 <div class="col-4 data-insert-container">
@@ -132,6 +137,11 @@
                 </div>
                 <div class="col groups-container">
                     <div v-if="selectedWorkplace.name">
+
+                        <div class="options-panel">
+                            <div style="height:50px;"></div>
+                        </div>
+
                         <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
                             v-for="(value, name) in subgroups"
                             @click="changeResultGroup(name,value);output='';diagram=''">
@@ -143,6 +153,11 @@
                 </div>
                 <div class="col results-container">
                     <div v-if="selectedWorkplace.name && selectedGroup">
+
+                        <div class="options-panel">
+                            <div style="height:50px;"></div>
+                        </div>
+
                         <div v-for="(item, index) in result_group" :key="index">
 
                             <!-- <div class="diamond-container">
@@ -249,7 +264,7 @@
 
     :root {
         --primary-background-color: white;
-        --secondary-background-color: white;
+        --secondary-background-color: #F3F3F3;;
         --font-color: black;
     }
     [data-theme="dark"] {
@@ -588,7 +603,7 @@
     }
 
     .slider:before {
-        background-color: #fff;
+        background-color: #F44725;;
         bottom: 4px;
         content: "";
         height: 26px;
@@ -599,7 +614,7 @@
     }
 
     input:checked+.slider {
-        background-color: #66bb6a;
+        background-color: var(--primary-background-color);
     }
 
     input:checked+.slider:before {
