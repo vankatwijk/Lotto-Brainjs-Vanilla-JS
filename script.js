@@ -346,16 +346,28 @@ var app = new Vue({
             }
             return lst;
         },
+        runapp(){
+            this.loading = true;
+
+            //give time to load the loading animation
+            setTimeout(() => { 
+                    
+                this.trainnetwork();
+
+            }, 500); //one sec
+        },
         trainnetwork(){
-            
             //for (var i=0;i<1;i++){
+
+            //give time to load the loading animation
+
             stats = this.net.train(this.tD);
             this.output = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
             this.output += "<br/>Trained.<br/>Run with last Draw result: " + this.lastDraw.join(", ") +"<br/>";
 
             this.diagram = brain.utilities.toSVG(this.net)
-
             this.runthrough();
+            
         },
 
         runthrough(){
@@ -400,6 +412,8 @@ var app = new Vue({
             }
 
             this.output += "</tbody></table>";
+
+            this.loading = false;
 
         },
         trainnetwork100(){

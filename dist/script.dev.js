@@ -405,8 +405,18 @@ var app = new Vue({
 
       return lst;
     },
+    runapp: function runapp() {
+      var _this4 = this;
+
+      this.loading = true; //give time to load the loading animation
+
+      setTimeout(function () {
+        _this4.trainnetwork();
+      }, 500); //one sec
+    },
     trainnetwork: function trainnetwork() {
       //for (var i=0;i<1;i++){
+      //give time to load the loading animation
       stats = this.net.train(this.tD);
       this.output = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
       this.output += "<br/>Trained.<br/>Run with last Draw result: " + this.lastDraw.join(", ") + "<br/>";
@@ -495,6 +505,7 @@ var app = new Vue({
       }
 
       this.output += "</tbody></table>";
+      this.loading = false;
     },
     trainnetwork100: function trainnetwork100() {
       for (var i = 0; i < 100; i++) {
@@ -530,7 +541,7 @@ var app = new Vue({
       return res;
     },
     changeResultGroup: function changeResultGroup(name, values) {
-      var _this4 = this;
+      var _this5 = this;
 
       this.selectedGroup = name;
       this.result_group = values.winning;
@@ -543,9 +554,9 @@ var app = new Vue({
       if (values.output !== undefined) {
         setTimeout(function () {
           console.log('change group values', values.output);
-          _this4.diagram = values.diagram;
-          _this4.output = values.output;
-          _this4.result_group_numbersToPlay = values.result_group_numbersToPlay;
+          _this5.diagram = values.diagram;
+          _this5.output = values.output;
+          _this5.result_group_numbersToPlay = values.result_group_numbersToPlay;
         }, 300);
       } else {
         this.result_group_numbersToPlay = [];
@@ -568,7 +579,7 @@ var app = new Vue({
       }
     },
     createGroups: function createGroups() {
-      var _this5 = this;
+      var _this6 = this;
 
       //reset default values
       this.matrix = [];
@@ -602,18 +613,18 @@ var app = new Vue({
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || _this5.selectedWorkplace.refDate === false) {
+        if (i === 0 || _this6.selectedWorkplace.refDate === false) {
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
 
-          _this5.generateProportionMatrix(input);
+          _this6.generateProportionMatrix(input);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
 
-          _this5.generateProportionMatrix(input);
+          _this6.generateProportionMatrix(input);
         } //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
 
-        if (_this5.selectedWorkplace.refDate === true) {
+        if (_this6.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
           ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
@@ -622,11 +633,11 @@ var app = new Vue({
         } //get the ref column
 
 
-        if (_this5.selectedWorkplace.refDate === true) {
+        if (_this6.selectedWorkplace.refDate === true) {
           inputRef = inputs[i * lengthrow];
         }
 
-        groupsConfig1 = _this5.selectedWorkplace.groupsConfig;
+        groupsConfig1 = _this6.selectedWorkplace.groupsConfig;
         groupsConfig = groupsConfig1.split(",");
         var groupNumbers = [];
         var subname = []; //for (var j=0;j<lengthrow;j++){
@@ -683,36 +694,36 @@ var app = new Vue({
         });
         subname = subname.join("-");
 
-        if (_this5.subgroups[subname] === undefined) {
-          _this5.subgroups[subname] = {};
-          _this5.subgroups[subname].name = '';
-          _this5.subgroups[subname].winning = [];
-          _this5.subgroups[subname].winningAndRef = [];
-          _this5.subgroups[subname].refs = [];
-          _this5.subgroups[subname].numbers = [];
+        if (_this6.subgroups[subname] === undefined) {
+          _this6.subgroups[subname] = {};
+          _this6.subgroups[subname].name = '';
+          _this6.subgroups[subname].winning = [];
+          _this6.subgroups[subname].winningAndRef = [];
+          _this6.subgroups[subname].refs = [];
+          _this6.subgroups[subname].numbers = [];
         }
 
-        _this5.subgroups[subname].name = subname;
+        _this6.subgroups[subname].name = subname;
 
-        _this5.subgroups[subname].winning.push(input);
+        _this6.subgroups[subname].winning.push(input);
 
-        _this5.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
+        _this6.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
 
-        _this5.subgroups[subname].refs.push(ref);
+        _this6.subgroups[subname].refs.push(ref);
 
-        _this5.subgroups[subname].numbers = [].concat(_toConsumableArray(_this5.subgroups[subname]['numbers']), groupNumbers);
+        _this6.subgroups[subname].numbers = [].concat(_toConsumableArray(_this6.subgroups[subname]['numbers']), groupNumbers);
 
-        _this5.groupKeys.push(subname);
+        _this6.groupKeys.push(subname);
 
-        _this5.subgroups.All.name = 'All';
+        _this6.subgroups.All.name = 'All';
 
-        _this5.subgroups.All.winning.push(input);
+        _this6.subgroups.All.winning.push(input);
 
-        _this5.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+        _this6.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
-        _this5.subgroups.All.refs.push(ref);
+        _this6.subgroups.All.refs.push(ref);
 
-        _this5.subgroups.All.numbers = [].concat(_toConsumableArray(_this5.subgroups.All.numbers), groupNumbers);
+        _this6.subgroups.All.numbers = [].concat(_toConsumableArray(_this6.subgroups.All.numbers), groupNumbers);
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {

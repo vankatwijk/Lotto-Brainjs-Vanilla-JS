@@ -61,72 +61,72 @@
                 </div>
                 <div class="col-4 data-insert-container">
 
-                        <div class="options-panel" v-if="selectedWorkplace.name">
-                            <button class="btn btn-primary" @click="saveWorkPlace()">Save</button>
-                            <button class="btn btn-primary" @click="renameWorkPlace()">Rename</button>
-                            <button class="btn btn-primary" @click="removeWorkPlace()">Delete Tab</button>
+                    <div class="options-panel" v-if="selectedWorkplace.name">
+                        <button class="btn btn-primary" @click="saveWorkPlace()">Save</button>
+                        <button class="btn btn-primary" @click="renameWorkPlace()">Rename</button>
+                        <button class="btn btn-primary" @click="removeWorkPlace()">Delete Tab</button>
 
+                    </div>
+
+                    <div class="overflow-container" v-if="selectedWorkplace.name" style="padding: 20px;">
+                        <div>
+                            Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
+                            <div class="form-floating">
+                                <textarea class="form-control text-area" v-model="selectedWorkplace.inputData"
+                                    placeholder="Insert winnings" id="floatingTextarea2"
+                                    style="height: 400px"></textarea>
+                                <label for="floatingTextarea2">Winnings</label>
+                            </div>
                         </div>
+                        <br>
+                        <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear Input</button>
+                        <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input Lines</button>
 
-                        <div class="overflow-container" v-if="selectedWorkplace.name" style="padding: 20px;">
-                            <div>
-                                Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
-                                <div class="form-floating">
-                                    <textarea class="form-control text-area" v-model="selectedWorkplace.inputData"
-                                        placeholder="Insert winnings" id="floatingTextarea2"
-                                        style="height: 400px"></textarea>
-                                    <label for="floatingTextarea2">Winnings</label>
-                                </div>
+                        <div class="form-group row">
+                            <div class="col-8">
+                                <label for="refDate">Reference date (in last column of row) : </label>
                             </div>
-                            <br>
-                            <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear Input</button>
-                            <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input Lines</button>
-
-                            <div class="form-group row">
-                                <div class="col-8">
-                                    <label for="refDate">Reference date (in last column of row) : </label>
-                                </div>
-                                <div class="col">
-                                    <input type="checkbox" id="refDate" v-model="selectedWorkplace.refDate">
-                                </div>
+                            <div class="col">
+                                <input type="checkbox" id="refDate" v-model="selectedWorkplace.refDate">
                             </div>
-                            <div class="form-group row">
-                                <div class="col-8">
-                                    <label for="lengthrow">Number of columns in a row : </label>
-                                </div>
-                                <div class="col">
-                                    <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" />
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-8">
-                                    <label for="numberballs">Number on balls go to : </label>
-                                </div>
-                                <div class="col">
-                                    <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" />
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-8">
-                                    <label for="groupsConfig">Configure your groups (10,20,30,40,50) : </label>
-                                </div>
-                                <div class="col">
-                                    <input size="4" type="text" v-model="selectedWorkplace.groupsConfig"
-                                        id="groupsConfig" />
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <div class="col-8">
-                                    <label for="layers">Hidden Layers first learning Shape : </label>
-                                </div>
-                                <div class="col">
-                                    <input size="4" type="text" v-model="selectedWorkplace.layers" id="layers" />
-                                </div>
-                            </div>
-                            <p>
-                                <button class="btn btn-primary" @click="createGroups();">Create Groups</button>
-                            </p>
                         </div>
+                        <div class="form-group row">
+                            <div class="col-8">
+                                <label for="lengthrow">Number of columns in a row : </label>
+                            </div>
+                            <div class="col">
+                                <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-8">
+                                <label for="numberballs">Number on balls go to : </label>
+                            </div>
+                            <div class="col">
+                                <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-8">
+                                <label for="groupsConfig">Configure your groups (10,20,30,40,50) : </label>
+                            </div>
+                            <div class="col">
+                                <input size="4" type="text" v-model="selectedWorkplace.groupsConfig"
+                                    id="groupsConfig" />
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-8">
+                                <label for="layers">Hidden Layers first learning Shape : </label>
+                            </div>
+                            <div class="col">
+                                <input size="4" type="text" v-model="selectedWorkplace.layers" id="layers" />
+                            </div>
+                        </div>
+                        <p>
+                            <button class="btn btn-primary" @click="createGroups();">Create Groups</button>
+                        </p>
+                    </div>
                 </div>
                 <div class="col groups-container">
 
@@ -146,64 +146,72 @@
                 </div>
                 <div class="col results-container">
 
-                        <div v-if="selectedWorkplace.name" class="options-panel">
-                            <div style="height:50px;"></div>
-                        </div>
-                        <div v-if="selectedWorkplace.name && selectedGroup" class="overflow-container" style="padding: 10px;">
+                    <div v-if="selectedWorkplace.name" class="options-panel">
+                        <div style="height:50px;"></div>
+                    </div>
+                    <div v-if="selectedWorkplace.name && selectedGroup" class="overflow-container"
+                        style="padding: 10px;">
 
-                            <div v-for="(item, index) in result_group" :key="index">
-    
-                                <!-- <div class="diamond-container">
+                        <div v-for="(item, index) in result_group" :key="index">
+
+                            <!-- <div class="diamond-container">
                                     <span class="diamond-shape">
                                       <span class="item-count">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
                                     </span>
                                 </div> -->
-                                <div class="reference-number-container">
-                                    <span
-                                        class="reference-number-difference">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
-                                </div>
-                                <div class="reference-number-container">
-                                    <span class="reference-number-line"></span>
-                                </div>
-                                <div class="badges-black">
-    
-                                    <span v-for="(item, index) in item" @click="selectnumber(item)" :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
-                                        {{item}}
-                                    </span>
-    
-    
-    
-                                    
-                                    <span class="ref-number-badge">{{result_group_refs[index]}}</span></div>
-                                <div class="reference-number-container">
-                                    <span class="reference-number-line"></span>
-                                </div>
+                            <div class="reference-number-container">
+                                <span
+                                    class="reference-number-difference">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
                             </div>
-                            <div class="diamond-container">
-                                <span class="diamond-shape">
-                                    <span
-                                        class="item-count">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</span>
-                                    <!-- .item-count -->
-                                </span><!-- .container .diamond-shape-->
+                            <div class="reference-number-container">
+                                <span class="reference-number-line"></span>
                             </div>
+                            <div class="badges-black">
 
+                                <span v-for="(item, index) in item" @click="selectnumber(item)"
+                                    :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
+                                    {{item}}
+                                </span>
+
+
+
+
+                                <span class="ref-number-badge">{{result_group_refs[index]}}</span>
+                            </div>
+                            <div class="reference-number-container">
+                                <span class="reference-number-line"></span>
+                            </div>
                         </div>
+                        <div class="diamond-container">
+                            <span class="diamond-shape">
+                                <span
+                                    class="item-count">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</span>
+                                <!-- .item-count -->
+                            </span><!-- .container .diamond-shape-->
+                        </div>
+
+                    </div>
 
                 </div>
                 <div class="col-4 results-container" style="border-left: 0px solid #F44725;">
 
-                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
+                    <div class="options-panel"
+                        v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
                         <button class="btn btn-primary" @click="createnetwork();">Create Neural Network</button>
                         <button class="btn btn-primary" @click="readtrainingdata();">Read Training Data</button>
-                        <button class="btn btn-primary" @click="trainnetwork();">Run</button>
+                        <button class="btn btn-primary" @click="runapp();">Run</button>
                     </div>
-                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length < 2">
+                    <div class="options-panel"
+                        v-if="selectedWorkplace.name && selectedGroup && result_group.length < 2">
                         <div style="height:50px;"></div>
 
                     </div>
 
                     <div class="overflow-container" v-if="selectedWorkplace.name && selectedGroup">
 
+                        <div v-if="loading">
+                            <div class="spinner"></div>
+                        </div>
 
                         <b>Output will show below:</b><br>
                         <div v-html="output">
@@ -262,18 +270,24 @@
                         <br>
                         <h3>Additional options</h3>
                         <p>
-                            Reference date - If selected it will take additional column form the winnings to identify where the winning is in the list, 
+                            Reference date - If selected it will take additional column form the winnings to identify
+                            where the winning is in the list,
                             if not selected the computer will set this automatically.<br><br>
 
-                            Number of columns in a row - This input tells the app how many numbers make a row of winning numbers. <br><br>
+                            Number of columns in a row - This input tells the app how many numbers make a row of winning
+                            numbers. <br><br>
 
                             Number on balls go to - How High do the numbers on the balls count up to.<br><br>
 
-                            Configure your groups (10,20,30,40,50) - Grouping up winning numbers into sets, this input takes a rule for how you want the sets to be created, 
-                            for example if you insert '10,50' and a winning ticket is ' 3 19 50 49 24' then the group will be '1-4' because there is only 1 number less than 
+                            Configure your groups (10,20,30,40,50) - Grouping up winning numbers into sets, this input
+                            takes a rule for how you want the sets to be created,
+                            for example if you insert '10,50' and a winning ticket is ' 3 19 50 49 24' then the group
+                            will be '1-4' because there is only 1 number less than
                             or equal to 10 and the remain 4 numbers are greater than or equal to 50<br><br>
 
-                            Hidden Layers first learning Shape - Brain.js neural network model configuration, by default you can set this to 70, if you want to adjust the apps predictions you can insert more complex models ex '5,5,2,9'.
+                            Hidden Layers first learning Shape - Brain.js neural network model configuration, by default
+                            you can set this to 70, if you want to adjust the apps predictions you can insert more
+                            complex models ex '5,5,2,9'.
                         </p>
                     </div>
                 </div>
@@ -289,21 +303,23 @@
 
 
 <style>
-
     :root {
         --primary-background-color: white;
-        --secondary-background-color: #F3F3F3;;
+        --secondary-background-color: #F3F3F3;
+        ;
         --font-color: black;
     }
+
     [data-theme="dark"] {
         --primary-background-color: black;
         --secondary-background-color: #161b22;
         --font-color: white;
     }
+
     .row>* {
-    padding-right: 0;
-    padding-left: 0;
-}
+        padding-right: 0;
+        padding-left: 0;
+    }
 
     body {
         margin: 0px;
@@ -378,6 +394,7 @@
         color: #ffffff;
         padding: 5px;
     }
+
     .overflow-container {
         overflow: auto;
         height: calc(100% - 100px);
@@ -411,7 +428,7 @@
         overflow: auto;
     }
 
-    .selected_number{    
+    .selected_number {
         background-color: red;
         display: inline-block;
         width: 25px;
@@ -606,7 +623,7 @@
     }
 
     /*Simple css to style it like a toggle switch*/
-    .theme-switch-wrapper {    
+    .theme-switch-wrapper {
         display: inline-block;
         width: 200px;
         align-items: center;
@@ -636,7 +653,8 @@
     }
 
     .slider:before {
-        background-color: #F44725;;
+        background-color: #F44725;
+        ;
         bottom: 4px;
         content: "";
         height: 26px;
@@ -733,6 +751,49 @@
 
     .menu li:hover {
         background-color: #0099cc;
+    }
+
+
+
+    .spinner {
+        width: 40px;
+        height: 40px;
+        background-color: #F44725;
+
+        margin: 100px auto;
+        -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
+        animation: sk-rotateplane 1.2s infinite ease-in-out;
+    }
+
+    @-webkit-keyframes sk-rotateplane {
+        0% {
+            -webkit-transform: perspective(120px)
+        }
+
+        50% {
+            -webkit-transform: perspective(120px) rotateY(180deg)
+        }
+
+        100% {
+            -webkit-transform: perspective(120px) rotateY(180deg) rotateX(180deg)
+        }
+    }
+
+    @keyframes sk-rotateplane {
+        0% {
+            transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+            -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg)
+        }
+
+        50% {
+            transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+            -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg)
+        }
+
+        100% {
+            transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+            -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+        }
     }
 </style>
 
