@@ -1,5 +1,8 @@
 var app = new Vue({
     el: '#app',
+    components: {
+        draggable: window['vuedraggable']
+    },
     data: {
         darkmode:null,
 
@@ -75,6 +78,11 @@ var app = new Vue({
     computed: {
     },
     methods: {
+
+        onUpdate: function (event) {
+            this.list.splice(event.newIndex, 0, this.workplaces.splice(event.oldIndex, 1)[0])
+        },
+
         selectnumber(selectednumber){
 
             if(this.result_group_selected_number.includes(selectednumber)){
