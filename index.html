@@ -55,9 +55,8 @@
                         <button class="btn btn-primary" @click="addWorkPlace();">+ Add Tab</button>
                     </div>
 
-                    <div class="overflow-container" v-sortable="{ onUpdate: onUpdate }">
-
-                        <draggable 
+                        <draggable  
+                        class="overflow-container"
                         v-model="workplaces" 
                         @start="drag=true" 
                         @end="drag=false" 
@@ -73,7 +72,6 @@
                         <!-- <div class="workplace-button" @click="addWorkPlace();">
                             <span>+ Add Tab</span>
                         </div> -->
-                    </div>
                 </div>
                 <div class="col-4 data-insert-container">
 
@@ -139,6 +137,14 @@
                                 <input size="4" type="text" v-model="selectedWorkplace.layers" id="layers" />
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <div class="col-8">
+                                <label for="predictnextgroup">Predict next group : </label>
+                            </div>
+                            <div class="col">
+                                <input type="checkbox" id="predictnextgroup" v-model="selectedWorkplace.predictnextgroup">
+                            </div>
+                        </div>
                         <p>
                             <button class="btn btn-primary" @click="createGroups();">Create Groups</button>
                         </p>
@@ -147,14 +153,21 @@
                 <div class="col groups-container">
 
                     <div v-if="selectedWorkplace.name" class="options-panel">
-                        <div style="height:50px;"></div>
+                        <div class="placeholder-button" style="height:50px;"> {{(selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '')}}</div>
                     </div>
                     <div v-if="selectedWorkplace.name" class="overflow-container">
 
-                        <div :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
+
+                        <div v-if="loadinggroups">
+                            <div class="spinner"></div>
+                        </div>
+
+
+                        <div v-if="!loadinggroups" :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
                             v-for="(value, name) in subgroups"
                             @click="changeResultGroup(name,value);output='';diagram=''">
-                            <span class="sub-button-length">{{value.winning.length}}</span>
+
+                            <span class="sub-button-length" :style="value.name === (selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '') ? 'background-color:#f44725;':''" >{{value.winning.length}}</span>
                             <span>{{value.name}}</span>
                         </div>
                     </div>
@@ -303,7 +316,10 @@
 
                             Hidden Layers first learning Shape - Brain.js neural network model configuration, by default
                             you can set this to 70, if you want to adjust the apps predictions you can insert more
-                            complex models ex '5,5,2,9'.
+                            complex models ex '5,5,2,9'.<br><br>
+
+                            Predict next group - if true, this will perform a sequence prediction on the groups based on each
+                            winning row and when the group was created to predict the next posible group.<br><br>
                         </p>
                     </div>
                 </div>
@@ -394,6 +410,17 @@
         font-weight: bold;
     }
 
+    .placeholder-button {
+        height: 50px;
+        color: #000;
+        background-color: #ffffff;
+        border-color: #f44725;
+        border-width: 4px;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 10px;
+    }
+
 
 
     .hide {
@@ -417,6 +444,7 @@
     }
 
     .workspaces {
+        height: 100%;
         background-color: var(--secondary-background-color);
         max-width: 200px;
         min-width: 100px;

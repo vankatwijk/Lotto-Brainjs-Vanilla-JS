@@ -24,6 +24,7 @@ var app = new Vue({
   data: {
     darkmode: null,
     loading: false,
+    loadinggroups: false,
     refDate: true,
     net: 0,
     tD: 0,
@@ -77,9 +78,6 @@ var app = new Vue({
   },
   computed: {},
   methods: {
-    onUpdate: function onUpdate(event) {
-      this.list.splice(event.newIndex, 0, this.workplaces.splice(event.oldIndex, 1)[0]);
-    },
     selectnumber: function selectnumber(selectednumber) {
       if (this.result_group_selected_number.includes(selectednumber)) {
         //remove number
@@ -615,7 +613,9 @@ var app = new Vue({
         return el != "";
       });
       inputs = filtered;
-      lengthrow = +this.selectedWorkplace.lengthrow;
+      lengthrow = +this.selectedWorkplace.lengthrow; //group sequence is used to predict the next group
+
+      var groupSequence = [];
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
@@ -698,6 +698,7 @@ var app = new Vue({
             }
           }
         });
+        groupSequence.push(subname);
         subname = subname.join("-");
 
         if (_this6.subgroups[subname] === undefined) {
@@ -742,8 +743,46 @@ var app = new Vue({
 
 
       this.selectedWorkplace.groups = this.subgroups;
+      this.selectedWorkplace.groupSequence = groupSequence;
+
+      if (this.selectedWorkplace.predictnextgroup) {
+        this.startpredictNextGroup();
+      }
+
       this.saveWorkPlace();
       console.log('subgroups', this.subgroups); //this.result_group_winning =this.groupKeys.join(" ");
+    },
+    startpredictNextGroup: function startpredictNextGroup() {
+      var _this7 = this;
+
+      this.loadinggroups = true;
+      this.selectedWorkplace.nextGroupResult = '';
+      setTimeout(function () {
+        _this7.predictNextGroup();
+      }, 500); //one sec
+    },
+    predictNextGroup: function predictNextGroup() {
+      //with the sequence of groups this function will predict the next group that will come up
+      var net = new brain.recurrent.LSTMTimeStep({
+        inputSize: this.selectedWorkplace.groupSequence[0].length,
+        hiddenLayers: [10],
+        outputSize: this.selectedWorkplace.groupSequence[0].length
+      });
+      net.train(this.selectedWorkplace.groupSequence); //instead of run you can use forecast
+
+      var output = net.run(this.selectedWorkplace.groupSequence);
+      var result = [];
+
+      for (var _i2 = 0, _arr2 = _toConsumableArray(output); _i2 < _arr2.length; _i2++) {
+        var out = _arr2[_i2];
+        var _n2 = 0;
+        if (out < 0) _n2 = 0;else _n2 = Math.round(+out);
+        result.push(_n2);
+      }
+
+      this.selectedWorkplace.nextGroupResult = result;
+      this.saveWorkPlace();
+      this.loadinggroups = false;
     },
     run: function run() {
       outputt = ""; //check these numbers in 'check' element

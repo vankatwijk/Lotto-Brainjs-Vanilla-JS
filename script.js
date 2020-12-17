@@ -7,6 +7,7 @@ var app = new Vue({
         darkmode:null,
 
         loading:false,
+        loadinggroups:false,
         refDate: true,
         net: 0,
         tD :0,
@@ -79,9 +80,6 @@ var app = new Vue({
     },
     methods: {
 
-        onUpdate: function (event) {
-            this.list.splice(event.newIndex, 0, this.workplaces.splice(event.oldIndex, 1)[0])
-        },
 
         selectnumber(selectednumber){
 
@@ -535,6 +533,9 @@ var app = new Vue({
             });
             inputs = filtered;
             lengthrow = +this.selectedWorkplace.lengthrow;
+
+            //group sequence is used to predict the next group
+            let groupSequence = [];
             
 
             for (var i=0;i<(Math.floor(inputs.length/(lengthrow+(this.selectedWorkplace.refDate?1:0) )));i++){
@@ -604,6 +605,7 @@ var app = new Vue({
                 });
 
 
+                groupSequence.push(subname);
                 subname = subname.join("-");
                 if(this.subgroups[subname] === undefined){
                     this.subgroups[subname] = {};
@@ -628,15 +630,61 @@ var app = new Vue({
                 this.subgroups.All.refs.push(ref);
                 this.subgroups.All.numbers = [...this.subgroups.All.numbers,...groupNumbers];
 
+
             }
 
 
             //save groups to localstorage
             this.selectedWorkplace.groups = this.subgroups;
+            this.selectedWorkplace.groupSequence = groupSequence;
+
+            if(this.selectedWorkplace.predictnextgroup){
+                this.startpredictNextGroup();
+                
+            }
+
             this.saveWorkPlace();
 
             console.log('subgroups',this.subgroups);
             //this.result_group_winning =this.groupKeys.join(" ");
+        },
+        startpredictNextGroup(){
+            this.loadinggroups = true;
+            this.selectedWorkplace.nextGroupResult = '';
+
+            setTimeout(() => { 
+                    
+                this.predictNextGroup();
+
+            }, 500); //one sec
+            
+        },
+        predictNextGroup(){
+            //with the sequence of groups this function will predict the next group that will come up
+              let net = new brain.recurrent.LSTMTimeStep({
+                inputSize: this.selectedWorkplace.groupSequence[0].length,
+                hiddenLayers: [10],
+                outputSize: this.selectedWorkplace.groupSequence[0].length,
+              });
+              
+              net.train(this.selectedWorkplace.groupSequence);
+              
+              //instead of run you can use forecast
+              let output = net.run(this.selectedWorkplace.groupSequence);
+              
+                let result = [];
+
+                for(let out of [...output]){
+                    let n = 0;
+                    if(out < 0) n = 0;
+                else n = Math.round(+out);
+                    result.push(n)
+                }
+              this.selectedWorkplace.nextGroupResult = result
+
+              this.saveWorkPlace();
+              this.loadinggroups = false;
+
         },
         run(){
             outputt = "";
