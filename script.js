@@ -1,3 +1,4 @@
+
 var app = new Vue({
     el: '#app',
     components: {
@@ -45,12 +46,105 @@ var app = new Vue({
         groupKeys : [],
         workplaces : [],
         selectedWorkplace : {},
-        matrix : []
+        matrix : [],
+
+        //firebase services
+        showLogin:true,
+        AppInFire:false,
+        fireEmail: '',
     },
     mounted() {
+
+        
+        this.AppInFire = eval(localStorage.getItem('AppInFire'));
         this.darkmode = eval(localStorage.getItem('darkmode'));
         const workplaces = JSON.parse(localStorage.getItem('workplaces'));
         console.log('work', workplaces)
+
+
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        // Confirm the link is a sign-in with email link.
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        if (firebase.auth().isSignInWithEmailLink(window.location.href)) {
+            // Additional state parameters can also be passed via URL.
+            // This can be used to continue the user's intended action before triggering
+            // the sign-in operation.
+            // Get the email if available. This should be available if the user completes
+            // the flow on the same device where they started it.
+            var email = localStorage.getItem('emailForSignIn');
+            if (!email) {
+                // User opened the link on a different device. To prevent session fixation
+                // attacks, ask the user to provide the associated email again. For example:
+                email = window.prompt('Please provide your email for confirmation');
+            }
+            // The client SDK will parse the code from the link for you.
+            firebase.auth().signInWithEmailLink(email, window.location.href)
+            .then((result) => {
+                // Clear email from storage.
+                
+                localStorage.removeItem('emailForSignIn');
+
+                // You can access the new user via result.user
+                // Additional user info profile not available via:
+                // result.additionalUserInfo.profile == null
+                // You can check if the user is new or existing:
+                // result.additionalUserInfo.isNewUser
+                // Identifier
+                this.AppInFire = true;
+                this.showLogin = false;
+                this.fireEmail = result.user.email;
+                localStorage.setItem('AppInFire', true);
+                
+
+                console.log('result',result.user.email);
+
+                if(result.additionalUserInfo.isNewUser){
+
+                    //if this is a new user take current localstorage and add it to the firestore
+                    db.collection(result.user.email).doc('workplaces').set({
+                        data: JSON.stringify(workplaces)
+                    })
+                    .then(function(docRef) {
+                        console.log("Document written with ID: ", docRef);
+                    })
+                    .catch(function(error) {
+                        console.error("Error adding document: ", error);
+                    });
+
+                }else{
+                    //if its already an existing login take the data from the firestore   .doc("workplaces")
+                    console.log("already have account:", result.user.email);
+                    var docRef = db.collection(result.user.email).doc("workplaces");
+
+                    docRef.get().then(function(doc) {
+                        if (doc.exists) {
+                            console.log("Document data:", doc.data());
+                            //localStorage.setItem('workplaces', JSON.parse( doc.data().data));
+                        } else {
+                            // doc.data() will be undefined in this case
+                            console.log("No such document!");
+                        }
+                    }).catch(function(error) {
+                        console.log("Error getting document:", error);
+                    });
+                }
+
+
+
+            })
+            .catch(function(error) {
+                console.log("Firestore error :", error);
+                // Some error occurred, you can inspect the code: error.code
+                // Common errors could be invalid email and invalid or expired OTPs.
+            });
+        }
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        //--------------------------------------------------------------------
+        
         if(workplaces === null){
             this.workplaces.push(
                 {
@@ -79,7 +173,56 @@ var app = new Vue({
     computed: {
     },
     methods: {
+        //firebase services
+        getUrlVars() {
+            var vars = {};
+            var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,    
+            function(m,key,value) {
+              vars[key] = value;
+            });
+            return vars;
+        },
+        logout(){
+            firebase.auth().signOut().then(function() {
+                // Sign-out successful.
+                this.showLogin = true;
+                this.fireEmail = '';
+                localStorage.setItem('workplaces', '');
 
+            }).catch(function(error) {
+                // An error happened.
+            });
+        },
+        fireSignin(){
+
+
+              var actionCodeSettings = {
+                // URL you want to redirect back to. The domain (www.example.com) for this
+                // URL must be in the authorized domains list in the Firebase Console.
+                url: 'http://lotto.hpvk.com',
+                // This must be true.
+                handleCodeInApp: true,
+              };
+              localStorage.setItem('emailForSignIn', this.fireEmail);
+
+
+              firebase.auth().sendSignInLinkToEmail(this.fireEmail, actionCodeSettings)
+                .then(() => {
+                    // The link was successfully sent. Inform the user.
+                    // Save the email locally so you don't need to ask the user for it again
+                    // if they open the link on the same device.
+                    localStorage.setItem('emailForSignIn', this.fireEmail);
+                })
+                .catch(function(error) {
+                    // Some error occurred, you can inspect the code: error.code
+                    console.log(error);
+                });
+
+            alert('check your email for a login link !');
+        },
+
+
+        //app
 
         selectnumber(selectednumber){
 
@@ -160,6 +303,20 @@ var app = new Vue({
             var foundIndex = this.workplaces.findIndex(x => x.name == this.selectedWorkplace.name);
             this.workplaces[foundIndex] = this.selectedWorkplace;
             localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+            if(this.AppInFire){
+
+                db.collection(this.fireEmail).doc("workplaces").set({
+                    data: JSON.stringify(localStorage.getItem('workplaces'))
+                })
+                .then(function(docRef) {
+                    console.log("Document written with ID: ", docRef);
+                })
+                .catch(function(error) {
+                    console.error("Error adding document: ", error);
+                });
+
+            }
         },
         renameWorkPlace(){
             var workplaceName = prompt("Please enter a name For the Tab:", this.selectedWorkplace.name);
@@ -175,6 +332,9 @@ var app = new Vue({
                 this.workplaces[foundIndex].name = workplaceName;
                 localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
             }
+
+
+            this.saveWorkPlace();
         },
         removeWorkPlace(){
             if (confirm("Are you sure you want to delete this workplace")) {

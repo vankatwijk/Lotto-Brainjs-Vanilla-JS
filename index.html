@@ -27,8 +27,43 @@
 
     <script src="//unpkg.com/brain.js" defer></script>
     <script type="text/javascript" src="browserbrain.js"></script>
-    <script src="script.js" defer></script>
 
+
+    <!-- The core Firebase JS SDK is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.0/firebase-app.js"></script>
+
+    <!-- TODO: Add SDKs for Firebase products that you want to use
+        https://firebase.google.com/docs/web/setup#available-libraries -->
+    <script src="https://www.gstatic.com/firebasejs/8.2.0/firebase-analytics.js"></script>
+
+    <!-- Add Firebase products that you want to use -->
+    <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-auth.js"></script>
+    <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-firestore.js"></script>
+        
+    <!-- 
+        <script>
+        // Your web app's Firebase configuration
+        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+        var firebaseConfig = {
+            apiKey: "AIzaSyDp1yF5-PsVi4FjhSCtOc4hw7xPHNhN52k",
+            authDomain: "super-orange-app.firebaseapp.com",
+            projectId: "super-orange-app",
+            storageBucket: "super-orange-app.appspot.com",
+            messagingSenderId: "989993684913",
+            appId: "1:989993684913:web:7912015257912ee6b9b790",
+            measurementId: "G-CGJCS4C3JZ"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.analytics();
+
+        var db = firebase.firestore();
+        
+        </script> -->
+        <script defer src="./init-firebase.js"></script>
+
+        <script src="script.js" defer></script>
 
 </head>
 
@@ -48,7 +83,33 @@
                     <em>Enable Dark Mode!</em>
                 </div>
             </div>
-            <div class="row main">
+            <div class="row main login-container" v-if="showLogin">
+
+
+
+
+                <div class="login-form" >
+                    <form >
+                        <h2 class="text-center" style="color:#F44725;" >You already have an account! , only an email address is required</h2>       
+                        <div class="form-group">
+                            <input type="text" class="form-control" v-model="fireEmail" id="groupsConfig" Placeholder="Email" required="required">
+                        </div>
+                        <div class="form-group">
+                            <button @click="fireSignin();" type="submit" class="btn btn-primary btn-block">Log in</button>
+                        </div>     
+                    </form>
+                    <p class="text-center"><a @click="showLogin = false" style="cursor: pointer;">Try Demo</a></p>
+                </div>
+
+
+
+
+
+                <!-- <input size="20" type="text" v-model="fireEmail" id="groupsConfig" Placeholder="Email" style="width: 200px;"/>
+                <button class="btn btn-primary" @click="fireSignin();" style="width: 200px;">Signin</button>
+                <button class="btn btn-primary" @click="showLogin = false" style="width: 200px;">Try Demo</button> -->
+            </div>
+            <div class="row main" v-if="!showLogin">
                 <div class="col workspaces">
 
                     <div class="options-panel">
@@ -325,11 +386,9 @@
                 </div>
             </div>
         </div>
-        <div class="row">
-
-        </div>
 
     </div>
+
 
 </body>
 
@@ -728,6 +787,24 @@
 
 
 
+    .login-container{
+        background-color: var(--primary-background-color);
+        color: var(--font-color);
+    }
+    .login-form {
+        width: 340px;
+        margin: 50px auto;
+        font-size: 15px;
+    }
+    .login-form form {
+        margin-bottom: 15px;
+        background: #f7f7f7;
+        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
+        padding: 30px;
+    }
+    .login-form h2 {
+        margin: 0 0 15px;
+    }
 
 
 
