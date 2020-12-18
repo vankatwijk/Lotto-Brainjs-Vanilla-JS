@@ -60,13 +60,26 @@ var app = new Vue({
     AppInFire: false,
     fireEmail: ''
   },
-  mounted: function mounted() {
+  beforeCreate: function beforeCreate() {
+    var workplaces = JSON.parse(localStorage.getItem('workplaces'));
+    var workplacesBackup = JSON.parse(localStorage.getItem('workplacesBackup')); //--------------------------------------------------------------------
+    // create a backup just incase the login destroys everything
+    //--------------------------------------------------------------------
+
+    console.log('Workplaces Backup', workplaces);
+
+    if (workplaces && !workplacesBackup) {
+      //if there are workplaces then back it up
+      localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
+    }
+  },
+  created: function created() {
     var _this = this;
 
     this.AppInFire = eval(localStorage.getItem('AppInFire'));
     this.darkmode = eval(localStorage.getItem('darkmode'));
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
-    console.log('work', workplaces); //--------------------------------------------------------------------
+    console.log('mounted - workplaces', workplaces); //--------------------------------------------------------------------
     //--------------------------------------------------------------------
     // Confirm the link is a sign-in with email link.
     //--------------------------------------------------------------------
@@ -89,13 +102,13 @@ var app = new Vue({
 
       firebase.auth().signInWithEmailLink(email, window.location.href).then(function (result) {
         // Clear email from storage.
-        localStorage.removeItem('emailForSignIn'); // You can access the new user via result.user
+        //localStorage.removeItem('emailForSignIn');
+        // You can access the new user via result.user
         // Additional user info profile not available via:
         // result.additionalUserInfo.profile == null
         // You can check if the user is new or existing:
         // result.additionalUserInfo.isNewUser
         // Identifier
-
         _this.AppInFire = true;
         _this.showLogin = false;
         _this.fireEmail = result.user.email;
@@ -117,11 +130,14 @@ var app = new Vue({
           var docRef = db.collection(result.user.email).doc("workplaces");
           docRef.get().then(function (doc) {
             if (doc.exists) {
-              console.log("Document data:", doc.data()); //localStorage.setItem('workplaces', JSON.parse( doc.data().data));
+              console.log("workplaces data:", doc.data());
+              localStorage.setItem('workplaces', JSON.parse(doc.data().data));
             } else {
               // doc.data() will be undefined in this case
               console.log("No such document!");
             }
+          }).then(function () {
+            _this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
           })["catch"](function (error) {
             console.log("Error getting document:", error);
           });
@@ -130,26 +146,27 @@ var app = new Vue({
         console.log("Firestore error :", error); // Some error occurred, you can inspect the code: error.code
         // Common errors could be invalid email and invalid or expired OTPs.
       });
+    } else {
+      //if this is in demo mode
+      if (workplaces === null) {
+        this.workplaces.push({
+          name: 'General',
+          refDate: true,
+          inputData: "\n                        3\t8\t16\t40\t43\t1\n                        1\t29\t33\t45\t47\t2\n                        14\t27\t39\t46\t48\t3\n                        5\t25\t34\t48\t50\t4\n                        15\t27\t33\t39\t50\t5\n                        ",
+          layers: '5,5,6',
+          lengthrow: 5,
+          numberballs: 50,
+          groupsConfig: '10,20,30,40,50'
+        });
+        localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+      } else {
+        this.workplaces = workplaces;
+      }
     } //--------------------------------------------------------------------
     //--------------------------------------------------------------------
     //--------------------------------------------------------------------
     //--------------------------------------------------------------------
 
-
-    if (workplaces === null) {
-      this.workplaces.push({
-        name: 'General',
-        refDate: true,
-        inputData: "\n                    3\t8\t16\t40\t43\t1\n                    1\t29\t33\t45\t47\t2\n                    14\t27\t39\t46\t48\t3\n                    5\t25\t34\t48\t50\t4\n                    15\t27\t33\t39\t50\t5\n                    ",
-        layers: '5,5,6',
-        lengthrow: 5,
-        numberballs: 50,
-        groupsConfig: '10,20,30,40,50'
-      });
-      localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
-    } else {
-      this.workplaces = workplaces;
-    }
   },
   computed: {},
   methods: {

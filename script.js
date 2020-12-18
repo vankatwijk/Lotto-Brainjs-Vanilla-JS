@@ -53,13 +53,29 @@ var app = new Vue({
         AppInFire:false,
         fireEmail: '',
     },
-    mounted() {
+    beforeCreate() {
+        let workplaces = JSON.parse(localStorage.getItem('workplaces'));
+        let workplacesBackup = JSON.parse(localStorage.getItem('workplacesBackup'));
+        //--------------------------------------------------------------------
+        // create a backup just incase the login destroys everything
+        //--------------------------------------------------------------------
+
+        console.log('Workplaces Backup',workplaces)
+        if(workplaces && !workplacesBackup){
+            //if there are workplaces then back it up
+            localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
+
+        }
+        
+    },
+    created() {
 
         
         this.AppInFire = eval(localStorage.getItem('AppInFire'));
         this.darkmode = eval(localStorage.getItem('darkmode'));
         const workplaces = JSON.parse(localStorage.getItem('workplaces'));
-        console.log('work', workplaces)
+        console.log('mounted - workplaces', workplaces)
+
 
 
         //--------------------------------------------------------------------
@@ -84,7 +100,7 @@ var app = new Vue({
             .then((result) => {
                 // Clear email from storage.
                 
-                localStorage.removeItem('emailForSignIn');
+                //localStorage.removeItem('emailForSignIn');
 
                 // You can access the new user via result.user
                 // Additional user info profile not available via:
@@ -118,14 +134,20 @@ var app = new Vue({
                     console.log("already have account:", result.user.email);
                     var docRef = db.collection(result.user.email).doc("workplaces");
 
-                    docRef.get().then(function(doc) {
+                    docRef.get().then((doc) => {
                         if (doc.exists) {
-                            console.log("Document data:", doc.data());
-                            //localStorage.setItem('workplaces', JSON.parse( doc.data().data));
+                            console.log("workplaces data:", doc.data());
+                            localStorage.setItem('workplaces', JSON.parse( doc.data().data));
+
                         } else {
                             // doc.data() will be undefined in this case
                             console.log("No such document!");
                         }
+                    }).then(() => {
+
+                        this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+
+
                     }).catch(function(error) {
                         console.log("Error getting document:", error);
                     });
@@ -139,35 +161,40 @@ var app = new Vue({
                 // Some error occurred, you can inspect the code: error.code
                 // Common errors could be invalid email and invalid or expired OTPs.
             });
+        }else{
+
+            //if this is in demo mode
+
+            if(workplaces === null){
+                this.workplaces.push(
+                    {
+                        name:'General',
+                        refDate:true,
+                        inputData : `
+                        3	8	16	40	43	1
+                        1	29	33	45	47	2
+                        14	27	39	46	48	3
+                        5	25	34	48	50	4
+                        15	27	33	39	50	5
+                        `,
+                        layers : '5,5,6',
+                        lengthrow :5,
+                        numberballs :50,
+                        groupsConfig : '10,20,30,40,50'
+                    }
+                );
+    
+                localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+            }else{
+                this.workplaces = workplaces;
+            }
+
         }
         //--------------------------------------------------------------------
         //--------------------------------------------------------------------
         //--------------------------------------------------------------------
         //--------------------------------------------------------------------
         
-        if(workplaces === null){
-            this.workplaces.push(
-                {
-                    name:'General',
-                    refDate:true,
-                    inputData : `
-                    3	8	16	40	43	1
-                    1	29	33	45	47	2
-                    14	27	39	46	48	3
-                    5	25	34	48	50	4
-                    15	27	33	39	50	5
-                    `,
-                    layers : '5,5,6',
-                    lengthrow :5,
-                    numberballs :50,
-                    groupsConfig : '10,20,30,40,50'
-                }
-            );
-
-            localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
-        }else{
-            this.workplaces = workplaces;
-        }
         
     },  
     computed: {
