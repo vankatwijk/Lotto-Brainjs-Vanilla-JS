@@ -52,6 +52,8 @@ var app = new Vue({
         showLogin:true,
         AppInFire:false,
         fireEmail: '',
+        firePhone: '',
+        recaptchaVerifier: ''
     },
     beforeCreate() {
         let workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -197,6 +199,9 @@ var app = new Vue({
         
         
     },  
+    mounted() {
+        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+    },
     computed: {
     },
     methods: {
@@ -246,6 +251,97 @@ var app = new Vue({
                 });
 
             alert('check your email for a login link !');
+        },
+        fireSigninPhone(){
+
+            const appVerifier = window.recaptchaVerifier;
+            const phoneNumberString = this.firePhone;
+
+            firebase.auth().signInWithPhoneNumber(phoneNumberString, appVerifier)
+            .then((confirmationResult) => {
+                console.log("Login success", confirmationResult);
+                window.recaptchaVerifier.clear();
+                // SMS sent. Prompt user to type the code from the message, then sign the
+                // user in with confirmationResult.confirm(code).
+                const verificationCode = window.prompt(
+                  "Please enter the verification " + "code that was sent to your mobile device."
+                );
+                
+                confirmationResult.confirm(verificationCode).then((result) => {
+                    // User signed in successfully.
+                    console.log('user',result.user);
+                    // Clear email from storage.
+                    
+                    //localStorage.removeItem('emailForSignIn');
+    
+                    // You can access the new user via result.user
+                    // Additional user info profile not available via:
+                    // result.additionalUserInfo.profile == null
+                    // You can check if the user is new or existing:
+                    // result.additionalUserInfo.isNewUser
+                    // Identifier
+                    this.AppInFire = true;
+                    this.showLogin = false;
+                    this.fireEmail = result.user.phoneNumber;
+                    localStorage.setItem('AppInFire', true);
+                    
+    
+                    console.log('result',result.user.phoneNumber);
+    
+                    if(result.additionalUserInfo.isNewUser){
+    
+                        //if this is a new user take current localstorage and add it to the firestore
+                        db.collection(result.user.email).doc('workplaces').set({
+                            data: JSON.stringify(workplaces)
+                        })
+                        .then(function(docRef) {
+                            console.log("Document written with ID: ", docRef);
+                        })
+                        .catch(function(error) {
+                            console.error("Error adding document: ", error);
+                        });
+                        return true;
+    
+                    }else{
+                        //if its already an existing login take the data from the firestore   .doc("workplaces")
+                        console.log("already have account:", result.user.email);
+                        var docRef = db.collection(result.user.email).doc("workplaces");
+    
+                        docRef.get().then((doc) => {
+                            if (doc.exists) {
+                                console.log("workplaces data:", doc.data());
+                                localStorage.setItem('workplaces', JSON.parse( doc.data().data));
+    
+                            } else {
+                                // doc.data() will be undefined in this case
+                                console.log("No such document!");
+                            }
+                        }).then(() => {
+    
+                            this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+    
+    
+                        }).catch(function(error) {
+                            console.log("Error getting document:", error);
+                        });
+                        return true;
+                    }
+                    // ...
+                }).catch(function (error) {
+                // User couldn't sign in (bad verification code?)
+                // ...
+                });
+              })
+              .catch((error) => {
+                console.error(error);
+                // Error; SMS not sent
+                // Handle Errors Here
+                window.recaptchaVerifier.clear();
+                return Promise.reject(error);
+              });
+            
+        
+
         },
 
 

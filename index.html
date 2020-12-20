@@ -96,11 +96,22 @@
                     <form >
                         <h2 class="text-center" style="color:#F44725;" >You already have an account! , only an email address is required</h2>       
                         <div class="form-group">
-                            <input type="text" class="form-control" v-model="fireEmail" id="groupsConfig" Placeholder="Email" required="required">
+                            <input type="text" class="form-control" v-model="fireEmail" id="fireEmail" Placeholder="Email" required="required">
                         </div>
                         <div class="form-group">
-                            <button @click="fireSignin();" type="submit" class="btn btn-primary btn-block">Log in</button>
-                        </div>     
+                            <button @click="fireSignin();" type="submit" class="btn btn-primary btn-block">Log via email</button>
+                        </div>  
+                        <br>
+                        <hr>                       
+                        <div class="form-group">
+                            <input type="text" class="form-control" v-model="firePhone" id="firePhone" Placeholder="Phone" required="required">
+                        </div>
+                        <div class="form-group">
+                            <button @click="fireSigninPhone();" type="submit" class="btn btn-primary btn-block">Log via phone</button>
+                        </div> 
+
+                        <div id="recaptcha-container"></div>
+
                     </form>
                     <p class="text-center"><a @click="showLogin = false" style="cursor: pointer;">Try Demo</a></p>
                 </div>
