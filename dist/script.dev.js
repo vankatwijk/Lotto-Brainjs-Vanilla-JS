@@ -60,7 +60,11 @@ var app = new Vue({
     AppInFire: false,
     fireEmail: '',
     firePhone: '',
-    recaptchaVerifier: ''
+    recaptchaVerifier: '',
+    viewTabs: true,
+    viewDataInsert: true,
+    viewGroups: true,
+    viewResult: true
   },
   beforeCreate: function beforeCreate() {
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -171,10 +175,32 @@ var app = new Vue({
 
   },
   mounted: function mounted() {
+    if (this.isMobile()) {
+      this.viewTabs = true;
+      this.viewDataInsert = false;
+      this.viewGroups = false;
+      this.viewResult = false;
+    }
+
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
   },
   computed: {},
   methods: {
+    navigateTo: function navigateTo(view) {
+      if (this.isMobile()) {
+        this.viewTabs = view === 'viewTabs' ? true : false;
+        this.viewDataInsert = view === 'viewDataInsert' ? true : false;
+        this.viewGroups = view === 'viewGroups' ? true : false;
+        this.viewResult = view === 'viewResult' ? true : false;
+      }
+    },
+    isMobile: function isMobile() {
+      if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        return true;
+      } else {
+        return false;
+      }
+    },
     //firebase services
     getUrlVars: function getUrlVars() {
       var vars = {};
@@ -350,6 +376,8 @@ var app = new Vue({
         //autogenerate the groups
         setTimeout(this.createGroups(), 5000);
       }
+
+      this.navigateTo('viewDataInsert');
     },
     saveWorkPlace: function saveWorkPlace() {
       var _this4 = this;
