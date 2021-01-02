@@ -64,7 +64,9 @@ var app = new Vue({
     viewTabs: true,
     viewDataInsert: true,
     viewGroups: true,
-    viewResult: true
+    viewResult: true,
+    deferredPrompt: null,
+    installButton: false
   },
   beforeCreate: function beforeCreate() {
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -175,6 +177,8 @@ var app = new Vue({
 
   },
   mounted: function mounted() {
+    var _this2 = this;
+
     if (this.isMobile()) {
       this.viewTabs = true;
       this.viewDataInsert = false;
@@ -182,10 +186,40 @@ var app = new Vue({
       this.viewResult = false;
     }
 
-    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container'); //deferredPrompt Allows to show the install prompt
+
+    window.addEventListener("beforeinstallprompt", function (e) {
+      console.log("beforeinstallprompt fired"); // Prevent Chrome 76 and earlier from automatically showing a prompt
+
+      e.preventDefault(); // Stash the event so it can be triggered later.
+
+      _this2.deferredPrompt = e;
+      _this2.installButton = true;
+    });
+    window.addEventListener("appinstalled", function (evt) {
+      console.log("appinstalled fired", evt);
+    });
   },
   computed: {},
   methods: {
+    installapp: function installapp() {
+      var _this3 = this;
+
+      // Show the prompt
+      this.deferredPrompt.prompt(); // Wait for the user to respond to the prompt
+
+      this.deferredPrompt.userChoice.then(function (choiceResult) {
+        if (choiceResult.outcome === "accepted") {
+          console.log("PWA setup accepted");
+          _this3.installButton = false;
+        } else {
+          console.log("PWA setup rejected");
+          _this3.installButton = false;
+        }
+
+        _this3.deferredPrompt = null;
+      });
+    },
     navigateTo: function navigateTo(view) {
       if (this.isMobile()) {
         this.viewTabs = view === 'viewTabs' ? true : false;
@@ -219,7 +253,7 @@ var app = new Vue({
       });
     },
     fireSignin: function fireSignin() {
-      var _this2 = this;
+      var _this4 = this;
 
       var actionCodeSettings = {
         // URL you want to redirect back to. The domain (www.example.com) for this
@@ -233,7 +267,7 @@ var app = new Vue({
         // The link was successfully sent. Inform the user.
         // Save the email locally so you don't need to ask the user for it again
         // if they open the link on the same device.
-        localStorage.setItem('emailForSignIn', _this2.fireEmail);
+        localStorage.setItem('emailForSignIn', _this4.fireEmail);
       })["catch"](function (error) {
         // Some error occurred, you can inspect the code: error.code
         console.log(error);
@@ -241,7 +275,7 @@ var app = new Vue({
       alert('check your email for a login link !');
     },
     fireSigninPhone: function fireSigninPhone() {
-      var _this3 = this;
+      var _this5 = this;
 
       var appVerifier = window.recaptchaVerifier;
       var phoneNumberString = this.firePhone;
@@ -262,9 +296,9 @@ var app = new Vue({
           // result.additionalUserInfo.isNewUser
           // Identifier
 
-          _this3.AppInFire = true;
-          _this3.showLogin = false;
-          _this3.fireEmail = result.user.phoneNumber;
+          _this5.AppInFire = true;
+          _this5.showLogin = false;
+          _this5.fireEmail = result.user.phoneNumber;
           localStorage.setItem('AppInFire', true);
           console.log('result', result.user.phoneNumber);
 
@@ -291,7 +325,7 @@ var app = new Vue({
                 console.log("No such document!");
               }
             }).then(function () {
-              _this3.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+              _this5.workplaces = JSON.parse(localStorage.getItem('workplaces'));
             })["catch"](function (error) {
               console.log("Error getting document:", error);
             });
@@ -380,10 +414,10 @@ var app = new Vue({
       this.navigateTo('viewDataInsert');
     },
     saveWorkPlace: function saveWorkPlace() {
-      var _this4 = this;
+      var _this6 = this;
 
       var foundIndex = this.workplaces.findIndex(function (x) {
-        return x.name == _this4.selectedWorkplace.name;
+        return x.name == _this6.selectedWorkplace.name;
       });
       this.workplaces[foundIndex] = this.selectedWorkplace;
       localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
@@ -399,7 +433,7 @@ var app = new Vue({
       }
     },
     renameWorkPlace: function renameWorkPlace() {
-      var _this5 = this;
+      var _this7 = this;
 
       var workplaceName = prompt("Please enter a name For the Tab:", this.selectedWorkplace.name);
 
@@ -411,7 +445,7 @@ var app = new Vue({
         alert("Name already exist !");
       } else {
         var foundIndex = this.workplaces.findIndex(function (x) {
-          return x.name == _this5.selectedWorkplace.name;
+          return x.name == _this7.selectedWorkplace.name;
         });
         this.workplaces[foundIndex].name = workplaceName;
         localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
@@ -420,7 +454,7 @@ var app = new Vue({
       this.saveWorkPlace();
     },
     removeWorkPlace: function removeWorkPlace() {
-      var _this6 = this;
+      var _this8 = this;
 
       if (confirm("Are you sure you want to delete this workplace")) {
         txt = "You pressed OK!";
@@ -429,7 +463,7 @@ var app = new Vue({
           alert("You can not remove the last workplace !");
         } else {
           var filteredWorkplaces = this.workplaces.filter(function (x) {
-            return x.name !== _this6.selectedWorkplace.name;
+            return x.name !== _this8.selectedWorkplace.name;
           });
           this.workplaces = filteredWorkplaces;
           localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
@@ -656,12 +690,12 @@ var app = new Vue({
       return lst;
     },
     runapp: function runapp() {
-      var _this7 = this;
+      var _this9 = this;
 
       this.loading = true; //give time to load the loading animation
 
       setTimeout(function () {
-        _this7.trainnetwork();
+        _this9.trainnetwork();
       }, 500); //one sec
     },
     trainnetwork: function trainnetwork() {
@@ -791,7 +825,7 @@ var app = new Vue({
       return res;
     },
     changeResultGroup: function changeResultGroup(name, values) {
-      var _this8 = this;
+      var _this10 = this;
 
       this.selectedGroup = name;
       this.result_group = values.winning;
@@ -804,9 +838,9 @@ var app = new Vue({
       if (values.output !== undefined) {
         setTimeout(function () {
           console.log('change group values', values.output);
-          _this8.diagram = values.diagram;
-          _this8.output = values.output;
-          _this8.result_group_numbersToPlay = values.result_group_numbersToPlay;
+          _this10.diagram = values.diagram;
+          _this10.output = values.output;
+          _this10.result_group_numbersToPlay = values.result_group_numbersToPlay;
         }, 300);
       } else {
         this.result_group_numbersToPlay = [];
@@ -829,7 +863,7 @@ var app = new Vue({
       }
     },
     createGroups: function createGroups() {
-      var _this9 = this;
+      var _this11 = this;
 
       //reset default values
       this.matrix = [];
@@ -865,18 +899,18 @@ var app = new Vue({
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || _this9.selectedWorkplace.refDate === false) {
+        if (i === 0 || _this11.selectedWorkplace.refDate === false) {
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
 
-          _this9.generateProportionMatrix(input);
+          _this11.generateProportionMatrix(input);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
 
-          _this9.generateProportionMatrix(input);
+          _this11.generateProportionMatrix(input);
         } //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
 
-        if (_this9.selectedWorkplace.refDate === true) {
+        if (_this11.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
           ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
@@ -885,11 +919,11 @@ var app = new Vue({
         } //get the ref column
 
 
-        if (_this9.selectedWorkplace.refDate === true) {
+        if (_this11.selectedWorkplace.refDate === true) {
           inputRef = inputs[i * lengthrow];
         }
 
-        groupsConfig1 = _this9.selectedWorkplace.groupsConfig;
+        groupsConfig1 = _this11.selectedWorkplace.groupsConfig;
         groupsConfig = groupsConfig1.split(",");
         var groupNumbers = [];
         var subname = []; //for (var j=0;j<lengthrow;j++){
@@ -947,36 +981,36 @@ var app = new Vue({
         groupSequence.push(subname);
         subname = subname.join("-");
 
-        if (_this9.subgroups[subname] === undefined) {
-          _this9.subgroups[subname] = {};
-          _this9.subgroups[subname].name = '';
-          _this9.subgroups[subname].winning = [];
-          _this9.subgroups[subname].winningAndRef = [];
-          _this9.subgroups[subname].refs = [];
-          _this9.subgroups[subname].numbers = [];
+        if (_this11.subgroups[subname] === undefined) {
+          _this11.subgroups[subname] = {};
+          _this11.subgroups[subname].name = '';
+          _this11.subgroups[subname].winning = [];
+          _this11.subgroups[subname].winningAndRef = [];
+          _this11.subgroups[subname].refs = [];
+          _this11.subgroups[subname].numbers = [];
         }
 
-        _this9.subgroups[subname].name = subname;
+        _this11.subgroups[subname].name = subname;
 
-        _this9.subgroups[subname].winning.push(input);
+        _this11.subgroups[subname].winning.push(input);
 
-        _this9.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
+        _this11.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
 
-        _this9.subgroups[subname].refs.push(ref);
+        _this11.subgroups[subname].refs.push(ref);
 
-        _this9.subgroups[subname].numbers = [].concat(_toConsumableArray(_this9.subgroups[subname]['numbers']), groupNumbers);
+        _this11.subgroups[subname].numbers = [].concat(_toConsumableArray(_this11.subgroups[subname]['numbers']), groupNumbers);
 
-        _this9.groupKeys.push(subname);
+        _this11.groupKeys.push(subname);
 
-        _this9.subgroups.All.name = 'All';
+        _this11.subgroups.All.name = 'All';
 
-        _this9.subgroups.All.winning.push(input);
+        _this11.subgroups.All.winning.push(input);
 
-        _this9.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+        _this11.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
-        _this9.subgroups.All.refs.push(ref);
+        _this11.subgroups.All.refs.push(ref);
 
-        _this9.subgroups.All.numbers = [].concat(_toConsumableArray(_this9.subgroups.All.numbers), groupNumbers);
+        _this11.subgroups.All.numbers = [].concat(_toConsumableArray(_this11.subgroups.All.numbers), groupNumbers);
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {
@@ -999,12 +1033,12 @@ var app = new Vue({
       console.log('subgroups', this.subgroups); //this.result_group_winning =this.groupKeys.join(" ");
     },
     startpredictNextGroup: function startpredictNextGroup() {
-      var _this10 = this;
+      var _this12 = this;
 
       this.loadinggroups = true;
       this.selectedWorkplace.nextGroupResult = '';
       setTimeout(function () {
-        _this10.predictNextGroup();
+        _this12.predictNextGroup();
       }, 500); //one sec
     },
     predictNextGroup: function predictNextGroup() {

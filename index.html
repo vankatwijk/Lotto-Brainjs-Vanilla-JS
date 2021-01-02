@@ -15,7 +15,6 @@
             navigator.serviceWorker.register('/service-worker.js');
         }
     </script>
-
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
@@ -80,7 +79,6 @@
 </head>
 
 <body>
-
     <div id="app">
         <div class="container-fluid">
             <div class="row header">
@@ -164,7 +162,7 @@
 
                                 <div class="footer-style footer-margin" v-show="isMobile()">
                                     <footer class="card-footer footer-position">
-                                        <button class="btn btn-primary" @click="navigateTo('viewGroups')">Back</button>
+                                        <button class="btn btn-primary" @click="installapp" v-show="installButton">Install App</button>
                                     </footer>
                                 </div>
 

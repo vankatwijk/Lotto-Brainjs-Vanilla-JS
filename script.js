@@ -59,6 +59,9 @@ var app = new Vue({
         viewDataInsert:true,
         viewGroups:true,
         viewResult:true,
+
+        deferredPrompt:null,
+        installButton:false
     },
     beforeCreate() {
         let workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -213,10 +216,45 @@ var app = new Vue({
         }
 
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container');
+ 
+        //deferredPrompt Allows to show the install prompt
+
+        window.addEventListener("beforeinstallprompt", e => {
+          console.log("beforeinstallprompt fired");
+          // Prevent Chrome 76 and earlier from automatically showing a prompt
+          e.preventDefault();
+          // Stash the event so it can be triggered later.
+          this.deferredPrompt = e;
+
+          this.installButton = true;
+ 
+        });
+
+        window.addEventListener("appinstalled", evt => {
+            console.log("appinstalled fired", evt);
+          });
     },
     computed: {
     },
     methods: {
+        installapp(){
+            // Show the prompt
+            this.deferredPrompt.prompt();
+
+            // Wait for the user to respond to the prompt
+            this.deferredPrompt.userChoice.then(choiceResult => {
+                if (choiceResult.outcome === "accepted") {
+                    console.log("PWA setup accepted");
+
+                    this.installButton = false;
+                } else {
+                    console.log("PWA setup rejected");
+
+                    this.installButton = false;
+                }
+                this.deferredPrompt = null;
+            });
+        },
         navigateTo(view){
             if(this.isMobile()){
                 this.viewTabs=(view === 'viewTabs'?true:false);
