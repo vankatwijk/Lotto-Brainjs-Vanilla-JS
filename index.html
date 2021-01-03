@@ -11,7 +11,7 @@
     <link rel="manifest" href="manifest.json">
 
     <script>
-        if('serviceWorker' in navigator) {
+        if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/service-worker.js');
         }
     </script>
@@ -51,7 +51,7 @@
     <!-- Add Firebase products that you want to use -->
     <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-auth.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-firestore.js"></script>
-        
+
     <!-- 
         <script>
         // Your web app's Firebase configuration
@@ -73,9 +73,9 @@
         var db = firebase.firestore();
         
         </script> -->
-        <script defer src="./init-firebase.js"></script>
+    <script defer src="./init-firebase.js"></script>
 
-        <script src="script.js" defer></script>
+    <script src="script.js" defer></script>
 
 </head>
 
@@ -86,7 +86,7 @@
                 <div class="col-12 col-md-4" style="width:400px;font-family: 'Monoton', cursive;">
                     <h2>Super Orange App</h2>
                 </div>
-                <div class="col-10 col-md-2" v-show="isMobile()">
+                <div class="col-8 col-md-2" v-show="isMobile()">
                     <button class="btn btn-primary" @click="navigateTo('viewTabs')">Go To Tabs</button>
                 </div>
                 <div class="col-2 col-md-2" class="theme-switch-wrapper">
@@ -102,23 +102,28 @@
 
 
 
-                <div class="login-form" >
-                    <form >
-                        <h2 class="text-center" style="color:#F44725;" >You already have an account! , only an email address is required</h2>       
+                <div class="login-form">
+                    <form>
+                        <h2 class="text-center" style="color:#F44725;">You already have an account! , only an email
+                            address is required</h2>
                         <div class="form-group">
-                            <input type="text" class="form-control" v-model="fireEmail" id="fireEmail" Placeholder="Email" required="required">
+                            <input type="text" class="form-control" v-model="fireEmail" id="fireEmail"
+                                Placeholder="Email" required="required">
                         </div>
                         <div class="form-group">
-                            <button @click="fireSignin();" type="submit" class="btn btn-primary btn-block">Log via email</button>
-                        </div>  
+                            <button @click="fireSignin();" type="submit" class="btn btn-primary btn-block">Log via
+                                email</button>
+                        </div>
                         <br>
-                        <hr>                       
+                        <hr>
                         <div class="form-group">
-                            <input type="text" class="form-control" v-model="firePhone" id="firePhone" Placeholder="Phone" required="required">
+                            <input type="text" class="form-control" v-model="firePhone" id="firePhone"
+                                Placeholder="Phone" required="required">
                         </div>
                         <div class="form-group">
-                            <button @click="fireSigninPhone();" type="submit" class="btn btn-primary btn-block">Log via phone</button>
-                        </div> 
+                            <button @click="fireSigninPhone();" type="submit" class="btn btn-primary btn-block">Log via
+                                phone</button>
+                        </div>
 
                         <div id="recaptcha-container"></div>
 
@@ -138,36 +143,32 @@
 
                 <!-- half size column in bootstrap -->
                 <div class="col-12 col-md-5" v-show="viewTabs || viewDataInsert">
-                    <div :class="isMobile() ? 'row main-mobile no-gutters' : 'row main no-gutters'">
+                    <div :class="isMobile() ? 'row main-mobile' : 'row main'">
                         <div class="col-12 col-md-4 workspaces" v-show="viewTabs">
 
                             <div class="options-panel">
                                 <button class="btn btn-primary" @click="addWorkPlace();">+ Add Tab</button>
                             </div>
 
-                                <draggable  
-                                class="overflow-container"
-                                v-model="workplaces" 
-                                :options="{disabled : isMobile()}"
-                                @start="drag=true" 
-                                @end="drag=false" 
+                            <draggable class="overflow-container" v-model="workplaces"
+                                :options="{disabled : isMobile()}" @start="drag=true" @end="drag=false"
                                 @change="saveWorkPlace()">
 
-                                    <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected':'workplace-button'"
-                                        v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
-                                        <span>{{item.name}}</span>
-                                    </div>
-                                    
-                                </draggable>
-
-
-                                <div class="footer-style footer-margin" v-show="isMobile()">
-                                    <footer class="card-footer footer-position">
-                                        <button class="btn btn-primary" @click="installapp">Install App</button>
-                                    </footer>
+                                <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected noselect':'workplace-button noselect'"
+                                    v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
+                                    <span>{{item.name}}</span>
                                 </div>
 
-                                <!-- <div class="workplace-button" @click="addWorkPlace();">
+                            </draggable>
+
+
+                            <div class="footer-style footer-margin" v-show="isMobile()">
+                                <footer class="card-footer footer-position">
+                                    <button class="btn btn-primary" @click="installapp">Install App</button>
+                                </footer>
+                            </div>
+
+                            <!-- <div class="workplace-button" @click="addWorkPlace();">
                                     <span>+ Add Tab</span>
                                 </div> -->
                         </div>
@@ -191,8 +192,10 @@
                                     </div>
                                 </div>
                                 <br>
-                                <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear Input</button>
-                                <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input Lines</button>
+                                <button class="btn btn-primary" @click="selectedWorkplace.inputData='';">Clear
+                                    Input</button>
+                                <button class="btn btn-primary" @click="reverseInputLines();">Reverse Input
+                                    Lines</button>
 
                                 <div class="form-group row">
                                     <div class="col-8">
@@ -207,7 +210,8 @@
                                         <label for="lengthrow">Number of columns in a row : </label>
                                     </div>
                                     <div class="col">
-                                        <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" />
+                                        <input size="4" type="text" v-model="selectedWorkplace.lengthrow"
+                                            id="lengthrow" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -215,7 +219,8 @@
                                         <label for="numberballs">Number on balls go to : </label>
                                     </div>
                                     <div class="col">
-                                        <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" />
+                                        <input size="4" type="text" v-model="selectedWorkplace.numberballs"
+                                            id="numberballs" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -240,7 +245,8 @@
                                         <label for="predictnextgroup">Predict next group : </label>
                                     </div>
                                     <div class="col">
-                                        <input type="checkbox" id="predictnextgroup" v-model="selectedWorkplace.predictnextgroup">
+                                        <input type="checkbox" id="predictnextgroup"
+                                            v-model="selectedWorkplace.predictnextgroup">
                                     </div>
                                 </div>
                                 <p>
@@ -251,7 +257,8 @@
                             <div class="footer-style footer-margin" v-show="isMobile()">
                                 <footer class="card-footer footer-position">
                                     <button class="btn btn-primary" @click="navigateTo('viewTabs')">Back</button>
-                                    <button class="btn btn-primary" @click="navigateTo('viewGroups')">View groups</button>
+                                    <button class="btn btn-primary" @click="navigateTo('viewGroups')">View
+                                        groups</button>
                                 </footer>
                             </div>
                         </div>
@@ -264,38 +271,48 @@
 
                     <div :class="isMobile() ? 'row main-mobile': 'row main'">
                         <div class="col-6 col-md-6 groups-container" v-show="viewGroups">
-        
+
                             <div v-if="selectedWorkplace.name" class="options-panel">
-                                <div class="placeholder-button" style="height:50px;"> {{(selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '')}}</div>
+                                <div class="placeholder-button" style="height:50px;">
+                                    {{(selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '')}}
+                                </div>
                             </div>
                             <div v-if="selectedWorkplace.name" class="overflow-container">
-        
-        
+
+
                                 <div v-if="loadinggroups">
                                     <div class="spinner"></div>
                                 </div>
-        
-        
-                                <div v-if="!loadinggroups" :class="selectedGroup === name ? 'sub-button-selected':'sub-button'"
+
+
+                                <div v-if="!loadinggroups"
+                                    :class="selectedGroup === name ? 'sub-button-selected noselect':'sub-button noselect'"
                                     v-for="(value, name) in subgroups"
                                     @click="changeResultGroup(name,value);output='';diagram=''">
-        
-                                    <span class="sub-button-length" :style="value.name === (selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '') ? 'background-color:#f44725;':''" >{{value.winning.length}}</span>
+
+                                    <span class="sub-button-length"
+                                        :style="value.name === (selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '') ? 'background-color:#f44725;':''">{{value.winning.length}}</span>
                                     <span>{{value.name}}</span>
                                 </div>
                             </div>
-        
+
+
+                            <div class="footer-style footer-margin" v-show="isMobile()">
+                                <footer class="card-footer footer-position">
+                                    <button class="btn btn-primary" @click="navigateTo('viewDataInsert')">Back</button>
+                                </footer>
+                            </div>
                         </div>
                         <div class="col-6 col-md-6 results-container" v-show="viewGroups">
-        
+
                             <div v-if="selectedWorkplace.name" class="options-panel">
                                 <div style="height:50px;"></div>
                             </div>
                             <div v-if="selectedWorkplace.name && selectedGroup" class="overflow-container"
                                 style="padding: 10px;">
-        
+
                                 <div v-for="(item, index) in result_group" :key="index">
-        
+
                                     <!-- <div class="diamond-container">
                                             <span class="diamond-shape">
                                             <span class="item-count">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
@@ -309,15 +326,15 @@
                                         <span class="reference-number-line"></span>
                                     </div>
                                     <div class="badges-black">
-        
+
                                         <span v-for="(item, index) in item" @click="selectnumber(item)"
                                             :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
                                             {{item}}
                                         </span>
-        
-        
-        
-        
+
+
+
+
                                         <span class="ref-number-badge">{{result_group_refs[index]}}</span>
                                     </div>
                                     <div class="reference-number-container">
@@ -331,26 +348,27 @@
                                         <!-- .item-count -->
                                     </span><!-- .container .diamond-shape-->
                                 </div>
-        
-                            </div>
-        
-                        </div>
 
-                        <div class="footer-style footer-margin" v-show="isMobile()">
-                            <footer class="card-footer footer-position">
-                                <button class="btn btn-primary" @click="navigateTo('viewDataInsert')">Back</button>
-                                <button class="btn btn-primary" @click="navigateTo('viewResult')">Go to Results</button>
-                            </footer>
+                            </div>
+
+
+                            <div class="footer-style footer-margin" v-show="isMobile()" v-if="selectedWorkplace.name && selectedGroup">
+                                <footer class="card-footer footer-position">
+                                    <button class="btn btn-primary" @click="navigateTo('viewResult')">Results</button>
+                                </footer>
+                            </div>
+
                         </div>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-4 results-container" style="border-left: 0px solid #F44725;" v-show="viewResult">
+                <div class="col-12 col-md-4 results-container" style="border-left: 0px solid #F44725;"
+                    v-show="viewResult">
 
                     <div class="options-panel"
                         v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
-                        <button class="btn btn-primary" @click="createnetwork();">Create Neural Network</button>
-                        <button class="btn btn-primary" @click="readtrainingdata();">Read Training Data</button>
+                        <button class="btn btn-primary" @click="createnetwork();">Create Network</button>
+                        <button class="btn btn-primary" @click="readtrainingdata();">Train</button>
                         <button class="btn btn-primary" @click="runapp();">Run</button>
                     </div>
                     <div class="options-panel"
@@ -359,7 +377,8 @@
 
                     </div>
 
-                    <div class="overflow-container" style="padding-left: 20px;" v-if="selectedWorkplace.name && selectedGroup">
+                    <div class="overflow-container" style="padding-left: 20px;"
+                        v-if="selectedWorkplace.name && selectedGroup">
 
                         <div v-if="loading">
                             <div class="spinner"></div>
@@ -441,7 +460,8 @@
                             you can set this to 70, if you want to adjust the apps predictions you can insert more
                             complex models ex '5,5,2,9'.<br><br>
 
-                            Predict next group - if true, this will perform a sequence prediction on the groups based on each
+                            Predict next group - if true, this will perform a sequence prediction on the groups based on
+                            each
                             winning row and when the group was created to predict the next posible group.<br><br>
                         </p>
                     </div>
@@ -478,8 +498,8 @@
     }
 
     .row>* {
-        padding-right: 0;
-        padding-left: 0;
+        /* padding-right: 0;
+        padding-left: 0; */
     }
 
     body {
@@ -562,12 +582,13 @@
     }
 
     .main {
-        height: calc(100vh - 50px);
+        height: calc(100vh - 56px);
     }
 
     .main-mobile {
         /* 70 for footer */
-        height: calc(100vh - 170px);
+        overflow: hidden;
+        height: calc(100vh - 97px);
     }
 
     .header {
@@ -579,12 +600,14 @@
 
     .overflow-container {
         overflow: auto;
-        height: calc(100% - 100px);
+        height: calc(100% - 167px);
     }
 
     .workspaces {
         height: 100%;
         background-color: var(--secondary-background-color);
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0;
         /* max-width: 200px;
         min-width: 100px; */
     }
@@ -594,7 +617,9 @@
         height: 100%;
         border-left: 4px solid #F44725;
         color: var(--font-color);
-        padding-right: 24px;
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0;
+        /* padding-right: 24px; */
     }
 
     .groups-container {
@@ -602,6 +627,9 @@
         /* max-width: 300px;
         min-width: 200px; */
         height: 100%;
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0;
+        /* height: calc(100% - 67px); */
     }
 
     .results-container {
@@ -610,6 +638,25 @@
         color: var(--font-color);
         height: 100%;
         overflow: auto;
+        --bs-gutter-x: 0;
+        --bs-gutter-y: 0;
+        /* height: calc(100% - 67px); */
+    }
+
+    .noselect {
+        -webkit-touch-callout: none;
+        /* iOS Safari */
+        -webkit-user-select: none;
+        /* Safari */
+        -khtml-user-select: none;
+        /* Konqueror HTML */
+        -moz-user-select: none;
+        /* Old versions of Firefox */
+        -ms-user-select: none;
+        /* Internet Explorer/Edge */
+        user-select: none;
+        /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
     }
 
     .selected_number {
@@ -868,21 +915,24 @@
 
 
 
-    .login-container{
+    .login-container {
         background-color: var(--primary-background-color);
         color: var(--font-color);
     }
+
     .login-form {
         width: 340px;
         margin: 50px auto;
         font-size: 15px;
     }
+
     .login-form form {
         margin-bottom: 15px;
         background: #f7f7f7;
         box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
         padding: 30px;
     }
+
     .login-form h2 {
         margin: 0 0 15px;
     }
