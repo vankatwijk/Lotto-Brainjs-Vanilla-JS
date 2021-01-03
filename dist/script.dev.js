@@ -85,9 +85,16 @@ var app = new Vue({
     var _this = this;
 
     this.AppInFire = eval(localStorage.getItem('AppInFire'));
+    this.AppInFireEmail = eval(localStorage.getItem('AppInFireEmail'));
     this.darkmode = eval(localStorage.getItem('darkmode'));
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
-    console.log('mounted - workplaces', workplaces); //--------------------------------------------------------------------
+    console.log('mounted - workplaces', workplaces); // if(this.isMobile() && this.AppInFire){
+    //     this.AppInFire = true;
+    //     this.showLogin = false;
+    //     this.fireEmail = this.AppInFireEmail;
+    //     localStorage.setItem('AppInFire', true);
+    // }
+    //--------------------------------------------------------------------
     //--------------------------------------------------------------------
     // Confirm the link is a sign-in with email link.
     //--------------------------------------------------------------------
@@ -121,6 +128,7 @@ var app = new Vue({
         _this.showLogin = false;
         _this.fireEmail = result.user.email;
         localStorage.setItem('AppInFire', true);
+        localStorage.setItem('AppInFireEmail', result.user.email);
         console.log('result', result.user.email);
 
         if (result.additionalUserInfo.isNewUser) {

@@ -82,12 +82,20 @@ var app = new Vue({
 
         
         this.AppInFire = eval(localStorage.getItem('AppInFire'));
+        this.AppInFireEmail = eval(localStorage.getItem('AppInFireEmail'));
         this.darkmode = eval(localStorage.getItem('darkmode'));
         const workplaces = JSON.parse(localStorage.getItem('workplaces'));
         console.log('mounted - workplaces', workplaces)
 
 
+        // if(this.isMobile() && this.AppInFire){
 
+        //     this.AppInFire = true;
+        //     this.showLogin = false;
+        //     this.fireEmail = this.AppInFireEmail;
+        //     localStorage.setItem('AppInFire', true);
+
+        // }
         //--------------------------------------------------------------------
         //--------------------------------------------------------------------
         // Confirm the link is a sign-in with email link.
@@ -122,6 +130,7 @@ var app = new Vue({
                 this.showLogin = false;
                 this.fireEmail = result.user.email;
                 localStorage.setItem('AppInFire', true);
+                localStorage.setItem('AppInFireEmail', result.user.email);
                 
 
                 console.log('result',result.user.email);
