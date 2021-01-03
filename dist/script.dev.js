@@ -66,7 +66,7 @@ var app = new Vue({
     viewGroups: true,
     viewResult: true,
     deferredPrompt: null,
-    installButton: false
+    installButton: true
   },
   beforeCreate: function beforeCreate() {
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -211,10 +211,10 @@ var app = new Vue({
       this.deferredPrompt.userChoice.then(function (choiceResult) {
         if (choiceResult.outcome === "accepted") {
           console.log("PWA setup accepted");
-          _this3.installButton = false;
+          _this3.installButton = true;
         } else {
           console.log("PWA setup rejected");
-          _this3.installButton = false;
+          _this3.installButton = true;
         }
 
         _this3.deferredPrompt = null;
