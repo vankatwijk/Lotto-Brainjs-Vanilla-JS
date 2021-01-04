@@ -57,8 +57,11 @@ var app = new Vue({
     matrix: [],
     //firebase services
     showLogin: true,
+    showRegister: false,
     AppInFire: false,
     fireEmail: '',
+    firePassword: '',
+    fireConfirmPassword: '',
     firePhone: '',
     recaptchaVerifier: '',
     viewTabs: true,
@@ -66,7 +69,7 @@ var app = new Vue({
     viewGroups: true,
     viewResult: true,
     deferredPrompt: null,
-    installButton: true
+    installButton: false
   },
   beforeCreate: function beforeCreate() {
     var workplaces = JSON.parse(localStorage.getItem('workplaces'));
@@ -192,6 +195,16 @@ var app = new Vue({
       this.viewDataInsert = false;
       this.viewGroups = false;
       this.viewResult = false;
+
+      if ('Notification' in window) {
+        Notification.requestPermission(function (result) {
+          console.log('User Choice', result);
+
+          if (result !== 'granted') {
+            console.log('No notification permission granted!');
+          } else {}
+        });
+      }
     }
 
     window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container'); //deferredPrompt Allows to show the install prompt
@@ -206,7 +219,40 @@ var app = new Vue({
     });
     window.addEventListener("appinstalled", function (evt) {
       console.log("appinstalled fired", evt);
-    });
+    }); //autologin
+
+    firebase.firestore().enablePersistence();
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+    if (localStorage.getItem('AppInFireEmail')) {
+      this.AppInFire = true;
+      this.showLogin = false;
+      this.fireEmail = localStorage.getItem('AppInFireEmail');
+      localStorage.setItem('AppInFire', true); // Signed in 
+      // ...
+      //if its already an existing login take the data from the firestore   .doc("workplaces")
+
+      console.log("already have account:", this.fireEmail);
+      var docRef = db.collection(this.fireEmail).doc("workplaces");
+      docRef.get().then(function (doc) {
+        if (doc.exists) {
+          console.log("workplaces data:", doc.data());
+          localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+        } else {
+          // doc.data() will be undefined in this case
+          console.log("No such document!");
+        }
+      }).then(function () {
+        _this2.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+      })["catch"](function (error) {
+        console.log("Error getting document:", error);
+        localStorage.removeItem('AppInFireEmail');
+        localStorage.removeItem('AppInFire');
+        this.AppInFire = false;
+        this.showLogin = true;
+        this.fireEmail = '';
+      });
+    }
   },
   computed: {},
   methods: {
@@ -219,10 +265,10 @@ var app = new Vue({
       this.deferredPrompt.userChoice.then(function (choiceResult) {
         if (choiceResult.outcome === "accepted") {
           console.log("PWA setup accepted");
-          _this3.installButton = true;
+          _this3.installButton = false;
         } else {
           console.log("PWA setup rejected");
-          _this3.installButton = true;
+          _this3.installButton = false;
         }
 
         _this3.deferredPrompt = null;
@@ -254,10 +300,20 @@ var app = new Vue({
     logout: function logout() {
       firebase.auth().signOut().then(function () {
         // Sign-out successful.
+        localStorage.setItem('workplaces', '');
+        localStorage.removeItem('AppInFireEmail');
+        localStorage.removeItem('AppInFire');
+        this.AppInFire = false;
         this.showLogin = true;
         this.fireEmail = '';
+      })["catch"](function (error) {
+        // An error happened.
         localStorage.setItem('workplaces', '');
-      })["catch"](function (error) {// An error happened.
+        localStorage.removeItem('AppInFireEmail');
+        localStorage.removeItem('AppInFire');
+        this.AppInFire = false;
+        this.showLogin = true;
+        this.fireEmail = '';
       });
     },
     fireSignin: function fireSignin() {
@@ -351,6 +407,87 @@ var app = new Vue({
         return Promise.reject(error);
       });
     },
+    fireRegisterWithPassword: function fireRegisterWithPassword(email, password) {
+      var _this6 = this;
+
+      if (this.firePassword === this.fireConfirmPassword) {
+        firebase.auth().createUserWithEmailAndPassword(this.fireEmail, this.firePassword).then(function (result) {
+          _this6.AppInFire = true;
+          _this6.showLogin = false;
+          _this6.fireEmail = result.user.email;
+          localStorage.setItem('AppInFire', true);
+          localStorage.setItem('AppInFireEmail', result.user.email);
+          console.log('result', result); // Signed in 
+          // ...
+
+          if (result.additionalUserInfo.isNewUser) {
+            //if this is a new user take current localstorage and add it to the firestore
+            db.collection(result.user.email).doc('workplaces').set({
+              data: JSON.stringify(workplaces)
+            }).then(function (docRef) {
+              console.log("Document written with ID: ", docRef);
+            })["catch"](function (error) {
+              console.error("Error adding document: ", error);
+            });
+          } else {
+            //if its already an existing login take the data from the firestore   .doc("workplaces")
+            console.log("already have account:", result.user.email);
+            var docRef = db.collection(result.user.email).doc("workplaces");
+            docRef.get().then(function (doc) {
+              if (doc.exists) {
+                console.log("workplaces data:", doc.data());
+                localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+              } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+              }
+            }).then(function () {
+              _this6.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+            })["catch"](function (error) {
+              console.log("Error getting document:", error);
+            });
+          }
+        })["catch"](function (error) {
+          var errorCode = error.code;
+          var errorMessage = error.message; // ..
+        });
+      } else {
+        alert('Passwords do not match');
+      }
+    },
+    fireSigninWithPassword: function fireSigninWithPassword(email, password) {
+      var _this7 = this;
+
+      firebase.auth().signInWithEmailAndPassword(this.fireEmail, this.firePassword).then(function (result) {
+        _this7.AppInFire = true;
+        _this7.showLogin = false;
+        _this7.fireEmail = result.user.email;
+        localStorage.setItem('AppInFire', true);
+        localStorage.setItem('AppInFireEmail', result.user.email);
+        console.log('result', result); // Signed in 
+        // ...
+        //if its already an existing login take the data from the firestore   .doc("workplaces")
+
+        console.log("already have account:", result.user.email);
+        var docRef = db.collection(result.user.email).doc("workplaces");
+        docRef.get().then(function (doc) {
+          if (doc.exists) {
+            console.log("workplaces data:", doc.data());
+            localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        }).then(function () {
+          _this7.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+        })["catch"](function (error) {
+          console.log("Error getting document:", error);
+        });
+      })["catch"](function (error) {
+        var errorCode = error.code;
+        var errorMessage = error.message;
+      });
+    },
     //app
     selectnumber: function selectnumber(selectednumber) {
       if (this.result_group_selected_number.includes(selectednumber)) {
@@ -422,10 +559,10 @@ var app = new Vue({
       this.navigateTo('viewDataInsert');
     },
     saveWorkPlace: function saveWorkPlace() {
-      var _this6 = this;
+      var _this8 = this;
 
       var foundIndex = this.workplaces.findIndex(function (x) {
-        return x.name == _this6.selectedWorkplace.name;
+        return x.name == _this8.selectedWorkplace.name;
       });
       this.workplaces[foundIndex] = this.selectedWorkplace;
       localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
@@ -441,7 +578,7 @@ var app = new Vue({
       }
     },
     renameWorkPlace: function renameWorkPlace() {
-      var _this7 = this;
+      var _this9 = this;
 
       var workplaceName = prompt("Please enter a name For the Tab:", this.selectedWorkplace.name);
 
@@ -453,7 +590,7 @@ var app = new Vue({
         alert("Name already exist !");
       } else {
         var foundIndex = this.workplaces.findIndex(function (x) {
-          return x.name == _this7.selectedWorkplace.name;
+          return x.name == _this9.selectedWorkplace.name;
         });
         this.workplaces[foundIndex].name = workplaceName;
         localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
@@ -462,7 +599,7 @@ var app = new Vue({
       this.saveWorkPlace();
     },
     removeWorkPlace: function removeWorkPlace() {
-      var _this8 = this;
+      var _this10 = this;
 
       if (confirm("Are you sure you want to delete this workplace")) {
         txt = "You pressed OK!";
@@ -471,7 +608,7 @@ var app = new Vue({
           alert("You can not remove the last workplace !");
         } else {
           var filteredWorkplaces = this.workplaces.filter(function (x) {
-            return x.name !== _this8.selectedWorkplace.name;
+            return x.name !== _this10.selectedWorkplace.name;
           });
           this.workplaces = filteredWorkplaces;
           localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
@@ -698,12 +835,12 @@ var app = new Vue({
       return lst;
     },
     runapp: function runapp() {
-      var _this9 = this;
+      var _this11 = this;
 
       this.loading = true; //give time to load the loading animation
 
       setTimeout(function () {
-        _this9.trainnetwork();
+        _this11.trainnetwork();
       }, 500); //one sec
     },
     trainnetwork: function trainnetwork() {
@@ -833,7 +970,7 @@ var app = new Vue({
       return res;
     },
     changeResultGroup: function changeResultGroup(name, values) {
-      var _this10 = this;
+      var _this12 = this;
 
       this.selectedGroup = name;
       this.result_group = values.winning;
@@ -846,9 +983,9 @@ var app = new Vue({
       if (values.output !== undefined) {
         setTimeout(function () {
           console.log('change group values', values.output);
-          _this10.diagram = values.diagram;
-          _this10.output = values.output;
-          _this10.result_group_numbersToPlay = values.result_group_numbersToPlay;
+          _this12.diagram = values.diagram;
+          _this12.output = values.output;
+          _this12.result_group_numbersToPlay = values.result_group_numbersToPlay;
         }, 300);
       } else {
         this.result_group_numbersToPlay = [];
@@ -871,9 +1008,10 @@ var app = new Vue({
       }
     },
     createGroups: function createGroups() {
-      var _this11 = this;
+      var _this13 = this;
 
-      //reset default values
+      this.navigateTo('viewGroups'); //reset default values
+
       this.matrix = [];
       this.result_group = "";
       this.result_group_winning = "";
@@ -907,18 +1045,18 @@ var app = new Vue({
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || _this11.selectedWorkplace.refDate === false) {
+        if (i === 0 || _this13.selectedWorkplace.refDate === false) {
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
 
-          _this11.generateProportionMatrix(input);
+          _this13.generateProportionMatrix(input);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
 
-          _this11.generateProportionMatrix(input);
+          _this13.generateProportionMatrix(input);
         } //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
 
-        if (_this11.selectedWorkplace.refDate === true) {
+        if (_this13.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
           ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
@@ -927,11 +1065,11 @@ var app = new Vue({
         } //get the ref column
 
 
-        if (_this11.selectedWorkplace.refDate === true) {
+        if (_this13.selectedWorkplace.refDate === true) {
           inputRef = inputs[i * lengthrow];
         }
 
-        groupsConfig1 = _this11.selectedWorkplace.groupsConfig;
+        groupsConfig1 = _this13.selectedWorkplace.groupsConfig;
         groupsConfig = groupsConfig1.split(",");
         var groupNumbers = [];
         var subname = []; //for (var j=0;j<lengthrow;j++){
@@ -989,36 +1127,36 @@ var app = new Vue({
         groupSequence.push(subname);
         subname = subname.join("-");
 
-        if (_this11.subgroups[subname] === undefined) {
-          _this11.subgroups[subname] = {};
-          _this11.subgroups[subname].name = '';
-          _this11.subgroups[subname].winning = [];
-          _this11.subgroups[subname].winningAndRef = [];
-          _this11.subgroups[subname].refs = [];
-          _this11.subgroups[subname].numbers = [];
+        if (_this13.subgroups[subname] === undefined) {
+          _this13.subgroups[subname] = {};
+          _this13.subgroups[subname].name = '';
+          _this13.subgroups[subname].winning = [];
+          _this13.subgroups[subname].winningAndRef = [];
+          _this13.subgroups[subname].refs = [];
+          _this13.subgroups[subname].numbers = [];
         }
 
-        _this11.subgroups[subname].name = subname;
+        _this13.subgroups[subname].name = subname;
 
-        _this11.subgroups[subname].winning.push(input);
+        _this13.subgroups[subname].winning.push(input);
 
-        _this11.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
+        _this13.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
 
-        _this11.subgroups[subname].refs.push(ref);
+        _this13.subgroups[subname].refs.push(ref);
 
-        _this11.subgroups[subname].numbers = [].concat(_toConsumableArray(_this11.subgroups[subname]['numbers']), groupNumbers);
+        _this13.subgroups[subname].numbers = [].concat(_toConsumableArray(_this13.subgroups[subname]['numbers']), groupNumbers);
 
-        _this11.groupKeys.push(subname);
+        _this13.groupKeys.push(subname);
 
-        _this11.subgroups.All.name = 'All';
+        _this13.subgroups.All.name = 'All';
 
-        _this11.subgroups.All.winning.push(input);
+        _this13.subgroups.All.winning.push(input);
 
-        _this11.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+        _this13.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
-        _this11.subgroups.All.refs.push(ref);
+        _this13.subgroups.All.refs.push(ref);
 
-        _this11.subgroups.All.numbers = [].concat(_toConsumableArray(_this11.subgroups.All.numbers), groupNumbers);
+        _this13.subgroups.All.numbers = [].concat(_toConsumableArray(_this13.subgroups.All.numbers), groupNumbers);
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {
@@ -1041,12 +1179,12 @@ var app = new Vue({
       console.log('subgroups', this.subgroups); //this.result_group_winning =this.groupKeys.join(" ");
     },
     startpredictNextGroup: function startpredictNextGroup() {
-      var _this12 = this;
+      var _this14 = this;
 
       this.loadinggroups = true;
       this.selectedWorkplace.nextGroupResult = '';
       setTimeout(function () {
-        _this12.predictNextGroup();
+        _this14.predictNextGroup();
       }, 500); //one sec
     },
     predictNextGroup: function predictNextGroup() {
