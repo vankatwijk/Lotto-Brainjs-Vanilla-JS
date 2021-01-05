@@ -16,10 +16,19 @@ function _iterableToArrayLimit(arr, i) { if (!(Symbol.iterator in Object(arr) ||
 
 function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(source, true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(source).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
+function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
+
 var app = new Vue({
   el: '#app',
   components: {
-    draggable: window['vuedraggable']
+    draggable: window['vuedraggable'] // orangeFace: window["orangeFace"]
+
   },
   data: {
     darkmode: null,
@@ -72,17 +81,24 @@ var app = new Vue({
     installButton: false
   },
   beforeCreate: function beforeCreate() {
-    var workplaces = JSON.parse(localStorage.getItem('workplaces'));
-    var workplacesBackup = JSON.parse(localStorage.getItem('workplacesBackup')); //--------------------------------------------------------------------
+    var workplaces = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+    var workplacesBackup = []; //JSON.parse(localStorage.getItem('workplacesBackup'));
+
+    localforage.getItem('workplaces', function (err, value) {
+      workplaces = value;
+    }); //--------------------------------------------------------------------
     // create a backup just incase the login destroys everything
     //--------------------------------------------------------------------
 
-    console.log('Workplaces Backup', workplaces);
+    localforage.getItem('workplacesBackup', function (err, value) {
+      console.log('Workplaces Backup', workplaces);
 
-    if (workplaces && !workplacesBackup) {
-      //if there are workplaces then back it up
-      localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
-    }
+      if (err) {
+        //if there are workplaces then back it up
+        localforage.setItem('workplacesBackup', workplaces, function (err, result) {}); //localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
+      }
+    });
   },
   created: function created() {
     var _this = this;
@@ -90,7 +106,11 @@ var app = new Vue({
     this.AppInFire = eval(localStorage.getItem('AppInFire'));
     this.AppInFireEmail = eval(localStorage.getItem('AppInFireEmail'));
     this.darkmode = eval(localStorage.getItem('darkmode'));
-    var workplaces = JSON.parse(localStorage.getItem('workplaces'));
+    var workplaces = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+    localforage.getItem('workplaces', function (err, value) {
+      workplaces = (_readOnlyError("workplaces"), value);
+    });
     console.log('mounted - workplaces', workplaces); // if(this.isMobile() && this.AppInFire){
     //     this.AppInFire = true;
     //     this.showLogin = false;
@@ -136,27 +156,46 @@ var app = new Vue({
 
         if (result.additionalUserInfo.isNewUser) {
           //if this is a new user take current localstorage and add it to the firestore
-          db.collection(result.user.email).doc('workplaces').set({
-            data: JSON.stringify(workplaces)
-          }).then(function (docRef) {
-            console.log("Document written with ID: ", docRef);
-          })["catch"](function (error) {
-            console.error("Error adding document: ", error);
-          });
+          // db.collection(result.user.email).doc('workplaces').set({
+          //         data: JSON.stringify(workplaces)
+          //     })
+          //     .then(function (docRef) {
+          //         console.log("Document written with ID: ", docRef);
+          //     })
+          //     .catch(function (error) {
+          //         console.error("Error adding document: ", error);
+          //     });
+          _this.saveWorkPlace();
         } else {
           //if its already an existing login take the data from the firestore   .doc("workplaces")
-          console.log("already have account:", result.user.email);
-          var docRef = db.collection(result.user.email).doc("workplaces");
+          console.log("already have account:", result.user.email); // var docRef = db.collection(result.user.email).doc("workplaces");
+          // docRef.get().then((doc) => {
+          //     if (doc.exists) {
+          //         console.log("workplaces data:", doc.data());
+          //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+          //     } else {
+          //         // doc.data() will be undefined in this case
+          //         console.log("No such document!");
+          //     }
+          // }).then(() => {
+          //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+          // }).catch(function (error) {
+          //     console.log("Error getting document:", error);
+          // });
+
+          var docRef = db.collection(result.user.email);
           docRef.get().then(function (doc) {
+            doc.forEach(function (element) {
+              console.log("workplaces elet:", element.data());
+            });
+
             if (doc.exists) {
-              console.log("workplaces data:", doc.data());
-              localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+              console.log("workplaces dddd:", doc); //localStorage.setItem('workplaces', JSON.parse(doc.data().data));
             } else {
               // doc.data() will be undefined in this case
               console.log("No such document!");
             }
-          }).then(function () {
-            _this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+          }).then(function () {//this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
           })["catch"](function (error) {
             console.log("Error getting document:", error);
           });
@@ -176,8 +215,9 @@ var app = new Vue({
           lengthrow: 5,
           numberballs: 50,
           groupsConfig: '10,20,30,40,50'
-        });
-        localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        }); //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+        localforage.setItem('workplaces', this.workplaces, function (err, result) {});
       } else {
         this.workplaces = workplaces;
       }
@@ -231,33 +271,95 @@ var app = new Vue({
       localStorage.setItem('AppInFire', true); // Signed in 
       // ...
       //if its already an existing login take the data from the firestore   .doc("workplaces")
+      // console.log("already have account:", this.fireEmail);
+      // var docRef = db.collection(this.fireEmail).doc("workplaces");
+      // docRef.get().then((doc) => {
+      //     if (doc.exists) {
+      //         console.log("workplaces data 23:", doc.data());
+      //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+      //     } else {
+      //         // doc.data() will be undefined in this case
+      //         console.log("No such document!");
+      //     }
+      // }).then(() => {
+      //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+      // }).catch(function (error) {
+      //     console.log("Error getting document:", error);
+      //     localStorage.removeItem('AppInFireEmail');
+      //     localStorage.removeItem('AppInFire');
+      //     this.AppInFire = false;
+      //     this.showLogin = true;
+      //     this.fireEmail = '';
+      // });
 
-      console.log("already have account:", this.fireEmail);
-      var docRef = db.collection(this.fireEmail).doc("workplaces");
-      docRef.get().then(function (doc) {
-        if (doc.exists) {
-          console.log("workplaces data:", doc.data());
-          localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+      localforage.getItem('service-worker-indexdb-updates', function (err, value) {
+        if (value === true) {
+          // there is an update in from the service worker
+          localforage.setItem('service-worker-indexdb-updates', false, function (err, result) {
+            _this2.saveWorkPlaceFromForge();
+          });
         } else {
-          // doc.data() will be undefined in this case
-          console.log("No such document!");
+          //there is no update from the service worker, check firebase
+          _this2.getDataFromFirebase();
         }
-      }).then(function () {
-        _this2.workplaces = JSON.parse(localStorage.getItem('workplaces'));
-      })["catch"](function (error) {
-        console.log("Error getting document:", error);
-        localStorage.removeItem('AppInFireEmail');
-        localStorage.removeItem('AppInFire');
-        this.AppInFire = false;
-        this.showLogin = true;
-        this.fireEmail = '';
       });
     }
   },
   computed: {},
   methods: {
-    installapp: function installapp() {
+    getDataFromFirebase: function getDataFromFirebase() {
       var _this3 = this;
+
+      console.log("[getDataFromFirebase] already have account:", this.fireEmail);
+      var docRef = db.collection(this.fireEmail);
+      docRef.get().then(function (doc) {
+        console.log('[getDataFromFirebase] documents :', doc.docs);
+        var tempDocsToSave = [];
+        var _iteratorNormalCompletion = true;
+        var _didIteratorError = false;
+        var _iteratorError = undefined;
+
+        try {
+          for (var _iterator = doc.docs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+            var element = _step.value;
+            var tempdocData = element.data();
+            console.log('[getDataFromFirebase] name3 :', tempdocData.name); //reject the document with workplaces
+
+            if (tempdocData.name !== undefined && tempdocData.name.length > 1) {
+              console.log('[getDataFromFirebase] name3 after if:', tempdocData.name);
+              tempdocData.matrix = JSON.parse(tempdocData.matrix);
+              tempdocData.groupSequence = JSON.parse(tempdocData.groupSequence);
+              tempdocData.groups = JSON.parse(tempdocData.groups);
+              tempDocsToSave.push(_objectSpread({}, tempdocData));
+              console.log('[getDataFromFirebase] doc data :', tempdocData);
+            } else {
+              console.log('[getDataFromFirebase] doc data move on:', tempdocData.name);
+            }
+          }
+        } catch (err) {
+          _didIteratorError = true;
+          _iteratorError = err;
+        } finally {
+          try {
+            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
+              _iterator["return"]();
+            }
+          } finally {
+            if (_didIteratorError) {
+              throw _iteratorError;
+            }
+          }
+        }
+
+        return tempDocsToSave;
+      }).then(function (dataForLocal) {
+        //localStorage.setItem('workplaces', JSON.stringify(dataForLocal));
+        localforage.setItem('workplaces', dataForLocal, function (err, result) {});
+        _this3.workplaces = dataForLocal;
+      });
+    },
+    installapp: function installapp() {
+      var _this4 = this;
 
       // Show the prompt
       this.deferredPrompt.prompt(); // Wait for the user to respond to the prompt
@@ -265,13 +367,13 @@ var app = new Vue({
       this.deferredPrompt.userChoice.then(function (choiceResult) {
         if (choiceResult.outcome === "accepted") {
           console.log("PWA setup accepted");
-          _this3.installButton = false;
+          _this4.installButton = false;
         } else {
           console.log("PWA setup rejected");
-          _this3.installButton = false;
+          _this4.installButton = false;
         }
 
-        _this3.deferredPrompt = null;
+        _this4.deferredPrompt = null;
       });
     },
     navigateTo: function navigateTo(view) {
@@ -298,26 +400,30 @@ var app = new Vue({
       return vars;
     },
     logout: function logout() {
+      var _this5 = this;
+
       firebase.auth().signOut().then(function () {
         // Sign-out successful.
-        localStorage.setItem('workplaces', '');
+        //localStorage.setItem('workplaces', '');
+        localforage.setItem('workplaces', '', function (err, result) {});
         localStorage.removeItem('AppInFireEmail');
         localStorage.removeItem('AppInFire');
-        this.AppInFire = false;
-        this.showLogin = true;
-        this.fireEmail = '';
+        _this5.AppInFire = false;
+        _this5.showLogin = true;
+        _this5.fireEmail = '';
       })["catch"](function (error) {
         // An error happened.
-        localStorage.setItem('workplaces', '');
+        //localStorage.setItem('workplaces', '');
+        localforage.setItem('workplaces', '', function (err, result) {});
         localStorage.removeItem('AppInFireEmail');
         localStorage.removeItem('AppInFire');
-        this.AppInFire = false;
-        this.showLogin = true;
-        this.fireEmail = '';
+        _this5.AppInFire = false;
+        _this5.showLogin = true;
+        _this5.fireEmail = '';
       });
     },
     fireSignin: function fireSignin() {
-      var _this4 = this;
+      var _this6 = this;
 
       var actionCodeSettings = {
         // URL you want to redirect back to. The domain (www.example.com) for this
@@ -331,7 +437,7 @@ var app = new Vue({
         // The link was successfully sent. Inform the user.
         // Save the email locally so you don't need to ask the user for it again
         // if they open the link on the same device.
-        localStorage.setItem('emailForSignIn', _this4.fireEmail);
+        localStorage.setItem('emailForSignIn', _this6.fireEmail);
       })["catch"](function (error) {
         // Some error occurred, you can inspect the code: error.code
         console.log(error);
@@ -339,7 +445,7 @@ var app = new Vue({
       alert('check your email for a login link !');
     },
     fireSigninPhone: function fireSigninPhone() {
-      var _this5 = this;
+      var _this7 = this;
 
       var appVerifier = window.recaptchaVerifier;
       var phoneNumberString = this.firePhone;
@@ -360,39 +466,45 @@ var app = new Vue({
           // result.additionalUserInfo.isNewUser
           // Identifier
 
-          _this5.AppInFire = true;
-          _this5.showLogin = false;
-          _this5.fireEmail = result.user.phoneNumber;
+          _this7.AppInFire = true;
+          _this7.showLogin = false;
+          _this7.fireEmail = result.user.phoneNumber;
           localStorage.setItem('AppInFire', true);
           console.log('result', result.user.phoneNumber);
 
           if (result.additionalUserInfo.isNewUser) {
             //if this is a new user take current localstorage and add it to the firestore
-            db.collection(result.user.email).doc('workplaces').set({
-              data: JSON.stringify(workplaces)
-            }).then(function (docRef) {
-              console.log("Document written with ID: ", docRef);
-            })["catch"](function (error) {
-              console.error("Error adding document: ", error);
-            });
+            // db.collection(result.user.email).doc('workplaces').set({
+            //         data: JSON.stringify(workplaces)
+            //     })
+            //     .then(function (docRef) {
+            //         console.log("Document written with ID: ", docRef);
+            //     })
+            //     .catch(function (error) {
+            //         console.error("Error adding document: ", error);
+            //     });
+            _this7.saveWorkPlace();
+
             return true;
           } else {
             //if its already an existing login take the data from the firestore   .doc("workplaces")
-            console.log("already have account:", result.user.email);
-            var docRef = db.collection(result.user.email).doc("workplaces");
-            docRef.get().then(function (doc) {
-              if (doc.exists) {
-                console.log("workplaces data:", doc.data());
-                localStorage.setItem('workplaces', JSON.parse(doc.data().data));
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-              }
-            }).then(function () {
-              _this5.workplaces = JSON.parse(localStorage.getItem('workplaces'));
-            })["catch"](function (error) {
-              console.log("Error getting document:", error);
-            });
+            // console.log("already have account:", result.user.email);
+            // var docRef = db.collection(result.user.email).doc("workplaces");
+            // docRef.get().then((doc) => {
+            //     if (doc.exists) {
+            //         console.log("workplaces data 434:", doc.data());
+            //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+            //     } else {
+            //         // doc.data() will be undefined in this case
+            //         console.log("No such document!");
+            //     }
+            // }).then(() => {
+            //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+            // }).catch(function (error) {
+            //     console.log("Error getting document:", error);
+            // });
+            _this7.getDataFromFirebase();
+
             return true;
           } // ...
 
@@ -408,13 +520,13 @@ var app = new Vue({
       });
     },
     fireRegisterWithPassword: function fireRegisterWithPassword(email, password) {
-      var _this6 = this;
+      var _this8 = this;
 
       if (this.firePassword === this.fireConfirmPassword) {
         firebase.auth().createUserWithEmailAndPassword(this.fireEmail, this.firePassword).then(function (result) {
-          _this6.AppInFire = true;
-          _this6.showLogin = false;
-          _this6.fireEmail = result.user.email;
+          _this8.AppInFire = true;
+          _this8.showLogin = false;
+          _this8.fireEmail = result.user.email;
           localStorage.setItem('AppInFire', true);
           localStorage.setItem('AppInFireEmail', result.user.email);
           console.log('result', result); // Signed in 
@@ -422,30 +534,34 @@ var app = new Vue({
 
           if (result.additionalUserInfo.isNewUser) {
             //if this is a new user take current localstorage and add it to the firestore
-            db.collection(result.user.email).doc('workplaces').set({
-              data: JSON.stringify(workplaces)
-            }).then(function (docRef) {
-              console.log("Document written with ID: ", docRef);
-            })["catch"](function (error) {
-              console.error("Error adding document: ", error);
-            });
+            // db.collection(result.user.email).doc('workplaces').set({
+            //         data: JSON.stringify(workplaces)
+            //     })
+            //     .then(function (docRef) {
+            //         console.log("Document written with ID: ", docRef);
+            //     })
+            //     .catch(function (error) {
+            //         console.error("Error adding document: ", error);
+            //     });
+            _this8.saveWorkPlace();
           } else {
             //if its already an existing login take the data from the firestore   .doc("workplaces")
-            console.log("already have account:", result.user.email);
-            var docRef = db.collection(result.user.email).doc("workplaces");
-            docRef.get().then(function (doc) {
-              if (doc.exists) {
-                console.log("workplaces data:", doc.data());
-                localStorage.setItem('workplaces', JSON.parse(doc.data().data));
-              } else {
-                // doc.data() will be undefined in this case
-                console.log("No such document!");
-              }
-            }).then(function () {
-              _this6.workplaces = JSON.parse(localStorage.getItem('workplaces'));
-            })["catch"](function (error) {
-              console.log("Error getting document:", error);
-            });
+            // console.log("already have account:", result.user.email);
+            // var docRef = db.collection(result.user.email).doc("workplaces");
+            // docRef.get().then((doc) => {
+            //     if (doc.exists) {
+            //         console.log("workplaces data 53:", doc.data());
+            //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+            //     } else {
+            //         // doc.data() will be undefined in this case
+            //         console.log("No such document!");
+            //     }
+            // }).then(() => {
+            //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+            // }).catch(function (error) {
+            //     console.log("Error getting document:", error);
+            // });
+            _this8.getDataFromFirebase();
           }
         })["catch"](function (error) {
           var errorCode = error.code;
@@ -456,33 +572,34 @@ var app = new Vue({
       }
     },
     fireSigninWithPassword: function fireSigninWithPassword(email, password) {
-      var _this7 = this;
+      var _this9 = this;
 
       firebase.auth().signInWithEmailAndPassword(this.fireEmail, this.firePassword).then(function (result) {
-        _this7.AppInFire = true;
-        _this7.showLogin = false;
-        _this7.fireEmail = result.user.email;
+        _this9.AppInFire = true;
+        _this9.showLogin = false;
+        _this9.fireEmail = result.user.email;
         localStorage.setItem('AppInFire', true);
         localStorage.setItem('AppInFireEmail', result.user.email);
         console.log('result', result); // Signed in 
         // ...
         //if its already an existing login take the data from the firestore   .doc("workplaces")
+        // console.log("already have account:", result.user.email);
+        // var docRef = db.collection(result.user.email).doc("workplaces");
+        // docRef.get().then((doc) => {
+        //     if (doc.exists) {
+        //         console.log("workplaces data 453:", doc.data());
+        //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+        //     } else {
+        //         // doc.data() will be undefined in this case
+        //         console.log("No such document!");
+        //     }
+        // }).then(() => {
+        //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+        // }).catch(function (error) {
+        //     console.log("Error getting document:", error);
+        // });
 
-        console.log("already have account:", result.user.email);
-        var docRef = db.collection(result.user.email).doc("workplaces");
-        docRef.get().then(function (doc) {
-          if (doc.exists) {
-            console.log("workplaces data:", doc.data());
-            localStorage.setItem('workplaces', JSON.parse(doc.data().data));
-          } else {
-            // doc.data() will be undefined in this case
-            console.log("No such document!");
-          }
-        }).then(function () {
-          _this7.workplaces = JSON.parse(localStorage.getItem('workplaces'));
-        })["catch"](function (error) {
-          console.log("Error getting document:", error);
-        });
+        _this9.getDataFromFirebase();
       })["catch"](function (error) {
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -537,8 +654,9 @@ var app = new Vue({
           lengthrow: 5,
           numberballs: 50,
           groupsConfig: '10,20,30,40,50'
-        });
-        localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        }); //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+        localforage.setItem('workplaces', this.workplaces, function (err, result) {});
       }
     },
     changeWorkPlace: function changeWorkPlace(item) {
@@ -558,27 +676,90 @@ var app = new Vue({
 
       this.navigateTo('viewDataInsert');
     },
-    saveWorkPlace: function saveWorkPlace() {
-      var _this8 = this;
+    saveWorkPlaceFromForge: function saveWorkPlaceFromForge() {
+      var _this10 = this;
 
-      var foundIndex = this.workplaces.findIndex(function (x) {
-        return x.name == _this8.selectedWorkplace.name;
+      console.log('saveWorkPlaceFromForge');
+      localforage.getItem('workplaces', function (err, workpls) {
+        _this10.workplaces = workpls;
+        console.log('saveWorkPlaceFromForge', _this10.workplaces); //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
       });
-      this.workplaces[foundIndex] = this.selectedWorkplace;
-      localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
       if (this.AppInFire) {
-        db.collection(this.fireEmail).doc("workplaces").set({
-          data: JSON.stringify(localStorage.getItem('workplaces'))
-        }).then(function (docRef) {
-          console.log("Document written with ID: ", docRef);
-        })["catch"](function (error) {
-          console.error("Error adding document: ", error);
+        console.log('saveWorkPlaceFromForge app in fire'); //no longer storing to the workplaces document, it is limited
+        // db.collection(this.fireEmail).doc("workplaces").set({
+        //         data: JSON.stringify(localStorage.getItem('workplaces'))
+        //     })
+        //     .then(function (docRef) {
+        //         console.log("Document written with ID: ", docRef);
+        //     })
+        //     .catch(function (error) {
+        //         console.error("Error adding document: ", error);
+        //     });
+        // console.log('[saving workplaces]',JSON.parse(localStorage.getItem('workplaces')));
+
+        var workplacedata = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+        localforage.getItem('workplaces', function (err, value) {
+          workplacedata = value;
+          workplacedata.map(function (obj) {
+            var tempobj = obj; //nested arrays are not supported
+
+            tempobj.matrix = JSON.stringify(tempobj.matrix);
+            tempobj.groupSequence = JSON.stringify(tempobj.groupSequence);
+            tempobj.groups = JSON.stringify(tempobj.groups);
+            db.collection(_this10.fireEmail).doc(obj.name).set(_objectSpread({}, obj)).then(function (docRef) {
+              console.log("Document written with ID 2: ", docRef);
+            })["catch"](function (error) {
+              console.error("Error adding document 2: ", error);
+            });
+          });
+        });
+      }
+    },
+    saveWorkPlace: function saveWorkPlace() {
+      var _this11 = this;
+
+      var foundIndex = this.workplaces.findIndex(function (x) {
+        return x.name == _this11.selectedWorkplace.name;
+      });
+      this.workplaces[foundIndex] = this.selectedWorkplace; //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+      localforage.setItem('workplaces', this.workplaces, function (err, result) {});
+
+      if (this.AppInFire) {
+        //no longer storing to the workplaces document, it is limited
+        // db.collection(this.fireEmail).doc("workplaces").set({
+        //         data: JSON.stringify(localStorage.getItem('workplaces'))
+        //     })
+        //     .then(function (docRef) {
+        //         console.log("Document written with ID: ", docRef);
+        //     })
+        //     .catch(function (error) {
+        //         console.error("Error adding document: ", error);
+        //     });
+        // console.log('[saving workplaces]',JSON.parse(localStorage.getItem('workplaces')));
+        var workplacedata = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+        localforage.getItem('workplaces', function (err, value) {
+          workplacedata = value;
+          workplacedata.map(function (obj) {
+            var tempobj = obj; //nested arrays are not supported
+
+            tempobj.matrix = JSON.stringify(tempobj.matrix);
+            tempobj.groupSequence = JSON.stringify(tempobj.groupSequence);
+            tempobj.groups = JSON.stringify(tempobj.groups);
+            db.collection(_this11.fireEmail).doc(obj.name).set(_objectSpread({}, obj)).then(function (docRef) {
+              console.log("Document written with ID 2: ", docRef);
+            })["catch"](function (error) {
+              console.error("Error adding document 2: ", error);
+            });
+          });
         });
       }
     },
     renameWorkPlace: function renameWorkPlace() {
-      var _this9 = this;
+      var _this12 = this;
 
       var workplaceName = prompt("Please enter a name For the Tab:", this.selectedWorkplace.name);
 
@@ -590,16 +771,17 @@ var app = new Vue({
         alert("Name already exist !");
       } else {
         var foundIndex = this.workplaces.findIndex(function (x) {
-          return x.name == _this9.selectedWorkplace.name;
+          return x.name == _this12.selectedWorkplace.name;
         });
-        this.workplaces[foundIndex].name = workplaceName;
-        localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        this.workplaces[foundIndex].name = workplaceName; //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+        localforage.setItem('workplaces', this.workplaces, function (err, result) {});
       }
 
       this.saveWorkPlace();
     },
     removeWorkPlace: function removeWorkPlace() {
-      var _this10 = this;
+      var _this13 = this;
 
       if (confirm("Are you sure you want to delete this workplace")) {
         txt = "You pressed OK!";
@@ -608,10 +790,11 @@ var app = new Vue({
           alert("You can not remove the last workplace !");
         } else {
           var filteredWorkplaces = this.workplaces.filter(function (x) {
-            return x.name !== _this10.selectedWorkplace.name;
+            return x.name !== _this13.selectedWorkplace.name;
           });
-          this.workplaces = filteredWorkplaces;
-          localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+          this.workplaces = filteredWorkplaces; //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+          localforage.setItem('workplaces', this.workplaces, function (err, result) {});
         }
       } else {
         txt = "You pressed Cancel!";
@@ -641,26 +824,26 @@ var app = new Vue({
 
         var remainingString = string.slice(0, i) + string.slice(i + 1, string.length); //Note: you can concat Strings via '+' in JS
 
-        var _iteratorNormalCompletion = true;
-        var _didIteratorError = false;
-        var _iteratorError = undefined;
+        var _iteratorNormalCompletion2 = true;
+        var _didIteratorError2 = false;
+        var _iteratorError2 = undefined;
 
         try {
-          for (var _iterator = permut(remainingString)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-            var subPermutation = _step.value;
+          for (var _iterator2 = permut(remainingString)[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+            var subPermutation = _step2.value;
             permutations.push(_char + subPermutation);
           }
         } catch (err) {
-          _didIteratorError = true;
-          _iteratorError = err;
+          _didIteratorError2 = true;
+          _iteratorError2 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion && _iterator["return"] != null) {
-              _iterator["return"]();
+            if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
+              _iterator2["return"]();
             }
           } finally {
-            if (_didIteratorError) {
-              throw _iteratorError;
+            if (_didIteratorError2) {
+              throw _iteratorError2;
             }
           }
         }
@@ -835,12 +1018,12 @@ var app = new Vue({
       return lst;
     },
     runapp: function runapp() {
-      var _this11 = this;
+      var _this14 = this;
 
       this.loading = true; //give time to load the loading animation
 
       setTimeout(function () {
-        _this11.trainnetwork();
+        _this14.trainnetwork();
       }, 500); //one sec
     },
     trainnetwork: function trainnetwork() {
@@ -861,29 +1044,29 @@ var app = new Vue({
       this.output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>"; //this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
 
       this.output += "Numbers to play: <b>";
-      var _iteratorNormalCompletion2 = true;
-      var _didIteratorError2 = false;
-      var _iteratorError2 = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator2 = numbersToPlay.entries()[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-          var _step2$value = _slicedToArray(_step2.value, 2),
-              _index = _step2$value[0],
-              _val = _step2$value[1];
+        for (var _iterator3 = numbersToPlay.entries()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var _step3$value = _slicedToArray(_step3.value, 2),
+              _index = _step3$value[0],
+              _val = _step3$value[1];
 
           this.output += "<span class='table-number-to-play'>" + _val + "</span>";
         }
       } catch (err) {
-        _didIteratorError2 = true;
-        _iteratorError2 = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion2 && _iterator2["return"] != null) {
-            _iterator2["return"]();
+          if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
+            _iterator3["return"]();
           }
         } finally {
-          if (_didIteratorError2) {
-            throw _iteratorError2;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
@@ -902,29 +1085,29 @@ var app = new Vue({
         // nextResult = this.tD_Ones(balls,thisSet);
 
         this.output += "<tr>";
-        var _iteratorNormalCompletion3 = true;
-        var _didIteratorError3 = false;
-        var _iteratorError3 = undefined;
+        var _iteratorNormalCompletion4 = true;
+        var _didIteratorError4 = false;
+        var _iteratorError4 = undefined;
 
         try {
-          for (var _iterator3 = thisSet.entries()[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-            var _step3$value = _slicedToArray(_step3.value, 2),
-                index = _step3$value[0],
-                val = _step3$value[1];
+          for (var _iterator4 = thisSet.entries()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
+            var _step4$value = _slicedToArray(_step4.value, 2),
+                index = _step4$value[0],
+                val = _step4$value[1];
 
             this.output += "<td>" + val + "</td>";
           }
         } catch (err) {
-          _didIteratorError3 = true;
-          _iteratorError3 = err;
+          _didIteratorError4 = true;
+          _iteratorError4 = err;
         } finally {
           try {
-            if (!_iteratorNormalCompletion3 && _iterator3["return"] != null) {
-              _iterator3["return"]();
+            if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
+              _iterator4["return"]();
             }
           } finally {
-            if (_didIteratorError3) {
-              throw _iteratorError3;
+            if (_didIteratorError4) {
+              throw _iteratorError4;
             }
           }
         }
@@ -970,7 +1153,7 @@ var app = new Vue({
       return res;
     },
     changeResultGroup: function changeResultGroup(name, values) {
-      var _this12 = this;
+      var _this15 = this;
 
       this.selectedGroup = name;
       this.result_group = values.winning;
@@ -983,9 +1166,9 @@ var app = new Vue({
       if (values.output !== undefined) {
         setTimeout(function () {
           console.log('change group values', values.output);
-          _this12.diagram = values.diagram;
-          _this12.output = values.output;
-          _this12.result_group_numbersToPlay = values.result_group_numbersToPlay;
+          _this15.diagram = values.diagram;
+          _this15.output = values.output;
+          _this15.result_group_numbersToPlay = values.result_group_numbersToPlay;
         }, 300);
       } else {
         this.result_group_numbersToPlay = [];
@@ -1008,7 +1191,7 @@ var app = new Vue({
       }
     },
     createGroups: function createGroups() {
-      var _this13 = this;
+      var _this16 = this;
 
       this.navigateTo('viewGroups'); //reset default values
 
@@ -1045,18 +1228,18 @@ var app = new Vue({
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || _this13.selectedWorkplace.refDate === false) {
+        if (i === 0 || _this16.selectedWorkplace.refDate === false) {
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
 
-          _this13.generateProportionMatrix(input);
+          _this16.generateProportionMatrix(input);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
 
-          _this13.generateProportionMatrix(input);
+          _this16.generateProportionMatrix(input);
         } //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
 
-        if (_this13.selectedWorkplace.refDate === true) {
+        if (_this16.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
           ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
@@ -1065,11 +1248,11 @@ var app = new Vue({
         } //get the ref column
 
 
-        if (_this13.selectedWorkplace.refDate === true) {
+        if (_this16.selectedWorkplace.refDate === true) {
           inputRef = inputs[i * lengthrow];
         }
 
-        groupsConfig1 = _this13.selectedWorkplace.groupsConfig;
+        groupsConfig1 = _this16.selectedWorkplace.groupsConfig;
         groupsConfig = groupsConfig1.split(",");
         var groupNumbers = [];
         var subname = []; //for (var j=0;j<lengthrow;j++){
@@ -1081,15 +1264,15 @@ var app = new Vue({
         input.forEach(function (element) {
           var triggered = false;
           groupNumbers.push(element);
-          var _iteratorNormalCompletion4 = true;
-          var _didIteratorError4 = false;
-          var _iteratorError4 = undefined;
+          var _iteratorNormalCompletion5 = true;
+          var _didIteratorError5 = false;
+          var _iteratorError5 = undefined;
 
           try {
-            for (var _iterator4 = groupsConfig.entries()[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-              var _step4$value = _slicedToArray(_step4.value, 2),
-                  index = _step4$value[0],
-                  val = _step4$value[1];
+            for (var _iterator5 = groupsConfig.entries()[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
+              var _step5$value = _slicedToArray(_step5.value, 2),
+                  index = _step5$value[0],
+                  val = _step5$value[1];
 
               if (triggered === false) {
                 if (+element <= +val) {
@@ -1110,16 +1293,16 @@ var app = new Vue({
             // }
 
           } catch (err) {
-            _didIteratorError4 = true;
-            _iteratorError4 = err;
+            _didIteratorError5 = true;
+            _iteratorError5 = err;
           } finally {
             try {
-              if (!_iteratorNormalCompletion4 && _iterator4["return"] != null) {
-                _iterator4["return"]();
+              if (!_iteratorNormalCompletion5 && _iterator5["return"] != null) {
+                _iterator5["return"]();
               }
             } finally {
-              if (_didIteratorError4) {
-                throw _iteratorError4;
+              if (_didIteratorError5) {
+                throw _iteratorError5;
               }
             }
           }
@@ -1127,36 +1310,36 @@ var app = new Vue({
         groupSequence.push(subname);
         subname = subname.join("-");
 
-        if (_this13.subgroups[subname] === undefined) {
-          _this13.subgroups[subname] = {};
-          _this13.subgroups[subname].name = '';
-          _this13.subgroups[subname].winning = [];
-          _this13.subgroups[subname].winningAndRef = [];
-          _this13.subgroups[subname].refs = [];
-          _this13.subgroups[subname].numbers = [];
+        if (_this16.subgroups[subname] === undefined) {
+          _this16.subgroups[subname] = {};
+          _this16.subgroups[subname].name = '';
+          _this16.subgroups[subname].winning = [];
+          _this16.subgroups[subname].winningAndRef = [];
+          _this16.subgroups[subname].refs = [];
+          _this16.subgroups[subname].numbers = [];
         }
 
-        _this13.subgroups[subname].name = subname;
+        _this16.subgroups[subname].name = subname;
 
-        _this13.subgroups[subname].winning.push(input);
+        _this16.subgroups[subname].winning.push(input);
 
-        _this13.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
+        _this16.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
 
-        _this13.subgroups[subname].refs.push(ref);
+        _this16.subgroups[subname].refs.push(ref);
 
-        _this13.subgroups[subname].numbers = [].concat(_toConsumableArray(_this13.subgroups[subname]['numbers']), groupNumbers);
+        _this16.subgroups[subname].numbers = [].concat(_toConsumableArray(_this16.subgroups[subname]['numbers']), groupNumbers);
 
-        _this13.groupKeys.push(subname);
+        _this16.groupKeys.push(subname);
 
-        _this13.subgroups.All.name = 'All';
+        _this16.subgroups.All.name = 'All';
 
-        _this13.subgroups.All.winning.push(input);
+        _this16.subgroups.All.winning.push(input);
 
-        _this13.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+        _this16.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
-        _this13.subgroups.All.refs.push(ref);
+        _this16.subgroups.All.refs.push(ref);
 
-        _this13.subgroups.All.numbers = [].concat(_toConsumableArray(_this13.subgroups.All.numbers), groupNumbers);
+        _this16.subgroups.All.numbers = [].concat(_toConsumableArray(_this16.subgroups.All.numbers), groupNumbers);
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {
@@ -1179,36 +1362,82 @@ var app = new Vue({
       console.log('subgroups', this.subgroups); //this.result_group_winning =this.groupKeys.join(" ");
     },
     startpredictNextGroup: function startpredictNextGroup() {
-      var _this14 = this;
+      var _this17 = this;
 
       this.loadinggroups = true;
       this.selectedWorkplace.nextGroupResult = '';
       setTimeout(function () {
-        _this14.predictNextGroup();
+        _this17.predictNextGroup();
       }, 500); //one sec
     },
-    predictNextGroup: function predictNextGroup() {
-      //with the sequence of groups this function will predict the next group that will come up
-      var net = new brain.recurrent.LSTMTimeStep({
-        inputSize: this.selectedWorkplace.groupSequence[0].length,
-        hiddenLayers: [10],
-        outputSize: this.selectedWorkplace.groupSequence[0].length
+    sendMessage: function sendMessage(message) {
+      // This wraps the message posting/response in a promise, which will
+      // resolve if the response doesn't contain an error, and reject with
+      // the error if it does. If you'd prefer, it's possible to call
+      // controller.postMessage() and set up the onmessage handler
+      // independently of a promise, but this is a convenient wrapper.
+      return new Promise(function (resolve, reject) {
+        //   var messageChannel = new MessageChannel();
+        navigator.serviceWorker.onmessage = function (event) {
+          if (event.data.error) {
+            console.log('message back error', event.data.error);
+            reject(event.data.error);
+          } else {
+            console.log('message back resolve', event.data);
+            resolve(event.data);
+          }
+        }; //   alternative
+        //   navigator.serviceWorker.onmessage = function (e) {
+        //     // messages from service worker.
+        //     console.log('e.data', e.data);
+        // This sends the message data as well as transferring
+        // messageChannel.port2 to the service worker.
+        // The service worker can then use the transferred port to reply
+        // via postMessage(), which will in turn trigger the onmessage
+        // handler on messageChannel.port1.
+        // See
+        // https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
+        //navigator.serviceWorker.controller.postMessage(message, [messageChannel.port2]);
+
+
+        navigator.serviceWorker.controller.postMessage(message, {
+          type: message.type,
+          length: message.length,
+          groupSequence: message.groupSequence,
+          tabName: message.tabName
+        });
       });
-      net.train(this.selectedWorkplace.groupSequence); //instead of run you can use forecast
+    },
+    predictNextGroup: function predictNextGroup() {
+      var _this18 = this;
 
-      var output = net.run(this.selectedWorkplace.groupSequence);
-      var result = [];
+      this.sendMessage({
+        type: 'PREDICT_NEXT_GROUP',
+        length: this.selectedWorkplace.groupSequence[0].length,
+        groupSequence: this.selectedWorkplace.groupSequence,
+        selectedWorkplace: this.selectedWorkplace,
+        tabName: 'temp'
+      }).then(function (output) {
+        console.log('predict next group then', output);
 
-      for (var _i2 = 0, _arr2 = _toConsumableArray(output); _i2 < _arr2.length; _i2++) {
-        var out = _arr2[_i2];
-        var _n2 = 0;
-        if (out < 0) _n2 = 0;else _n2 = Math.round(+out);
-        result.push(_n2);
-      }
+        _this18.saveWorkPlaceFromForge();
 
-      this.selectedWorkplace.nextGroupResult = result;
-      this.saveWorkPlace();
-      this.loadinggroups = false;
+        _this18.loadinggroups = false; //set a flag to let the app know if its been remounted that it needs to save the data
+
+        localforage.setItem('service-worker-indexdb-updates', false, function (err, result) {});
+      }); // navigator.serviceWorker.onmessage = function (e) {
+      //     // messages from service worker.
+      //     console.log('e.data', e.data);
+      // };
+      // //with the sequence of groups this function will predict the next group that will come up
+      // let net = new brain.recurrent.LSTMTimeStep({
+      //     inputSize: this.selectedWorkplace.groupSequence[0].length,
+      //     hiddenLayers: [10],
+      //     outputSize: this.selectedWorkplace.groupSequence[0].length,
+      // });
+      // net.train(this.selectedWorkplace.groupSequence);
+      // //instead of run you can use forecast
+      // let output = net.run(this.selectedWorkplace.groupSequence);
     },
     run: function run() {
       outputt = ""; //check these numbers in 'check' element

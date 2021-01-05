@@ -1,7 +1,8 @@
 var app = new Vue({
     el: '#app',
     components: {
-        draggable: window['vuedraggable']
+        draggable: window['vuedraggable'],
+        // orangeFace: window["orangeFace"]
     },
     data: {
         darkmode: null,
@@ -49,7 +50,7 @@ var app = new Vue({
 
         //firebase services
         showLogin: true,
-        showRegister:false,
+        showRegister: false,
         AppInFire: false,
         fireEmail: '',
         firePassword: '',
@@ -66,18 +67,30 @@ var app = new Vue({
         installButton: false
     },
     beforeCreate() {
-        let workplaces = JSON.parse(localStorage.getItem('workplaces'));
-        let workplacesBackup = JSON.parse(localStorage.getItem('workplacesBackup'));
+
+        let workplaces = []; //JSON.parse(localStorage.getItem('workplaces'));
+        let workplacesBackup = []; //JSON.parse(localStorage.getItem('workplacesBackup'));
+
+        localforage.getItem('workplaces', (err, value) => {
+            workplaces = value
+        });
         //--------------------------------------------------------------------
         // create a backup just incase the login destroys everything
         //--------------------------------------------------------------------
 
-        console.log('Workplaces Backup', workplaces)
-        if (workplaces && !workplacesBackup) {
-            //if there are workplaces then back it up
-            localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
+        localforage.getItem('workplacesBackup', (err, value) => {
+            console.log('Workplaces Backup', workplaces)
+            if (err) {
+                //if there are workplaces then back it up
+                localforage.setItem('workplacesBackup', workplaces, function (err, result) {
 
-        }
+                });
+                //localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
+
+            }
+        });
+
+
 
     },
     created() {
@@ -86,7 +99,11 @@ var app = new Vue({
         this.AppInFire = eval(localStorage.getItem('AppInFire'));
         this.AppInFireEmail = eval(localStorage.getItem('AppInFireEmail'));
         this.darkmode = eval(localStorage.getItem('darkmode'));
-        const workplaces = JSON.parse(localStorage.getItem('workplaces'));
+        const workplaces = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+        localforage.getItem('workplaces', (err, value) => {
+            workplaces = value
+        });
         console.log('mounted - workplaces', workplaces)
 
 
@@ -140,25 +157,50 @@ var app = new Vue({
                     if (result.additionalUserInfo.isNewUser) {
 
                         //if this is a new user take current localstorage and add it to the firestore
-                        db.collection(result.user.email).doc('workplaces').set({
-                                data: JSON.stringify(workplaces)
-                            })
-                            .then(function (docRef) {
-                                console.log("Document written with ID: ", docRef);
-                            })
-                            .catch(function (error) {
-                                console.error("Error adding document: ", error);
-                            });
+                        // db.collection(result.user.email).doc('workplaces').set({
+                        //         data: JSON.stringify(workplaces)
+                        //     })
+                        //     .then(function (docRef) {
+                        //         console.log("Document written with ID: ", docRef);
+                        //     })
+                        //     .catch(function (error) {
+                        //         console.error("Error adding document: ", error);
+                        //     });
+                        this.saveWorkPlace();
 
                     } else {
                         //if its already an existing login take the data from the firestore   .doc("workplaces")
                         console.log("already have account:", result.user.email);
-                        var docRef = db.collection(result.user.email).doc("workplaces");
+                        // var docRef = db.collection(result.user.email).doc("workplaces");
+
+                        // docRef.get().then((doc) => {
+                        //     if (doc.exists) {
+                        //         console.log("workplaces data:", doc.data());
+                        //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+
+                        //     } else {
+                        //         // doc.data() will be undefined in this case
+                        //         console.log("No such document!");
+                        //     }
+                        // }).then(() => {
+
+                        //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+
+
+                        // }).catch(function (error) {
+                        //     console.log("Error getting document:", error);
+                        // });
+                        var docRef = db.collection(result.user.email);
 
                         docRef.get().then((doc) => {
+
+                            doc.forEach(element => {
+
+                                console.log("workplaces elet:", element.data());
+                            });
                             if (doc.exists) {
-                                console.log("workplaces data:", doc.data());
-                                localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+                                console.log("workplaces dddd:", doc);
+                                //localStorage.setItem('workplaces', JSON.parse(doc.data().data));
 
                             } else {
                                 // doc.data() will be undefined in this case
@@ -166,7 +208,7 @@ var app = new Vue({
                             }
                         }).then(() => {
 
-                            this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+                            //this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
 
 
                         }).catch(function (error) {
@@ -203,7 +245,11 @@ var app = new Vue({
                     groupsConfig: '10,20,30,40,50'
                 });
 
-                localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+                localforage.setItem('workplaces', this.workplaces, function (err, result) {
+
+                });
             } else {
                 this.workplaces = workplaces;
             }
@@ -223,13 +269,13 @@ var app = new Vue({
             this.viewGroups = false;
             this.viewResult = false;
 
-            
-            if('Notification' in window) {
-                Notification.requestPermission(function(result){
-                    console.log('User Choice',result);
-                    if(result !== 'granted') {
+
+            if ('Notification' in window) {
+                Notification.requestPermission(function (result) {
+                    console.log('User Choice', result);
+                    if (result !== 'granted') {
                         console.log('No notification permission granted!')
-                    }else{
+                    } else {
 
                     }
                 });
@@ -259,48 +305,102 @@ var app = new Vue({
         firebase.firestore().enablePersistence();
         firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
-        if(localStorage.getItem('AppInFireEmail')){
+        if (localStorage.getItem('AppInFireEmail')) {
 
             this.AppInFire = true;
             this.showLogin = false;
             this.fireEmail = localStorage.getItem('AppInFireEmail');
             localStorage.setItem('AppInFire', true);
-    
+
 
             // Signed in 
             // ...
             //if its already an existing login take the data from the firestore   .doc("workplaces")
-            console.log("already have account:", this.fireEmail);
-            var docRef = db.collection(this.fireEmail).doc("workplaces");
-    
-            docRef.get().then((doc) => {
-                if (doc.exists) {
-                    console.log("workplaces data:", doc.data());
-                    localStorage.setItem('workplaces', JSON.parse(doc.data().data));
-    
-                } else {
-                    // doc.data() will be undefined in this case
-                    console.log("No such document!");
-                }
-            }).then(() => {
-    
-                this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
-    
-    
-            }).catch(function (error) {
-                console.log("Error getting document:", error);
-                localStorage.removeItem('AppInFireEmail');
-                localStorage.removeItem('AppInFire');
+            // console.log("already have account:", this.fireEmail);
+            // var docRef = db.collection(this.fireEmail).doc("workplaces");
 
-                this.AppInFire = false;
-                this.showLogin = true;
-                this.fireEmail = '';
+            // docRef.get().then((doc) => {
+            //     if (doc.exists) {
+            //         console.log("workplaces data 23:", doc.data());
+            //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+
+            //     } else {
+            //         // doc.data() will be undefined in this case
+            //         console.log("No such document!");
+            //     }
+            // }).then(() => {
+
+            //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+
+
+            // }).catch(function (error) {
+            //     console.log("Error getting document:", error);
+            //     localStorage.removeItem('AppInFireEmail');
+            //     localStorage.removeItem('AppInFire');
+
+            //     this.AppInFire = false;
+            //     this.showLogin = true;
+            //     this.fireEmail = '';
+            // });
+            localforage.getItem('service-worker-indexdb-updates', (err, value) => {
+
+                if (value === true) {
+                    // there is an update in from the service worker
+                    localforage.setItem('service-worker-indexdb-updates', false, (err, result) => {
+                        this.saveWorkPlaceFromForge();
+                    });
+                } else {
+                    //there is no update from the service worker, check firebase
+                    this.getDataFromFirebase();
+                }
             });
         }
 
     },
     computed: {},
     methods: {
+        getDataFromFirebase() {
+            console.log("[getDataFromFirebase] already have account:", this.fireEmail);
+            var docRef = db.collection(this.fireEmail);
+
+            docRef.get().then((doc) => {
+
+                console.log('[getDataFromFirebase] documents :', doc.docs);
+                let tempDocsToSave = [];
+
+                for (let element of doc.docs) {
+                    let tempdocData = element.data();
+                    console.log('[getDataFromFirebase] name3 :', tempdocData.name);
+                    //reject the document with workplaces
+                    if (tempdocData.name !== undefined && tempdocData.name.length > 1) {
+
+                        console.log('[getDataFromFirebase] name3 after if:', tempdocData.name);
+                        tempdocData.matrix = JSON.parse(tempdocData.matrix);
+                        tempdocData.groupSequence = JSON.parse(tempdocData.groupSequence);
+                        tempdocData.groups = JSON.parse(tempdocData.groups);
+
+                        tempDocsToSave.push({
+                            ...tempdocData
+                        });
+                        console.log('[getDataFromFirebase] doc data :', tempdocData);
+                    } else {
+
+                        console.log('[getDataFromFirebase] doc data move on:', tempdocData.name);
+                    }
+                }
+                return tempDocsToSave;
+            }).then((dataForLocal) => {
+
+                //localStorage.setItem('workplaces', JSON.stringify(dataForLocal));
+
+                localforage.setItem('workplaces', dataForLocal, function (err, result) {
+
+                });
+                this.workplaces = dataForLocal;
+
+
+            });
+        },
         installapp() {
             // Show the prompt
             this.deferredPrompt.prompt();
@@ -344,9 +444,13 @@ var app = new Vue({
             return vars;
         },
         logout() {
-            firebase.auth().signOut().then(function () {
+            firebase.auth().signOut().then(() => {
                 // Sign-out successful.
-                localStorage.setItem('workplaces', '');
+                //localStorage.setItem('workplaces', '');
+
+                localforage.setItem('workplaces', '', function (err, result) {
+
+                });
 
                 localStorage.removeItem('AppInFireEmail');
                 localStorage.removeItem('AppInFire');
@@ -355,9 +459,13 @@ var app = new Vue({
                 this.showLogin = true;
                 this.fireEmail = '';
 
-            }).catch(function (error) {
+            }).catch((error) => {
                 // An error happened.
-                localStorage.setItem('workplaces', '');
+                //localStorage.setItem('workplaces', '');
+
+                localforage.setItem('workplaces', '', function (err, result) {
+
+                });
 
                 localStorage.removeItem('AppInFireEmail');
                 localStorage.removeItem('AppInFire');
@@ -433,39 +541,44 @@ var app = new Vue({
                         if (result.additionalUserInfo.isNewUser) {
 
                             //if this is a new user take current localstorage and add it to the firestore
-                            db.collection(result.user.email).doc('workplaces').set({
-                                    data: JSON.stringify(workplaces)
-                                })
-                                .then(function (docRef) {
-                                    console.log("Document written with ID: ", docRef);
-                                })
-                                .catch(function (error) {
-                                    console.error("Error adding document: ", error);
-                                });
+                            // db.collection(result.user.email).doc('workplaces').set({
+                            //         data: JSON.stringify(workplaces)
+                            //     })
+                            //     .then(function (docRef) {
+                            //         console.log("Document written with ID: ", docRef);
+                            //     })
+                            //     .catch(function (error) {
+                            //         console.error("Error adding document: ", error);
+                            //     });
+
+                            this.saveWorkPlace();
                             return true;
 
                         } else {
                             //if its already an existing login take the data from the firestore   .doc("workplaces")
-                            console.log("already have account:", result.user.email);
-                            var docRef = db.collection(result.user.email).doc("workplaces");
+                            // console.log("already have account:", result.user.email);
+                            // var docRef = db.collection(result.user.email).doc("workplaces");
 
-                            docRef.get().then((doc) => {
-                                if (doc.exists) {
-                                    console.log("workplaces data:", doc.data());
-                                    localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+                            // docRef.get().then((doc) => {
+                            //     if (doc.exists) {
+                            //         console.log("workplaces data 434:", doc.data());
+                            //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
 
-                                } else {
-                                    // doc.data() will be undefined in this case
-                                    console.log("No such document!");
-                                }
-                            }).then(() => {
+                            //     } else {
+                            //         // doc.data() will be undefined in this case
+                            //         console.log("No such document!");
+                            //     }
+                            // }).then(() => {
 
-                                this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+                            //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
 
 
-                            }).catch(function (error) {
-                                console.log("Error getting document:", error);
-                            });
+                            // }).catch(function (error) {
+                            //     console.log("Error getting document:", error);
+                            // });
+
+                            this.getDataFromFirebase();
+
                             return true;
                         }
                         // ...
@@ -487,66 +600,69 @@ var app = new Vue({
         },
         fireRegisterWithPassword(email, password) {
 
-            if(this.firePassword === this.fireConfirmPassword){
+            if (this.firePassword === this.fireConfirmPassword) {
 
                 firebase.auth().createUserWithEmailAndPassword(this.fireEmail, this.firePassword)
-                .then((result) => {
-                    this.AppInFire = true;
-                    this.showLogin = false;
-                    this.fireEmail = result.user.email;
-                    localStorage.setItem('AppInFire', true);
-                    localStorage.setItem('AppInFireEmail', result.user.email);
+                    .then((result) => {
+                        this.AppInFire = true;
+                        this.showLogin = false;
+                        this.fireEmail = result.user.email;
+                        localStorage.setItem('AppInFire', true);
+                        localStorage.setItem('AppInFireEmail', result.user.email);
 
 
-                    console.log('result', result);
-                    // Signed in 
-                    // ...
+                        console.log('result', result);
+                        // Signed in 
+                        // ...
 
-                    if (result.additionalUserInfo.isNewUser) {
+                        if (result.additionalUserInfo.isNewUser) {
 
-                        //if this is a new user take current localstorage and add it to the firestore
-                        db.collection(result.user.email).doc('workplaces').set({
-                                data: JSON.stringify(workplaces)
-                            })
-                            .then(function (docRef) {
-                                console.log("Document written with ID: ", docRef);
-                            })
-                            .catch(function (error) {
-                                console.error("Error adding document: ", error);
-                            });
+                            //if this is a new user take current localstorage and add it to the firestore
+                            // db.collection(result.user.email).doc('workplaces').set({
+                            //         data: JSON.stringify(workplaces)
+                            //     })
+                            //     .then(function (docRef) {
+                            //         console.log("Document written with ID: ", docRef);
+                            //     })
+                            //     .catch(function (error) {
+                            //         console.error("Error adding document: ", error);
+                            //     });
+                            this.saveWorkPlace();
 
-                    } else {
-                        //if its already an existing login take the data from the firestore   .doc("workplaces")
-                        console.log("already have account:", result.user.email);
-                        var docRef = db.collection(result.user.email).doc("workplaces");
+                        } else {
+                            //if its already an existing login take the data from the firestore   .doc("workplaces")
+                            // console.log("already have account:", result.user.email);
+                            // var docRef = db.collection(result.user.email).doc("workplaces");
 
-                        docRef.get().then((doc) => {
-                            if (doc.exists) {
-                                console.log("workplaces data:", doc.data());
-                                localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+                            // docRef.get().then((doc) => {
+                            //     if (doc.exists) {
+                            //         console.log("workplaces data 53:", doc.data());
+                            //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
 
-                            } else {
-                                // doc.data() will be undefined in this case
-                                console.log("No such document!");
-                            }
-                        }).then(() => {
+                            //     } else {
+                            //         // doc.data() will be undefined in this case
+                            //         console.log("No such document!");
+                            //     }
+                            // }).then(() => {
 
-                            this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+                            //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
 
 
-                        }).catch(function (error) {
-                            console.log("Error getting document:", error);
-                        });
-                    }
+                            // }).catch(function (error) {
+                            //     console.log("Error getting document:", error);
+                            // });
 
-                })
-                .catch((error) => {
-                    var errorCode = error.code;
-                    var errorMessage = error.message;
-                    // ..
-                });
+                            this.getDataFromFirebase();
+                        }
 
-            }else{
+                    })
+                    .catch((error) => {
+                        var errorCode = error.code;
+                        var errorMessage = error.message;
+                        // ..
+                    });
+
+            } else {
                 alert('Passwords do not match');
             }
         },
@@ -565,26 +681,29 @@ var app = new Vue({
                     // Signed in 
                     // ...
                     //if its already an existing login take the data from the firestore   .doc("workplaces")
-                    console.log("already have account:", result.user.email);
-                    var docRef = db.collection(result.user.email).doc("workplaces");
+                    // console.log("already have account:", result.user.email);
+                    // var docRef = db.collection(result.user.email).doc("workplaces");
 
-                    docRef.get().then((doc) => {
-                        if (doc.exists) {
-                            console.log("workplaces data:", doc.data());
-                            localStorage.setItem('workplaces', JSON.parse(doc.data().data));
+                    // docRef.get().then((doc) => {
+                    //     if (doc.exists) {
+                    //         console.log("workplaces data 453:", doc.data());
+                    //         localStorage.setItem('workplaces', JSON.parse(doc.data().data));
 
-                        } else {
-                            // doc.data() will be undefined in this case
-                            console.log("No such document!");
-                        }
-                    }).then(() => {
+                    //     } else {
+                    //         // doc.data() will be undefined in this case
+                    //         console.log("No such document!");
+                    //     }
+                    // }).then(() => {
 
-                        this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
+                    //     this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
 
 
-                    }).catch(function (error) {
-                        console.log("Error getting document:", error);
-                    });
+                    // }).catch(function (error) {
+                    //     console.log("Error getting document:", error);
+                    // });
+
+
+                    this.getDataFromFirebase();
                 })
                 .catch((error) => {
                     var errorCode = error.code;
@@ -644,7 +763,11 @@ var app = new Vue({
                     numberballs: 50,
                     groupsConfig: '10,20,30,40,50'
                 })
-                localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+                localforage.setItem('workplaces', this.workplaces, function (err, result) {
+
+                });
 
             }
         },
@@ -671,22 +794,118 @@ var app = new Vue({
             this.navigateTo('viewDataInsert');
 
         },
+        saveWorkPlaceFromForge() {
+            console.log('saveWorkPlaceFromForge');
+
+
+            localforage.getItem('workplaces', (err, workpls) => {
+
+                this.workplaces = workpls;
+
+            console.log('saveWorkPlaceFromForge',this.workplaces);
+                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+            });
+
+            if (this.AppInFire) {
+                console.log('saveWorkPlaceFromForge app in fire');
+
+
+                //no longer storing to the workplaces document, it is limited
+
+                // db.collection(this.fireEmail).doc("workplaces").set({
+                //         data: JSON.stringify(localStorage.getItem('workplaces'))
+                //     })
+                //     .then(function (docRef) {
+                //         console.log("Document written with ID: ", docRef);
+                //     })
+                //     .catch(function (error) {
+                //         console.error("Error adding document: ", error);
+                //     });
+
+                // console.log('[saving workplaces]',JSON.parse(localStorage.getItem('workplaces')));
+                let workplacedata = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+                localforage.getItem('workplaces', (err, value) => {
+                    workplacedata = value
+
+
+                    workplacedata.map((obj) => {
+
+                        let tempobj = obj;
+                        //nested arrays are not supported
+                        tempobj.matrix = JSON.stringify(tempobj.matrix);
+                        tempobj.groupSequence = JSON.stringify(tempobj.groupSequence);
+                        tempobj.groups = JSON.stringify(tempobj.groups);
+
+                        db.collection(this.fireEmail).doc(obj.name).set({
+                                ...obj
+                            })
+                            .then(function (docRef) {
+                                console.log("Document written with ID 2: ", docRef);
+                            })
+                            .catch(function (error) {
+                                console.error("Error adding document 2: ", error);
+                            });
+                    });
+
+                });
+
+
+            }
+        },
         saveWorkPlace() {
             var foundIndex = this.workplaces.findIndex(x => x.name == this.selectedWorkplace.name);
             this.workplaces[foundIndex] = this.selectedWorkplace;
-            localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+            //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+            localforage.setItem('workplaces', this.workplaces, function (err, result) {
+
+            });
 
             if (this.AppInFire) {
 
-                db.collection(this.fireEmail).doc("workplaces").set({
-                        data: JSON.stringify(localStorage.getItem('workplaces'))
-                    })
-                    .then(function (docRef) {
-                        console.log("Document written with ID: ", docRef);
-                    })
-                    .catch(function (error) {
-                        console.error("Error adding document: ", error);
+
+                //no longer storing to the workplaces document, it is limited
+
+                // db.collection(this.fireEmail).doc("workplaces").set({
+                //         data: JSON.stringify(localStorage.getItem('workplaces'))
+                //     })
+                //     .then(function (docRef) {
+                //         console.log("Document written with ID: ", docRef);
+                //     })
+                //     .catch(function (error) {
+                //         console.error("Error adding document: ", error);
+                //     });
+
+                // console.log('[saving workplaces]',JSON.parse(localStorage.getItem('workplaces')));
+                let workplacedata = []; //JSON.parse(localStorage.getItem('workplaces'));
+
+                localforage.getItem('workplaces', (err, value) => {
+                    workplacedata = value
+
+
+                    workplacedata.map((obj) => {
+
+                        let tempobj = obj;
+                        //nested arrays are not supported
+                        tempobj.matrix = JSON.stringify(tempobj.matrix);
+                        tempobj.groupSequence = JSON.stringify(tempobj.groupSequence);
+                        tempobj.groups = JSON.stringify(tempobj.groups);
+
+                        db.collection(this.fireEmail).doc(obj.name).set({
+                                ...obj
+                            })
+                            .then(function (docRef) {
+                                console.log("Document written with ID 2: ", docRef);
+                            })
+                            .catch(function (error) {
+                                console.error("Error adding document 2: ", error);
+                            });
                     });
+
+                });
+
 
             }
         },
@@ -702,7 +921,11 @@ var app = new Vue({
 
                 var foundIndex = this.workplaces.findIndex(x => x.name == this.selectedWorkplace.name);
                 this.workplaces[foundIndex].name = workplaceName;
-                localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+                localforage.setItem('workplaces', this.workplaces, function (err, result) {
+
+                });
             }
 
 
@@ -716,7 +939,11 @@ var app = new Vue({
                 } else {
                     var filteredWorkplaces = this.workplaces.filter(x => x.name !== this.selectedWorkplace.name);
                     this.workplaces = filteredWorkplaces;
-                    localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                    //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+                    localforage.setItem('workplaces', this.workplaces, function (err, result) {
+
+                    });
                 }
             } else {
                 txt = "You pressed Cancel!";
@@ -1195,31 +1422,83 @@ var app = new Vue({
             }, 500); //one sec
 
         },
-        predictNextGroup() {
-            //with the sequence of groups this function will predict the next group that will come up
-            let net = new brain.recurrent.LSTMTimeStep({
-                inputSize: this.selectedWorkplace.groupSequence[0].length,
-                hiddenLayers: [10],
-                outputSize: this.selectedWorkplace.groupSequence[0].length,
+        sendMessage(message) {
+            // This wraps the message posting/response in a promise, which will
+            // resolve if the response doesn't contain an error, and reject with
+            // the error if it does. If you'd prefer, it's possible to call
+            // controller.postMessage() and set up the onmessage handler
+            // independently of a promise, but this is a convenient wrapper.
+            return new Promise((resolve, reject) => {
+                //   var messageChannel = new MessageChannel();
+
+                navigator.serviceWorker.onmessage = (event) => {
+                    if (event.data.error) {
+                        console.log('message back error', event.data.error)
+                        reject(event.data.error);
+                    } else {
+                        console.log('message back resolve', event.data)
+                        resolve(event.data);
+                    }
+                };
+
+                //   alternative
+                //   navigator.serviceWorker.onmessage = function (e) {
+                //     // messages from service worker.
+                //     console.log('e.data', e.data);
+
+                // This sends the message data as well as transferring
+                // messageChannel.port2 to the service worker.
+                // The service worker can then use the transferred port to reply
+                // via postMessage(), which will in turn trigger the onmessage
+                // handler on messageChannel.port1.
+                // See
+                // https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
+                //navigator.serviceWorker.controller.postMessage(message, [messageChannel.port2]);
+
+                navigator.serviceWorker.controller.postMessage(message, {
+                    type: message.type,
+                    length: message.length,
+                    groupSequence: message.groupSequence,
+                    tabName: message.tabName
+                });
             });
+        },
 
-            net.train(this.selectedWorkplace.groupSequence);
+        predictNextGroup() {
 
-            //instead of run you can use forecast
-            let output = net.run(this.selectedWorkplace.groupSequence);
+            this.sendMessage({
+                type: 'PREDICT_NEXT_GROUP',
+                length: this.selectedWorkplace.groupSequence[0].length,
+                groupSequence: this.selectedWorkplace.groupSequence,
+                selectedWorkplace: this.selectedWorkplace,
+                tabName: 'temp'
+            }).then((output) => {
 
-            let result = [];
+                console.log('predict next group then',output);
+                this.saveWorkPlaceFromForge();
+                this.loadinggroups = false;
 
-            for (let out of [...output]) {
-                let n = 0;
-                if (out < 0) n = 0;
-                else n = Math.round(+out);
-                result.push(n)
-            }
-            this.selectedWorkplace.nextGroupResult = result
+                    //set a flag to let the app know if its been remounted that it needs to save the data
+                    localforage.setItem('service-worker-indexdb-updates', false, function(err, result) {
+                    });
+            });
+            // navigator.serviceWorker.onmessage = function (e) {
+            //     // messages from service worker.
+            //     console.log('e.data', e.data);
+            // };
+            // //with the sequence of groups this function will predict the next group that will come up
+            // let net = new brain.recurrent.LSTMTimeStep({
+            //     inputSize: this.selectedWorkplace.groupSequence[0].length,
+            //     hiddenLayers: [10],
+            //     outputSize: this.selectedWorkplace.groupSequence[0].length,
+            // });
 
-            this.saveWorkPlace();
-            this.loadinggroups = false;
+            // net.train(this.selectedWorkplace.groupSequence);
+
+            // //instead of run you can use forecast
+            // let output = net.run(this.selectedWorkplace.groupSequence);
+
+
 
         },
         run() {
