@@ -230,6 +230,8 @@ var app = new Vue({
   mounted: function mounted() {
     var _this2 = this;
 
+    this.darkmode = eval(localStorage.getItem('darkmode'));
+
     if (this.isMobile()) {
       this.viewTabs = true;
       this.viewDataInsert = false;

@@ -28,8 +28,8 @@
 
 
 
-var CACHE_STATIC_NAME = 'static-v10';
-var CACHE_DYNAMIC_NAME = 'dynamic-v10';
+var CACHE_STATIC_NAME = 'static-v11';
+var CACHE_DYNAMIC_NAME = 'dynamic-v11';
 
 // precaching
 self.addEventListener('install', function (event) {

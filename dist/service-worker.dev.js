@@ -32,8 +32,8 @@ function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 //       ],
 //     }),
 //   );
-var CACHE_STATIC_NAME = 'static-v10';
-var CACHE_DYNAMIC_NAME = 'dynamic-v10'; // precaching
+var CACHE_STATIC_NAME = 'static-v11';
+var CACHE_DYNAMIC_NAME = 'dynamic-v11'; // precaching
 
 self.addEventListener('install', function (event) {
   console.log('[Service Worker] Installing Service Worker ...', event);
