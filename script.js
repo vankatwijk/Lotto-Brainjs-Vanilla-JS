@@ -1,10 +1,12 @@
+
+
 var app = new Vue({
     el: '#app',
     components: {
-        draggable: window['vuedraggable'],
-        // orangeFace: window["orangeFace"]
+        draggable: window['vuedraggable']
     },
     data: {
+        showOrangeFace:false,
         darkmode: null,
 
         loading: false,
@@ -64,7 +66,8 @@ var app = new Vue({
         viewResult: true,
 
         deferredPrompt: null,
-        installButton: false
+        installButton: false,
+        isMobile:true,
     },
     beforeCreate() {
 
@@ -264,7 +267,7 @@ var app = new Vue({
     },
     mounted() {
         this.darkmode = eval(localStorage.getItem('darkmode'));
-        if (this.isMobile()) {
+        if (this.getIsMobile()) {
             this.viewTabs = true;
             this.viewDataInsert = false;
             this.viewGroups = false;
@@ -421,17 +424,19 @@ var app = new Vue({
             });
         },
         navigateTo(view) {
-            if (this.isMobile()) {
+            if (this.getIsMobile()) {
                 this.viewTabs = (view === 'viewTabs' ? true : false);
                 this.viewDataInsert = (view === 'viewDataInsert' ? true : false);
                 this.viewGroups = (view === 'viewGroups' ? true : false);
                 this.viewResult = (view === 'viewResult' ? true : false);
             }
         },
-        isMobile() {
+        getIsMobile() {
             if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+                this.isMobile = true;
                 return true
             } else {
+                this.isMobile = false;
                 return false
             }
         },

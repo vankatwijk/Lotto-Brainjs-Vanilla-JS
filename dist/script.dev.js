@@ -27,10 +27,10 @@ function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only")
 var app = new Vue({
   el: '#app',
   components: {
-    draggable: window['vuedraggable'] // orangeFace: window["orangeFace"]
-
+    draggable: window['vuedraggable']
   },
   data: {
+    showOrangeFace: false,
     darkmode: null,
     loading: false,
     loadinggroups: false,
@@ -78,7 +78,8 @@ var app = new Vue({
     viewGroups: true,
     viewResult: true,
     deferredPrompt: null,
-    installButton: false
+    installButton: false,
+    isMobile: true
   },
   beforeCreate: function beforeCreate() {
     var workplaces = []; //JSON.parse(localStorage.getItem('workplaces'));
@@ -232,7 +233,7 @@ var app = new Vue({
 
     this.darkmode = eval(localStorage.getItem('darkmode'));
 
-    if (this.isMobile()) {
+    if (this.getIsMobile()) {
       this.viewTabs = true;
       this.viewDataInsert = false;
       this.viewGroups = false;
@@ -379,17 +380,19 @@ var app = new Vue({
       });
     },
     navigateTo: function navigateTo(view) {
-      if (this.isMobile()) {
+      if (this.getIsMobile()) {
         this.viewTabs = view === 'viewTabs' ? true : false;
         this.viewDataInsert = view === 'viewDataInsert' ? true : false;
         this.viewGroups = view === 'viewGroups' ? true : false;
         this.viewResult = view === 'viewResult' ? true : false;
       }
     },
-    isMobile: function isMobile() {
+    getIsMobile: function getIsMobile() {
       if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        this.isMobile = true;
         return true;
       } else {
+        this.isMobile = false;
         return false;
       }
     },
