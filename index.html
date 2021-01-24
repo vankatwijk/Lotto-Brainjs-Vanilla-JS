@@ -106,7 +106,6 @@
             </div>
 
             <div v-if="showOrangeFace">
-sdsd
             </div>
 
             <div class="row main login-container" v-if="showLogin">
@@ -207,10 +206,12 @@ sdsd
                         </div>
                         <div class="col-12 col-md-8 data-insert-container" v-show="viewDataInsert">
 
-                            <div class="options-panel" v-if="selectedWorkplace.name">
-                                <button class="btn btn-primary" @click="saveWorkPlace()">Save</button>
-                                <button class="btn btn-primary" @click="renameWorkPlace()">Rename</button>
-                                <button class="btn btn-primary" @click="removeWorkPlace()">Delete Tab</button>
+                            <div class="options-panel scrollmenu" v-if="selectedWorkplace.name">
+
+                                <button class="btn btn-primary scrollmenuitem" @click="saveWorkPlace()">Save</button>
+                                <button class="btn btn-primary scrollmenuitem" @click="renameWorkPlace()">Rename</button>
+                                <button class="btn btn-primary scrollmenuitem" @click="removeWorkPlace()">Delete Tab</button>
+                                <button class="btn btn-primary scrollmenuitem" @click="duplicateWorkPlace()">Duplicate</button>
 
                             </div>
 
@@ -517,6 +518,14 @@ sdsd
 
 
 <style>
+.scrollmenu {
+  overflow: overlay;
+  white-space: nowrap;
+}
+
+.scrollmenuitem {
+  display: inline-block;
+}
     hr {
         color: black;
     }

@@ -805,6 +805,31 @@ var app = new Vue({
         txt = "You pressed Cancel!";
       }
     },
+    duplicateWorkPlace: function duplicateWorkPlace() {
+      var _this14 = this;
+
+      var workplaceName = prompt("Please enter a name For the duplicate Tab:", this.selectedWorkplace.name);
+
+      if (workplaceName == null || workplaceName == "") {
+        alert("the name can not be empty !");
+      } else if (this.workplaces.find(function (o) {
+        return o.name === workplaceName;
+      })) {
+        alert("Name already exist !");
+      } else {
+        //find the index for the current selected
+        var tempWorkplace = JSON.parse(JSON.stringify(this.selectedWorkplace));
+        tempWorkplace.name = workplaceName;
+        this.workplaces.push(tempWorkplace); //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+        //update the localstorage
+
+        localforage.setItem('workplaces', this.workplaces, function (err, result) {
+          if (result) {
+            _this14.saveWorkPlace();
+          }
+        });
+      }
+    },
     //https://stackoverflow.com/questions/39927452/recursively-print-all-permutations-of-a-string-javascript
     permut: function (_permut) {
       function permut(_x) {
@@ -1023,12 +1048,12 @@ var app = new Vue({
       return lst;
     },
     runapp: function runapp() {
-      var _this14 = this;
+      var _this15 = this;
 
       this.loading = true; //give time to load the loading animation
 
       setTimeout(function () {
-        _this14.trainnetwork();
+        _this15.trainnetwork();
       }, 500); //one sec
     },
     trainnetwork: function trainnetwork() {
@@ -1158,7 +1183,7 @@ var app = new Vue({
       return res;
     },
     changeResultGroup: function changeResultGroup(name, values) {
-      var _this15 = this;
+      var _this16 = this;
 
       this.selectedGroup = name;
       this.result_group = values.winning;
@@ -1171,9 +1196,9 @@ var app = new Vue({
       if (values.output !== undefined) {
         setTimeout(function () {
           console.log('change group values', values.output);
-          _this15.diagram = values.diagram;
-          _this15.output = values.output;
-          _this15.result_group_numbersToPlay = values.result_group_numbersToPlay;
+          _this16.diagram = values.diagram;
+          _this16.output = values.output;
+          _this16.result_group_numbersToPlay = values.result_group_numbersToPlay;
         }, 300);
       } else {
         this.result_group_numbersToPlay = [];
@@ -1196,7 +1221,7 @@ var app = new Vue({
       }
     },
     createGroups: function createGroups() {
-      var _this16 = this;
+      var _this17 = this;
 
       this.navigateTo('viewGroups'); //reset default values
 
@@ -1233,18 +1258,18 @@ var app = new Vue({
 
       var _loop = function _loop() {
         //use last column as date ref column filter out the other numbers as winnings
-        if (i === 0 || _this16.selectedWorkplace.refDate === false) {
+        if (i === 0 || _this17.selectedWorkplace.refDate === false) {
           input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
 
-          _this16.generateProportionMatrix(input);
+          _this17.generateProportionMatrix(input);
         } else {
           input = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + lengthrow);
 
-          _this16.generateProportionMatrix(input);
+          _this17.generateProportionMatrix(input);
         } //input = inputs.slice(i*lengthrow,i*lengthrow+lengthrow);
 
 
-        if (_this16.selectedWorkplace.refDate === true) {
+        if (_this17.selectedWorkplace.refDate === true) {
           inputWithRef = inputs.slice(i * (lengthrow + 1), i * (lengthrow + 1) + (lengthrow + 1));
           ref = inputs[i * lengthrow + (lengthrow + i)];
         } else {
@@ -1253,11 +1278,11 @@ var app = new Vue({
         } //get the ref column
 
 
-        if (_this16.selectedWorkplace.refDate === true) {
+        if (_this17.selectedWorkplace.refDate === true) {
           inputRef = inputs[i * lengthrow];
         }
 
-        groupsConfig1 = _this16.selectedWorkplace.groupsConfig;
+        groupsConfig1 = _this17.selectedWorkplace.groupsConfig;
         groupsConfig = groupsConfig1.split(",");
         var groupNumbers = [];
         var subname = []; //for (var j=0;j<lengthrow;j++){
@@ -1315,36 +1340,36 @@ var app = new Vue({
         groupSequence.push(subname);
         subname = subname.join("-");
 
-        if (_this16.subgroups[subname] === undefined) {
-          _this16.subgroups[subname] = {};
-          _this16.subgroups[subname].name = '';
-          _this16.subgroups[subname].winning = [];
-          _this16.subgroups[subname].winningAndRef = [];
-          _this16.subgroups[subname].refs = [];
-          _this16.subgroups[subname].numbers = [];
+        if (_this17.subgroups[subname] === undefined) {
+          _this17.subgroups[subname] = {};
+          _this17.subgroups[subname].name = '';
+          _this17.subgroups[subname].winning = [];
+          _this17.subgroups[subname].winningAndRef = [];
+          _this17.subgroups[subname].refs = [];
+          _this17.subgroups[subname].numbers = [];
         }
 
-        _this16.subgroups[subname].name = subname;
+        _this17.subgroups[subname].name = subname;
 
-        _this16.subgroups[subname].winning.push(input);
+        _this17.subgroups[subname].winning.push(input);
 
-        _this16.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
+        _this17.subgroups[subname].winningAndRef.push(inputWithRef.join(" "));
 
-        _this16.subgroups[subname].refs.push(ref);
+        _this17.subgroups[subname].refs.push(ref);
 
-        _this16.subgroups[subname].numbers = [].concat(_toConsumableArray(_this16.subgroups[subname]['numbers']), groupNumbers);
+        _this17.subgroups[subname].numbers = [].concat(_toConsumableArray(_this17.subgroups[subname]['numbers']), groupNumbers);
 
-        _this16.groupKeys.push(subname);
+        _this17.groupKeys.push(subname);
 
-        _this16.subgroups.All.name = 'All';
+        _this17.subgroups.All.name = 'All';
 
-        _this16.subgroups.All.winning.push(input);
+        _this17.subgroups.All.winning.push(input);
 
-        _this16.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
+        _this17.subgroups.All.winningAndRef.push(inputWithRef.join(" "));
 
-        _this16.subgroups.All.refs.push(ref);
+        _this17.subgroups.All.refs.push(ref);
 
-        _this16.subgroups.All.numbers = [].concat(_toConsumableArray(_this16.subgroups.All.numbers), groupNumbers);
+        _this17.subgroups.All.numbers = [].concat(_toConsumableArray(_this17.subgroups.All.numbers), groupNumbers);
       };
 
       for (var i = 0; i < Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0))); i++) {
@@ -1367,12 +1392,12 @@ var app = new Vue({
       console.log('subgroups', this.subgroups); //this.result_group_winning =this.groupKeys.join(" ");
     },
     startpredictNextGroup: function startpredictNextGroup() {
-      var _this17 = this;
+      var _this18 = this;
 
       this.loadinggroups = true;
       this.selectedWorkplace.nextGroupResult = '';
       setTimeout(function () {
-        _this17.predictNextGroup();
+        _this18.predictNextGroup();
       }, 500); //one sec
     },
     sendMessage: function sendMessage(message) {
@@ -1414,7 +1439,7 @@ var app = new Vue({
       });
     },
     predictNextGroup: function predictNextGroup() {
-      var _this18 = this;
+      var _this19 = this;
 
       this.sendMessage({
         type: 'PREDICT_NEXT_GROUP',
@@ -1425,9 +1450,9 @@ var app = new Vue({
       }).then(function (output) {
         console.log('predict next group then', output);
 
-        _this18.saveWorkPlaceFromForge();
+        _this19.saveWorkPlaceFromForge();
 
-        _this18.loadinggroups = false; //set a flag to let the app know if its been remounted that it needs to save the data
+        _this19.loadinggroups = false; //set a flag to let the app know if its been remounted that it needs to save the data
 
         localforage.setItem('service-worker-indexdb-updates', false, function (err, result) {});
       }); // navigator.serviceWorker.onmessage = function (e) {

@@ -955,6 +955,31 @@ var app = new Vue({
                 txt = "You pressed Cancel!";
             }
         },
+        duplicateWorkPlace() {
+
+            var workplaceName = prompt("Please enter a name For the duplicate Tab:", this.selectedWorkplace.name);
+            if (workplaceName == null || workplaceName == "") {
+                alert("the name can not be empty !");
+            } else if (this.workplaces.find(o => o.name === workplaceName)) {
+
+                alert("Name already exist !");
+
+            } else {
+                //find the index for the current selected
+                var tempWorkplace = JSON.parse(JSON.stringify(this.selectedWorkplace));
+                tempWorkplace.name = workplaceName;
+                this.workplaces.push(tempWorkplace);
+                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+                //update the localstorage
+                localforage.setItem('workplaces', this.workplaces, (err, result) => {
+                    if(result){
+                        this.saveWorkPlace();
+                    }
+                });
+            }
+
+        },
 
 
         //https://stackoverflow.com/questions/39927452/recursively-print-all-permutations-of-a-string-javascript
