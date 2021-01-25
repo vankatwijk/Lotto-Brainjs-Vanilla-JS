@@ -34,8 +34,7 @@
 
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
 
 
 
@@ -54,33 +53,13 @@
     <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-auth.js"></script>
     <script defer src="https://www.gstatic.com/firebasejs/8.1.2/firebase-firestore.js"></script>
 
-    <!-- 
-        <script>
-        // Your web app's Firebase configuration
-        // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-        var firebaseConfig = {
-            apiKey: "AIzaSyDp1yF5-PsVi4FjhSCtOc4hw7xPHNhN52k",
-            authDomain: "super-orange-app.firebaseapp.com",
-            projectId: "super-orange-app",
-            storageBucket: "super-orange-app.appspot.com",
-            messagingSenderId: "989993684913",
-            appId: "1:989993684913:web:7912015257912ee6b9b790",
-            measurementId: "G-CGJCS4C3JZ"
-        };
-        
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        firebase.analytics();
-
-        var db = firebase.firestore();
-        
-        </script> -->
     <script defer src="./init-firebase.js"></script>
 
-    <script defer src="httpVueLoader.js"></script>
+    <!-- <script defer src="httpVueLoader.js"></script> -->
+    <script src="https://unpkg.com/http-vue-loader"></script>
 
     <script type="module" src="script.js" defer></script>
-    
+
 
 </head>
 
@@ -114,15 +93,12 @@
                     <form>
                         <!-- <h2 class="text-center" style="color:#F44725;">You already have an account! , only an email
                             address is required</h2> -->
-                        
-                            <h2 class="text-center" style="color:#F44725;">Login</h2>
+
+                        <h2 class="text-center" style="color:#F44725;">Login</h2>
                         <div class="form-group">
-                            <input type="text" class="form-control" v-model="fireEmail" id="fireEmail"
-                                Placeholder="Email" required="required">
-                            <input type="password" class="form-control" v-model="firePassword" id="firePassword"
-                                Placeholder="Password" required="required">
-                            <input type="password" class="form-control" v-model="fireConfirmPassword" id="fireConfirmPassword"
-                                Placeholder="Confirm Password" required="required" v-show="showRegister">
+                            <input type="text" class="form-control" v-model="fireEmail" id="fireEmail" Placeholder="Email" required="required">
+                            <input type="password" class="form-control" v-model="firePassword" id="firePassword" Placeholder="Password" required="required">
+                            <input type="password" class="form-control" v-model="fireConfirmPassword" id="fireConfirmPassword" Placeholder="Confirm Password" required="required" v-show="showRegister">
                         </div>
                         <div class="form-group" v-if="!showRegister">
                             <button @click="fireSigninWithPassword();" type="submit" class="btn btn-primary btn-block">Login</button>
@@ -133,12 +109,12 @@
                         <hr>
 
                         <div v-show="!showRegister" style="color: var(--font-color-invert);">
-                            Don't have an account, 
+                            Don't have an account,
                             <a @click="showRegister = true" style="color:blue;text-decoration: underline;">Signup</a>
                         </div>
 
                         <div v-show="showRegister" style="color: var(--font-color-invert);">
-                            Already have an account 
+                            Already have an account
                             <a @click="showRegister = false" style="color:blue;text-decoration: underline;">Login</a>
                         </div>
 
@@ -149,8 +125,7 @@
                         </div>
                         <hr>
                         <div class="form-group">
-                            <input type="text" class="form-control" v-model="firePhone" id="firePhone"
-                                Placeholder="Phone" required="required">
+                            <input type="text" class="form-control" v-model="firePhone" id="firePhone" Placeholder="Phone" required="required">
                         </div>
                         <div class="form-group">
                             <button @click="fireSigninPhone();" type="submit" class="btn btn-primary btn-block">Log via
@@ -182,12 +157,11 @@
                                 <button class="btn btn-primary" @click="addWorkPlace();">+ Add Tab</button>
                             </div>
 
-                            <draggable class="overflow-container" v-model="workplaces"
-                                :options="{disabled : isMobile}" @start="drag=true" @end="drag=false"
-                                @change="saveWorkPlace()">
+                            <draggable class="overflow-container" v-model="workplaces" :options="{disabled : isMobile}" @start="drag=true" @end="drag=false" @change="saveWorkPlace()">
 
-                                <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected noselect':'workplace-button noselect'"
-                                    v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
+                                <mycomponent></mycomponent>
+
+                                <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected noselect':'workplace-button noselect'" v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
                                     <span>{{item.name}}</span>
                                 </div>
 
@@ -219,9 +193,7 @@
                                 <div>
                                     Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
                                     <div class="form-floating">
-                                        <textarea class="form-control text-area" v-model="selectedWorkplace.inputData"
-                                            placeholder="Insert winnings" id="floatingTextarea2"
-                                            style="height: 400px"></textarea>
+                                        <textarea class="form-control text-area" v-model="selectedWorkplace.inputData" placeholder="Insert winnings" id="floatingTextarea2" style="height: 400px"></textarea>
                                         <label for="floatingTextarea2">Winnings</label>
                                     </div>
                                 </div>
@@ -244,8 +216,7 @@
                                         <label for="lengthrow">Number of columns in a row : </label>
                                     </div>
                                     <div class="col">
-                                        <input size="4" type="text" v-model="selectedWorkplace.lengthrow"
-                                            id="lengthrow" />
+                                        <input size="4" type="text" v-model="selectedWorkplace.lengthrow" id="lengthrow" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -253,8 +224,7 @@
                                         <label for="numberballs">Number on balls go to : </label>
                                     </div>
                                     <div class="col">
-                                        <input size="4" type="text" v-model="selectedWorkplace.numberballs"
-                                            id="numberballs" />
+                                        <input size="4" type="text" v-model="selectedWorkplace.numberballs" id="numberballs" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -262,8 +232,7 @@
                                         <label for="groupsConfig">Configure your groups (10,20,30,40,50) : </label>
                                     </div>
                                     <div class="col">
-                                        <input size="4" type="text" v-model="selectedWorkplace.groupsConfig"
-                                            id="groupsConfig" />
+                                        <input size="4" type="text" v-model="selectedWorkplace.groupsConfig" id="groupsConfig" />
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -279,8 +248,7 @@
                                         <label for="predictnextgroup">Predict next group : </label>
                                     </div>
                                     <div class="col">
-                                        <input type="checkbox" id="predictnextgroup"
-                                            v-model="selectedWorkplace.predictnextgroup">
+                                        <input type="checkbox" id="predictnextgroup" v-model="selectedWorkplace.predictnextgroup">
                                     </div>
                                 </div>
                                 <p>
@@ -319,13 +287,9 @@
                                 </div>
 
 
-                                <div v-if="!loadinggroups"
-                                    :class="selectedGroup === name ? 'sub-button-selected noselect':'sub-button noselect'"
-                                    v-for="(value, name) in subgroups"
-                                    @click="changeResultGroup(name,value);output='';diagram=''">
+                                <div v-if="!loadinggroups" :class="selectedGroup === name ? 'sub-button-selected noselect':'sub-button noselect'" v-for="(value, name) in subgroups" @click="changeResultGroup(name,value);output='';diagram=''">
 
-                                    <span class="sub-button-length"
-                                        :style="value.name === (selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '') ? 'background-color:#f44725;':''">{{value.winning.length}}</span>
+                                    <span class="sub-button-length" :style="value.name === (selectedWorkplace.nextGroupResult ? selectedWorkplace.nextGroupResult.join('-') : '') ? 'background-color:#f44725;':''">{{value.winning.length}}</span>
                                     <span>{{value.name}}</span>
                                 </div>
                             </div>
@@ -342,8 +306,7 @@
                             <div v-if="selectedWorkplace.name" class="options-panel">
                                 <div style="height:50px;"></div>
                             </div>
-                            <div v-if="selectedWorkplace.name && selectedGroup" class="overflow-container"
-                                style="padding: 10px;">
+                            <div v-if="selectedWorkplace.name && selectedGroup" class="overflow-container" style="padding: 10px;">
 
                                 <div v-for="(item, index) in result_group" :key="index">
 
@@ -353,16 +316,14 @@
                                             </span>
                                         </div> -->
                                     <div class="reference-number-container">
-                                        <span
-                                            class="reference-number-difference">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
+                                        <span class="reference-number-difference">{{index===0?0: (result_group_refs[index] - result_group_refs[index-1]) - 1}}</span>
                                     </div>
                                     <div class="reference-number-container">
                                         <span class="reference-number-line"></span>
                                     </div>
                                     <div class="badges-black">
 
-                                        <span v-for="(item, index) in item" @click="selectnumber(item)"
-                                            :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
+                                        <span v-for="(item, index) in item" @click="selectnumber(item)" :class="result_group_selected_number.includes(item+'') ? 'selectable_number selected_number' : 'selectable_number'">
                                             {{item}}
                                         </span>
 
@@ -379,8 +340,9 @@
                                     <span class="diamond-shape">
                                         <span
                                             class="item-count">{{ subgroups.All.refs[subgroups.All.refs.length-1] - result_group_refs[result_group_refs.length-1]}}</span>
-                                        <!-- .item-count -->
-                                    </span><!-- .container .diamond-shape-->
+                                    <!-- .item-count -->
+                                    </span>
+                                    <!-- .container .diamond-shape-->
                                 </div>
 
                             </div>
@@ -396,23 +358,19 @@
                     </div>
                 </div>
 
-                <div class="col-12 col-md-4 results-container" style="border-left: 0px solid #F44725;"
-                    v-show="viewResult">
+                <div class="col-12 col-md-4 results-container" style="border-left: 0px solid #F44725;" v-show="viewResult">
 
-                    <div class="options-panel"
-                        v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
+                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
                         <button class="btn btn-primary" @click="createnetwork();">Create Network</button>
                         <button class="btn btn-primary" @click="readtrainingdata();">Train</button>
                         <button class="btn btn-primary" @click="runapp();">Run</button>
                     </div>
-                    <div class="options-panel"
-                        v-if="selectedWorkplace.name && selectedGroup && result_group.length < 2">
+                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length < 2">
                         <div style="height:50px;"></div>
 
                     </div>
 
-                    <div class="overflow-container" style="padding-left: 20px;"
-                        v-if="selectedWorkplace.name && selectedGroup">
+                    <div class="overflow-container" style="padding-left: 20px;" v-if="selectedWorkplace.name && selectedGroup">
 
                         <div v-if="loading">
                             <div class="spinner"></div>
@@ -435,70 +393,17 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr v-for="(item, index) in matrix"
-                                    :class="(result_group_numbers.includes(index+'') ? 'table-highlight' : '' )">
-                                    <th scope="row" v-if="item"><span
-                                            :class="result_group_numbersToPlay.includes(index) ? 'table-number-to-play' : 'table-number-regular'">{{index}}</span>
+                                <tr v-for="(item, index) in matrix" :class="(result_group_numbers.includes(index+'') ? 'table-highlight' : '' )">
+                                    <th scope="row" v-if="item"><span :class="result_group_numbersToPlay.includes(index) ? 'table-number-to-play' : 'table-number-regular'">{{index}}</span>
                                     </th>
-                                    <td v-for="colcount in +selectedWorkplace.lengthrow" :key="colcount+'colrow'"
-                                        v-if="item" v-html="getMatrixValueWithTableFormate(index,colcount-1)"></td>
+                                    <td v-for="colcount in +selectedWorkplace.lengthrow" :key="colcount+'colrow'" v-if="item" v-html="getMatrixValueWithTableFormate(index,colcount-1)"></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                    <div class="overflow-container" style="padding:20px;" v-else>
 
-                        <br>
-                        <div style="width:400px;font-family: 'Monoton', cursive;">
-                            <h2>Super</h2>
-                            <h2>Orange</h2>
-                            <h2>App</h2>
-                        </div>
-                        <br>
-                        <h2>
-                            How to use :
-                        </h2>
-                        <p>
-                            First select a Tab on the left, The General tab is loaded with sample data<br>
+                    <helpInformation v-else></helpInformation>
 
-                            Load the network with previous winnings to generate a model in the Large Text area<br>
-                            1. First, click on [Create Groups] button.<br>
-                            2. Then, Select a group you want to use<br>
-                            3. Then, click on [Create Neural Network] button.<br>
-                            4. Then, click [Read Training Data].<br>
-                            5. Then, click [Run] button as many times as you like to see trained network and
-                            results
-                            of run.
-
-                        </p>
-                        <br>
-                        <br>
-                        <h3>Additional options</h3>
-                        <p>
-                            Reference date - If selected it will take additional column form the winnings to identify
-                            where the winning is in the list,
-                            if not selected the computer will set this automatically.<br><br>
-
-                            Number of columns in a row - This input tells the app how many numbers make a row of winning
-                            numbers. <br><br>
-
-                            Number on balls go to - How High do the numbers on the balls count up to.<br><br>
-
-                            Configure your groups (10,20,30,40,50) - Grouping up winning numbers into sets, this input
-                            takes a rule for how you want the sets to be created,
-                            for example if you insert '10,50' and a winning ticket is ' 3 19 50 49 24' then the group
-                            will be '1-4' because there is only 1 number less than
-                            or equal to 10 and the remain 4 numbers are greater than or equal to 50<br><br>
-
-                            Hidden Layers first learning Shape - Brain.js neural network model configuration, by default
-                            you can set this to 70, if you want to adjust the apps predictions you can insert more
-                            complex models ex '5,5,2,9'.<br><br>
-
-                            Predict next group - if true, this will perform a sequence prediction on the groups based on
-                            each
-                            winning row and when the group was created to predict the next posible group.<br><br>
-                        </p>
-                    </div>
 
 
                     <div class="footer-style footer-margin" v-show="isMobile">
@@ -516,583 +421,7 @@
 
 </body>
 
-
-<style>
-.scrollmenu {
-  overflow: overlay;
-  white-space: nowrap;
-}
-
-.scrollmenuitem {
-  display: inline-block;
-}
-    hr {
-        color: black;
-    }
-    :root {
-        --primary-background-color: white;
-        --secondary-background-color: #F3F3F3;
-        --font-color: black;
-        --font-color-invert: white;
-    }
-
-    [data-theme="dark"] {
-        --primary-background-color: black;
-        --secondary-background-color: #161b22;
-        --font-color: white;
-        --font-color-invert: black;
-    }
-
-    .row>* {
-        /* padding-right: 0;
-        padding-left: 0; */
-    }
-
-    body {
-        margin: 0px;
-        background-color: white;
-        color: black;
-    }
-
-    .text-area {
-        height: 400px;
-        border: 4px solid #f44725;
-    }
-
-    input {
-        border: 4px solid #f44725;
-    }
-
-    .form-group {
-        margin-top: 10px;
-        margin-bottom: 10px;
-        padding-left: 20px;
-    }
-
-    .footer-style {
-        background-color: #f44725;
-        color: white;
-    }
-
-    .btn-primary {
-        color: #000;
-        background-color: #ffffff;
-        border-color: #f44725;
-        border-width: 4px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .btn-primary:hover {
-        color: white;
-        background-color: #f44725;
-        border-color: white;
-        border-width: 4px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .btn-primary:active {
-        color: white;
-        background-color: #f44725;
-        border-color: white;
-        border-width: 4px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .btn-primary:focus {
-        color: white;
-        background-color: #f44725;
-        border-color: white;
-        border-width: 4px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .placeholder-button {
-        height: 50px;
-        color: #000;
-        background-color: #ffffff;
-        border-color: #f44725;
-        border-width: 4px;
-        font-size: 20px;
-        font-weight: bold;
-        padding: 10px;
-    }
-
-
-
-    .hide {
-        display: none;
-    }
-
-    .main {
-        height: calc(100vh - 56px);
-    }
-
-    .main-mobile {
-        /* 70 for footer */
-        overflow: hidden;
-        height: calc(100vh - 97px);
-    }
-
-    .header {
-        /* height: 50px; */
-        background-color: #F44725;
-        color: #ffffff;
-        padding: 5px;
-    }
-
-    .overflow-container {
-        overflow: auto;
-        height: calc(100% - 167px);
-    }
-
-    .workspaces {
-        height: 100%;
-        background-color: var(--secondary-background-color);
-        --bs-gutter-x: 0;
-        --bs-gutter-y: 0;
-        /* max-width: 200px;
-        min-width: 100px; */
-    }
-
-    .data-insert-container {
-        background-color: var(--primary-background-color);
-        height: 100%;
-        border-left: 4px solid #F44725;
-        color: var(--font-color);
-        --bs-gutter-x: 0;
-        --bs-gutter-y: 0;
-        /* padding-right: 24px; */
-    }
-
-    .groups-container {
-        background-color: var(--secondary-background-color);
-        /* max-width: 300px;
-        min-width: 200px; */
-        height: 100%;
-        --bs-gutter-x: 0;
-        --bs-gutter-y: 0;
-        /* height: calc(100% - 67px); */
-    }
-
-    .results-container {
-        border-left: 4px solid #F44725;
-        background-color: var(--primary-background-color);
-        color: var(--font-color);
-        height: 100%;
-        overflow: auto;
-        --bs-gutter-x: 0;
-        --bs-gutter-y: 0;
-        /* height: calc(100% - 67px); */
-    }
-
-    .noselect {
-        -webkit-touch-callout: none;
-        /* iOS Safari */
-        -webkit-user-select: none;
-        /* Safari */
-        -khtml-user-select: none;
-        /* Konqueror HTML */
-        -moz-user-select: none;
-        /* Old versions of Firefox */
-        -ms-user-select: none;
-        /* Internet Explorer/Edge */
-        user-select: none;
-        /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
-    }
-
-    .selected_number {
-        background-color: red;
-        display: inline-block;
-        width: 25px;
-        height: 25px;
-        text-align: center;
-        color: white;
-        border-radius: 20px;
-    }
-
-    .selectable_number {
-        cursor: pointer;
-    }
-
-    .ref-number-badge {
-        display: inline-block;
-        width: 30px;
-        height: 22px;
-        background-color: black;
-        color: white;
-        padding: 0px;
-        text-align: center;
-        float: right;
-    }
-
-    .badges-red {
-        background-color: black;
-        color: white;
-        text-align: center;
-    }
-
-    .badges-black {
-        padding: 8px;
-
-        background-color: white;
-        color: black;
-        border: 4px solid #F44725;
-    }
-
-    .sub-button-selected {
-        cursor: pointer;
-        background-color: #F44725;
-        color: white;
-        border: 4px solid #F44725;
-        padding: 10px;
-        margin: 10px;
-        margin-right: 0px;
-        border-right: 0px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .sub-button {
-        cursor: pointer;
-        background-color: white;
-        color: black;
-        border: 4px solid #F44725;
-        padding: 10px;
-        margin: 10px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-
-    .workplace-button-selected {
-        cursor: pointer;
-        background-color: #F44725;
-        color: white;
-        border: 4px solid #F44725;
-        padding: 10px;
-        margin: 10px;
-        margin-right: 0px;
-        border-right: 0px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .workplace-button {
-        cursor: pointer;
-        background-color: white;
-        color: black;
-        border: 4px solid #F44725;
-        padding: 10px;
-        margin: 10px;
-        font-size: 20px;
-        font-weight: bold;
-    }
-
-    .options-panel {
-        background-color: #F44725;
-        padding: 15px;
-        width: 100%;
-        margin-bottom: 20px;
-
-    }
-
-    /* width */
-    ::-webkit-scrollbar {
-        width: 10px;
-    }
-
-    /* Track */
-    ::-webkit-scrollbar-track {
-        background: rgba(0, 0, 0, 0);
-    }
-
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-        background: #F44725;
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-        background: #d33e20;
-    }
-
-    .table-highlight {
-        background-color: rgb(206 206 206);
-        color: white;
-    }
-
-    .table-number-to-play {
-        background-color: red;
-        display: inline-block;
-        color: white;
-        border-radius: 10vh;
-        width: 30px;
-        height: 30px;
-        text-align: center;
-        padding: 3px;
-    }
-
-    .table-number-regular {
-        background-color: black;
-        display: inline-block;
-        color: white;
-        border-radius: 10vh;
-        width: 30px;
-        height: 30px;
-        text-align: center;
-        padding: 3px;
-    }
-
-
-
-    /* #Shape Styles
-    –––––––––––––––––––––––––––––––––––––––––––––––––– */
-    .diamond-container {
-        text-align: center;
-        margin-top: 10px;
-    }
-
-    .diamond-shape {
-        display: inline-block;
-        background: #f44725;
-        height: 30px;
-        text-align: center;
-        transform: rotate(45deg);
-        width: 30px;
-    }
-
-    .item-count {
-        color: white;
-        display: table-cell;
-        height: 30px;
-        transform: rotate(-45deg);
-        vertical-align: middle;
-        width: 30px;
-    }
-
-
-    .reference-number-difference {
-        display: inline-block;
-        background: #f44725;
-        height: 30px;
-        text-align: center;
-        width: 30px;
-        color: white;
-
-    }
-
-    .reference-number-line {
-        display: inline-block;
-        background: #f44725;
-        height: 18px;
-        text-align: center;
-        width: 4px;
-    }
-
-    .reference-number-container {
-        text-align: center;
-        height: 18px;
-    }
-
-    /*Simple css to style it like a toggle switch*/
-    .theme-switch-wrapper {
-        display: inline-block;
-        width: 200px;
-        align-items: center;
-
-    }
-
-    .theme-switch {
-        display: inline-block;
-        height: 34px;
-        position: relative;
-        width: 60px;
-    }
-
-    .theme-switch input {
-        display: none;
-    }
-
-    .slider {
-        background-color: #ccc;
-        bottom: 0;
-        cursor: pointer;
-        left: 0;
-        position: absolute;
-        right: 0;
-        top: 0;
-        transition: .4s;
-    }
-
-    .slider:before {
-        background-color: #F44725;
-        ;
-        bottom: 4px;
-        content: "";
-        height: 26px;
-        left: 4px;
-        position: absolute;
-        transition: .4s;
-        width: 26px;
-    }
-
-    input:checked+.slider {
-        background-color: var(--primary-background-color);
-    }
-
-    input:checked+.slider:before {
-        transform: translateX(26px);
-    }
-
-    .slider.round {
-        border-radius: 34px;
-    }
-
-    .slider.round:before {
-        border-radius: 50%;
-    }
-
-
-
-
-
-    .login-container {
-        background-color: var(--primary-background-color);
-        color: var(--font-color);
-    }
-
-    .login-form {
-        width: 340px;
-        margin: 50px auto;
-        font-size: 15px;
-    }
-
-    .login-form form {
-        margin-bottom: 15px;
-        background: #f7f7f7;
-        box-shadow: 0px 2px 2px rgba(0, 0, 0, 0.3);
-        padding: 30px;
-    }
-
-    .login-form h2 {
-        margin: 0 0 15px;
-    }
-
-
-
-
-
-
-
-
-
-    textarea.myowntextarea {
-        /*width: 200px;*/
-        height: 80px;
-    }
-
-    table.beta,
-    table.beta th,
-    table.beta td {
-        border-spacing: 0px;
-        border: 1px solid black;
-    }
-
-    table.beta th,
-    table.beta td {
-        padding: 3px;
-    }
-
-
-    .result {
-
-        background-color: #0E9594;
-        color: #ffffff;
-    }
-
-    .sub-button-length {
-        display: inline-block;
-        width: 50px;
-        height: 50px;
-        text-align: center;
-        padding: 10px;
-        background-color: black;
-        color: white;
-        margin-right: 5px;
-    }
-
-
-    .special {
-        background-color: #0E9594;
-        color: #ffffff;
-        padding: 15px;
-    }
-
-    .menu ul {
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-    }
-
-    .menu li {
-        padding: 8px;
-        margin-bottom: 7px;
-        background-color: #33b5e5;
-        color: #ffffff;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-    }
-
-    .menu li:hover {
-        background-color: #0099cc;
-    }
-
-
-
-    .spinner {
-        width: 40px;
-        height: 40px;
-        background-color: #F44725;
-
-        margin: 100px auto;
-        -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
-        animation: sk-rotateplane 1.2s infinite ease-in-out;
-    }
-
-    @-webkit-keyframes sk-rotateplane {
-        0% {
-            -webkit-transform: perspective(120px)
-        }
-
-        50% {
-            -webkit-transform: perspective(120px) rotateY(180deg)
-        }
-
-        100% {
-            -webkit-transform: perspective(120px) rotateY(180deg) rotateX(180deg)
-        }
-    }
-
-    @keyframes sk-rotateplane {
-        0% {
-            transform: perspective(120px) rotateX(0deg) rotateY(0deg);
-            -webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg)
-        }
-
-        50% {
-            transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
-            -webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg)
-        }
-
-        100% {
-            transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
-            -webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
-        }
-    }
-</style>
+<!-- main CSS -->
+<link href="style.css" rel="stylesheet">
 
 </html>

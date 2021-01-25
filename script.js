@@ -1,12 +1,12 @@
-
-
 var app = new Vue({
     el: '#app',
     components: {
+        helpInformation: httpVueLoader('components/helpInformation.vue'),
+        mycomponent: httpVueLoader('components/mycomponent.vue'),
         draggable: window['vuedraggable']
     },
     data: {
-        showOrangeFace:false,
+        showOrangeFace: false,
         darkmode: null,
 
         loading: false,
@@ -67,7 +67,7 @@ var app = new Vue({
 
         deferredPrompt: null,
         installButton: false,
-        isMobile:true,
+        isMobile: true,
     },
     beforeCreate() {
 
@@ -85,7 +85,7 @@ var app = new Vue({
             console.log('Workplaces Backup', workplaces)
             if (err) {
                 //if there are workplaces then back it up
-                localforage.setItem('workplacesBackup', workplaces, function (err, result) {
+                localforage.setItem('workplacesBackup', workplaces, function(err, result) {
 
                 });
                 //localStorage.setItem('workplacesBackup', JSON.stringify(workplaces));
@@ -214,7 +214,7 @@ var app = new Vue({
                             //this.workplaces = JSON.parse(localStorage.getItem('workplaces'));
 
 
-                        }).catch(function (error) {
+                        }).catch(function(error) {
                             console.log("Error getting document:", error);
                         });
                     }
@@ -222,7 +222,7 @@ var app = new Vue({
 
 
                 })
-                .catch(function (error) {
+                .catch(function(error) {
                     console.log("Firestore error :", error);
                     // Some error occurred, you can inspect the code: error.code
                     // Common errors could be invalid email and invalid or expired OTPs.
@@ -250,7 +250,7 @@ var app = new Vue({
 
                 //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
-                localforage.setItem('workplaces', this.workplaces, function (err, result) {
+                localforage.setItem('workplaces', this.workplaces, function(err, result) {
 
                 });
             } else {
@@ -275,7 +275,7 @@ var app = new Vue({
 
 
             if ('Notification' in window) {
-                Notification.requestPermission(function (result) {
+                Notification.requestPermission(function(result) {
                     console.log('User Choice', result);
                     if (result !== 'granted') {
                         console.log('No notification permission granted!')
@@ -397,7 +397,7 @@ var app = new Vue({
 
                 //localStorage.setItem('workplaces', JSON.stringify(dataForLocal));
 
-                localforage.setItem('workplaces', dataForLocal, function (err, result) {
+                localforage.setItem('workplaces', dataForLocal, function(err, result) {
 
                 });
                 this.workplaces = dataForLocal;
@@ -444,7 +444,7 @@ var app = new Vue({
         getUrlVars() {
             var vars = {};
             var parts = window.location.href.replace(/[?&]+([^=&]+)=([^&]*)/gi,
-                function (m, key, value) {
+                function(m, key, value) {
                     vars[key] = value;
                 });
             return vars;
@@ -454,7 +454,7 @@ var app = new Vue({
                 // Sign-out successful.
                 //localStorage.setItem('workplaces', '');
 
-                localforage.setItem('workplaces', '', function (err, result) {
+                localforage.setItem('workplaces', '', function(err, result) {
 
                 });
 
@@ -469,7 +469,7 @@ var app = new Vue({
                 // An error happened.
                 //localStorage.setItem('workplaces', '');
 
-                localforage.setItem('workplaces', '', function (err, result) {
+                localforage.setItem('workplaces', '', function(err, result) {
 
                 });
 
@@ -501,7 +501,7 @@ var app = new Vue({
                     // if they open the link on the same device.
                     localStorage.setItem('emailForSignIn', this.fireEmail);
                 })
-                .catch(function (error) {
+                .catch(function(error) {
                     // Some error occurred, you can inspect the code: error.code
                     console.log(error);
                 });
@@ -588,7 +588,7 @@ var app = new Vue({
                             return true;
                         }
                         // ...
-                    }).catch(function (error) {
+                    }).catch(function(error) {
                         // User couldn't sign in (bad verification code?)
                         // ...
                     });
@@ -761,17 +761,17 @@ var app = new Vue({
             } else {
 
                 this.workplaces.push({
-                    name: workplaceName,
-                    refDate: true,
-                    inputData: "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
-                    layers: '5,5,6',
-                    lengthrow: 5,
-                    numberballs: 50,
-                    groupsConfig: '10,20,30,40,50'
-                })
-                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+                        name: workplaceName,
+                        refDate: true,
+                        inputData: "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
+                        layers: '5,5,6',
+                        lengthrow: 5,
+                        numberballs: 50,
+                        groupsConfig: '10,20,30,40,50'
+                    })
+                    //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
-                localforage.setItem('workplaces', this.workplaces, function (err, result) {
+                localforage.setItem('workplaces', this.workplaces, function(err, result) {
 
                 });
 
@@ -808,7 +808,7 @@ var app = new Vue({
 
                 this.workplaces = workpls;
 
-            console.log('saveWorkPlaceFromForge',this.workplaces);
+                console.log('saveWorkPlaceFromForge', this.workplaces);
                 //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
             });
@@ -847,10 +847,10 @@ var app = new Vue({
                         db.collection(this.fireEmail).doc(obj.name).set({
                                 ...obj
                             })
-                            .then(function (docRef) {
+                            .then(function(docRef) {
                                 console.log("Document written with ID 2: ", docRef);
                             })
-                            .catch(function (error) {
+                            .catch(function(error) {
                                 console.error("Error adding document 2: ", error);
                             });
                     });
@@ -865,7 +865,7 @@ var app = new Vue({
             this.workplaces[foundIndex] = this.selectedWorkplace;
             //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
-            localforage.setItem('workplaces', this.workplaces, function (err, result) {
+            localforage.setItem('workplaces', this.workplaces, function(err, result) {
 
             });
 
@@ -902,10 +902,10 @@ var app = new Vue({
                         db.collection(this.fireEmail).doc(obj.name).set({
                                 ...obj
                             })
-                            .then(function (docRef) {
+                            .then(function(docRef) {
                                 console.log("Document written with ID 2: ", docRef);
                             })
-                            .catch(function (error) {
+                            .catch(function(error) {
                                 console.error("Error adding document 2: ", error);
                             });
                     });
@@ -929,7 +929,7 @@ var app = new Vue({
                 this.workplaces[foundIndex].name = workplaceName;
                 //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
-                localforage.setItem('workplaces', this.workplaces, function (err, result) {
+                localforage.setItem('workplaces', this.workplaces, function(err, result) {
 
                 });
             }
@@ -939,7 +939,7 @@ var app = new Vue({
         },
         removeWorkPlace() {
             if (confirm("Are you sure you want to delete this workplace")) {
-                txt = "You pressed OK!";
+                let txt = "You pressed OK!";
                 if (this.workplaces.length === 1) {
                     alert("You can not remove the last workplace !");
                 } else {
@@ -947,7 +947,7 @@ var app = new Vue({
                     this.workplaces = filteredWorkplaces;
                     //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
-                    localforage.setItem('workplaces', this.workplaces, function (err, result) {
+                    localforage.setItem('workplaces', this.workplaces, function(err, result) {
 
                     });
                 }
@@ -973,7 +973,7 @@ var app = new Vue({
 
                 //update the localstorage
                 localforage.setItem('workplaces', this.workplaces, (err, result) => {
-                    if(result){
+                    if (result) {
                         this.saveWorkPlace();
                     }
                 });
@@ -1133,7 +1133,7 @@ var app = new Vue({
             for (var i = 0; i < result.length; i++) {
                 orderlst.push([i + 1, result[i]]);
             }
-            orderlst = orderlst.sort(function (a, b) {
+            orderlst = orderlst.sort(function(a, b) {
                 return b[1] - a[1]
             });
             lst = [];
@@ -1322,7 +1322,7 @@ var app = new Vue({
             check = this.selectedWorkplace.inputData;
             check = this.clean(check);
             checks = check.split(" ");
-            var filtered = checks.filter(function (el) { //filter out empty
+            var filtered = checks.filter(function(el) { //filter out empty
                 return el != "";
             });
             inputs = filtered;
@@ -1505,13 +1505,12 @@ var app = new Vue({
                 tabName: 'temp'
             }).then((output) => {
 
-                console.log('predict next group then',output);
+                console.log('predict next group then', output);
                 this.saveWorkPlaceFromForge();
                 this.loadinggroups = false;
 
-                    //set a flag to let the app know if its been remounted that it needs to save the data
-                    localforage.setItem('service-worker-indexdb-updates', false, function(err, result) {
-                    });
+                //set a flag to let the app know if its been remounted that it needs to save the data
+                localforage.setItem('service-worker-indexdb-updates', false, function(err, result) {});
             });
             // navigator.serviceWorker.onmessage = function (e) {
             //     // messages from service worker.
@@ -1539,7 +1538,7 @@ var app = new Vue({
             check = this.result_group_winning;
             check = this.clean(check);
             checks = check.split(" ");
-            var filtered = checks.filter(function (el) { //filter out empty
+            var filtered = checks.filter(function(el) { //filter out empty
                 return el != "";
             });
             checks = filtered;
@@ -1592,7 +1591,7 @@ var app = new Vue({
 
     },
     watch: {
-        darkmode: function (val) {
+        darkmode: function(val) {
 
             localStorage.setItem('darkmode', val);
             if (val) {
@@ -1601,7 +1600,7 @@ var app = new Vue({
                 document.documentElement.setAttribute('data-theme', 'light');
             }
         },
-        output: function (val) {
+        output: function(val) {
 
             //save groups to localstorage
             //console.log('selectedGroup',this.selectedGroup);
@@ -1611,7 +1610,7 @@ var app = new Vue({
                 this.saveWorkPlace();
             }
         },
-        matrix: function (val) {
+        matrix: function(val) {
 
             //save matrix inside groups in localstorage
             //console.log('matrix',val);
@@ -1622,7 +1621,7 @@ var app = new Vue({
                 this.saveWorkPlace();
             }
         },
-        diagram: function (val) {
+        diagram: function(val) {
 
             //save diagram inside groups to localstorage
             //console.log('diagram',this.diagram);
@@ -1633,7 +1632,7 @@ var app = new Vue({
                 this.saveWorkPlace();
             }
         },
-        result_group_numbersToPlay: function (val) {
+        result_group_numbersToPlay: function(val) {
 
             //save diagram inside groups to localstorage
             //console.log('diagram',this.diagram);
