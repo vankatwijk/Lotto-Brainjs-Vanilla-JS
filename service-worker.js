@@ -124,7 +124,7 @@ self.addEventListener('message', (event) => {
         console.log('hi there');
         let net = new brain.recurrent.LSTMTimeStep({
             inputSize: event.data.length,
-            hiddenLayers: [10],
+            hiddenLayers: [70],
             outputSize: event.data.length,
         });
 
