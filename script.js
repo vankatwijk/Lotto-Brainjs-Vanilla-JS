@@ -31,6 +31,7 @@ var app = new Vue({
 
         diagram: "",
         output: "",
+        inputDataPrevious: '',
         inputData: `
         3	8	16	40	43	1
         1	29	33	45	47	2
@@ -240,6 +241,7 @@ var app = new Vue({
                 this.workplaces.push({
                     name: 'General',
                     refDate: true,
+                    inputDataPrevious: '',
                     inputData: `
                         3	8	16	40	43	1
                         1	29	33	45	47	2
@@ -368,6 +370,15 @@ var app = new Vue({
     },
     computed: {},
     methods: {
+        inputUndo() {
+            if (this.selectedWorkplace.inputDataPrevious) {
+                this.selectedWorkplace.inputData = this.selectedWorkplace.inputDataPrevious;
+            }
+        },
+        inputedit(data) {
+            this.selectedWorkplace.inputDataPrevious = this.selectedWorkplace.inputData;
+            this.selectedWorkplace.inputData = data;
+        },
         getDataFromFirebase() {
             console.log("[getDataFromFirebase] already have account:", this.fireEmail);
             var docRef = db.collection(this.fireEmail);
@@ -768,6 +779,7 @@ var app = new Vue({
                 this.workplaces.push({
                         name: workplaceName,
                         refDate: true,
+                        inputDataPrevious: '',
                         inputData: "3	8	16	40	43	1 1	29	33	45	47	2 14	27	39	46	48	3 5	25	34	48	50	4 15	27	33	39	50	5",
                         layers: '5,5,6',
                         lengthrow: 5,

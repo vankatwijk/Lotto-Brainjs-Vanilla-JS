@@ -65,7 +65,7 @@
 
 <body>
     <div id="app">
-        <overlay-input-edit :show="overlayInputEditShow" @showm="overlayInputEditShow=false"></overlay-input-edit>
+        <overlay-input-edit :show="overlayInputEditShow" :inputdata="selectedWorkplace.inputData" @showm="overlayInputEditShow=false" @done="inputedit"></overlay-input-edit>
 
         <div class="container-fluid">
             <div class="row header">
@@ -187,13 +187,15 @@
                                 <button class="btn btn-primary scrollmenuitem" @click="renameWorkPlace()">Rename</button>
                                 <button class="btn btn-primary scrollmenuitem" @click="removeWorkPlace()">Delete Tab</button>
                                 <button class="btn btn-primary scrollmenuitem" @click="duplicateWorkPlace()">Duplicate</button>
+                                <button class="btn btn-primary scrollmenuitem" @click="overlayInputEditShow=true;">Select Columns</button>
+                                <button class="btn btn-primary scrollmenuitem" @click="inputUndo()">Undo Last Change</button>
 
                             </div>
 
                             <div class="overflow-container" v-if="selectedWorkplace.name" style="padding: 20px;">
                                 <div>
                                     Enter your previous draw data below (oldest to newest, newest on the bottom):<br>
-                                    <div class="form-floating">
+                                    <div class="form-group">
                                         <textarea class="form-control text-area" v-model="selectedWorkplace.inputData" placeholder="Insert winnings" id="floatingTextarea2" style="height: 400px"></textarea>
                                         <label for="floatingTextarea2">Winnings</label>
                                     </div>
