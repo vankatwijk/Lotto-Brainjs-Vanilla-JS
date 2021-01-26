@@ -1476,45 +1476,52 @@ var app = new Vue({
 
         },
         sendMessage(message) {
-            // This wraps the message posting/response in a promise, which will
-            // resolve if the response doesn't contain an error, and reject with
-            // the error if it does. If you'd prefer, it's possible to call
-            // controller.postMessage() and set up the onmessage handler
-            // independently of a promise, but this is a convenient wrapper.
-            return new Promise((resolve, reject) => {
-                //   var messageChannel = new MessageChannel();
+            try {
 
-                navigator.serviceWorker.onmessage = (event) => {
-                    if (event.data.error) {
-                        console.log('message back error', event.data.error)
-                        reject(event.data.error);
-                    } else {
-                        console.log('message back resolve', event.data)
-                        resolve(event.data);
-                    }
-                };
+                // This wraps the message posting/response in a promise, which will
+                // resolve if the response doesn't contain an error, and reject with
+                // the error if it does. If you'd prefer, it's possible to call
+                // controller.postMessage() and set up the onmessage handler
+                // independently of a promise, but this is a convenient wrapper.
+                return new Promise((resolve, reject) => {
+                    //var messageChannel = new MessageChannel();
 
-                //   alternative
-                //   navigator.serviceWorker.onmessage = function (e) {
-                //     // messages from service worker.
-                //     console.log('e.data', e.data);
+                    navigator.serviceWorker.onmessage = (event) => {
+                        if (event.data.error) {
+                            console.log('message back error', event.data.error)
+                            reject(event.data.error);
+                        } else {
+                            console.log('message back resolve', event.data)
+                            resolve(event.data);
+                        }
+                    };
 
-                // This sends the message data as well as transferring
-                // messageChannel.port2 to the service worker.
-                // The service worker can then use the transferred port to reply
-                // via postMessage(), which will in turn trigger the onmessage
-                // handler on messageChannel.port1.
-                // See
-                // https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
-                //navigator.serviceWorker.controller.postMessage(message, [messageChannel.port2]);
+                    //   alternative
+                    //   navigator.serviceWorker.onmessage = function (e) {
+                    //     // messages from service worker.
+                    //     console.log('e.data', e.data);
 
-                navigator.serviceWorker.controller.postMessage(message, {
-                    type: message.type,
-                    length: message.length,
-                    groupSequence: message.groupSequence,
-                    tabName: message.tabName
+                    // This sends the message data as well as transferring
+                    // messageChannel.port2 to the service worker.
+                    // The service worker can then use the transferred port to reply
+                    // via postMessage(), which will in turn trigger the onmessage
+                    // handler on messageChannel.port1.
+                    // See
+                    // https://html.spec.whatwg.org/multipage/workers.html#dom-worker-postmessage
+                    //navigator.serviceWorker.controller.postMessage(message, [messageChannel.port2]);
+
+                    navigator.serviceWorker.controller.postMessage(message, {
+                        type: message.type,
+                        length: message.length,
+                        groupSequence: message.groupSequence,
+                        tabName: message.tabName
+                    });
                 });
-            });
+
+            } catch (error) {
+                alert('There is an internal error, please reload the browser', error);
+            }
+
         },
 
         predictNextGroup() {
@@ -1528,6 +1535,16 @@ var app = new Vue({
             }).then((output) => {
 
                 console.log('predict next group then', output);
+                let result = [];
+
+                for (let out of[...output]) {
+                    let n = 0;
+                    if (out < 0) n = 0;
+                    else n = Math.round(+out);
+                    result.push(n)
+                }
+                this.selectedWorkplace.nextGroupResult = result;
+
                 this.saveWorkPlaceFromForge();
                 this.loadinggroups = false;
 

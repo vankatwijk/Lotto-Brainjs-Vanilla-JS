@@ -173,17 +173,20 @@ self.addEventListener('message', (event) => {
                 //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
 
-                localforage.setItem('workplaces', workplaces, function(err, result) {});
+                localforage.setItem('workplaces', workplaces, function(err, result) {
 
-                //-------------------------------------------------
+                    //-------------------------------------------------
 
-                console.log('predicted groups ==== start');
+                    console.log('predicted groups ==== start');
 
-                //set a flag to let the app know if its been remounted that it needs to save the data
-                localforage.setItem('service-worker-indexdb-updates', true, function(err, result) {});
+                    //set a flag to let the app know if its been remounted that it needs to save the data
+                    localforage.setItem('service-worker-indexdb-updates', true, function(err, result) {});
 
-                console.log('predicted groups', output);
-                event.source.postMessage(output);
+                    console.log('predicted groups', output);
+                    event.source.postMessage(output);
+
+                });
+
             });
 
         });
