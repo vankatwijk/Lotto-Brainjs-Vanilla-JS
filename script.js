@@ -1,6 +1,7 @@
 var app = new Vue({
     el: '#app',
     components: {
+        overlayInputEdit: httpVueLoader('components/overlayInputEdit.vue'),
         helpInformation: httpVueLoader('components/helpInformation.vue'),
         mycomponent: httpVueLoader('components/mycomponent.vue'),
         draggable: window['vuedraggable']
@@ -68,6 +69,10 @@ var app = new Vue({
         deferredPrompt: null,
         installButton: false,
         isMobile: true,
+
+        //---------------
+        overlayInputEditShow: false,
+
     },
     beforeCreate() {
 
@@ -1004,7 +1009,7 @@ var app = new Vue({
             return permutations;
         },
         clean(s) {
-            r = s.replace(/\D/g, ' ');
+            let r = s.replace(/\D/g, ' ');
             r = r.replace(/\s\s+/g, ' ');
             return r;
         },
@@ -1279,7 +1284,7 @@ var app = new Vue({
         generateProportionMatrix(winningRow) {
 
 
-            lengthrow = +this.selectedWorkplace.lengthrow;
+            let lengthrow = +this.selectedWorkplace.lengthrow;
             for (var m = 0; m < lengthrow; m++) {
 
                 if (this.matrix[winningRow[m]] === undefined) {
@@ -1319,20 +1324,25 @@ var app = new Vue({
 
             // put them in groups of 6 for each item
             //create rows here
-            check = this.selectedWorkplace.inputData;
+            let check = this.selectedWorkplace.inputData;
             check = this.clean(check);
-            checks = check.split(" ");
+            let checks = check.split(" ");
             var filtered = checks.filter(function(el) { //filter out empty
                 return el != "";
             });
-            inputs = filtered;
-            lengthrow = +this.selectedWorkplace.lengthrow;
+            let inputs = filtered;
+            let lengthrow = +this.selectedWorkplace.lengthrow;
 
             //group sequence is used to predict the next group
             let groupSequence = [];
 
 
             for (var i = 0; i < (Math.floor(inputs.length / (lengthrow + (this.selectedWorkplace.refDate ? 1 : 0)))); i++) {
+
+                let input = [];
+                let inputWithRef = [];
+                let ref = null;
+                let inputRef = null;
 
                 //use last column as date ref column filter out the other numbers as winnings
                 if (i === 0 || this.selectedWorkplace.refDate === false) {
@@ -1512,22 +1522,6 @@ var app = new Vue({
                 //set a flag to let the app know if its been remounted that it needs to save the data
                 localforage.setItem('service-worker-indexdb-updates', false, function(err, result) {});
             });
-            // navigator.serviceWorker.onmessage = function (e) {
-            //     // messages from service worker.
-            //     console.log('e.data', e.data);
-            // };
-            // //with the sequence of groups this function will predict the next group that will come up
-            // let net = new brain.recurrent.LSTMTimeStep({
-            //     inputSize: this.selectedWorkplace.groupSequence[0].length,
-            //     hiddenLayers: [10],
-            //     outputSize: this.selectedWorkplace.groupSequence[0].length,
-            // });
-
-            // net.train(this.selectedWorkplace.groupSequence);
-
-            // //instead of run you can use forecast
-            // let output = net.run(this.selectedWorkplace.groupSequence);
-
 
 
         },

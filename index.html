@@ -65,6 +65,8 @@
 
 <body>
     <div id="app">
+        <overlay-input-edit :show="overlayInputEditShow" @showm="overlayInputEditShow=false"></overlay-input-edit>
+
         <div class="container-fluid">
             <div class="row header">
                 <div class="col-12 col-md-4" style="width:400px;font-family: 'Monoton', cursive;">
@@ -148,6 +150,7 @@
             </div>
             <div :class="isMobile ? 'row main-mobile' : 'row main'" v-if="!showLogin">
 
+
                 <!-- half size column in bootstrap -->
                 <div class="col-12 col-md-5" v-show="viewTabs || viewDataInsert">
                     <div :class="isMobile ? 'row main-mobile' : 'row main'">
@@ -158,8 +161,6 @@
                             </div>
 
                             <draggable class="overflow-container" v-model="workplaces" :options="{disabled : isMobile}" @start="drag=true" @end="drag=false" @change="saveWorkPlace()">
-
-                                <mycomponent></mycomponent>
 
                                 <div :class="selectedWorkplace.name === item.name ? 'workplace-button-selected noselect':'workplace-button noselect'" v-for="item in workplaces" @click="changeWorkPlace(item);output='';diagram=''">
                                     <span>{{item.name}}</span>
