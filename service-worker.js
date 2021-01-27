@@ -28,8 +28,8 @@
 
 
 
-var CACHE_STATIC_NAME = 'static-v11';
-var CACHE_DYNAMIC_NAME = 'dynamic-v11';
+var CACHE_STATIC_NAME = 'static-v14';
+var CACHE_DYNAMIC_NAME = 'dynamic-v14';
 
 // precaching
 self.addEventListener('install', function(event) {
@@ -117,6 +117,51 @@ self.addEventListener('fetch', function(event) {
 importScripts("https://unpkg.com/brain.js@2.0.0-beta.2/dist/brain-browser.min.js");
 importScripts("localforage.js");
 
+
+
+
+function clean(s) {
+    let r = s.replace(/\D/g, ' ');
+    r = r.replace(/\s\s+/g, ' ');
+    return r;
+}
+
+function tD_Ones(size, row) {
+    var res = [];
+    for (var i = 0; i < size; i++) {
+        res.push(0);
+    }
+    for (var i = 0; i < row.length; i++) {
+        let curindex = parseInt(row[i]) - 1;
+        res[curindex] = 1;
+    }
+    return res;
+}
+
+function highestProb(result, print = 1) {
+    let orderlst = [];
+    let output = ''
+    for (var i = 0; i < result.length; i++) {
+        orderlst.push([i + 1, result[i]]);
+    }
+    orderlst = orderlst.sort(function(a, b) {
+        return b[1] - a[1]
+    });
+    let lst = [];
+    if (print == 1) {
+        output += "Highest probability is: " + orderlst[0][1] + "<br/>";
+        output += "Lowest probability is: " + orderlst[orderlst.length - 1][1] + "<br/>";
+    }
+    for (var i = 0; i < orderlst.length; i++) {
+        lst.push(orderlst[i][0]);
+    }
+    return {
+        lst: lst,
+        output: output
+    };
+}
+
+
 // console.log(self.brain);
 // If the "hi" message is posted, say hi back
 self.addEventListener('message', (event) => {
@@ -124,7 +169,7 @@ self.addEventListener('message', (event) => {
         console.log('hi there');
         let net = new brain.recurrent.LSTMTimeStep({
             inputSize: event.data.length,
-            hiddenLayers: [70],
+            hiddenLayers: [20],
             outputSize: event.data.length,
         });
 
@@ -177,7 +222,7 @@ self.addEventListener('message', (event) => {
 
                     //-------------------------------------------------
 
-                    console.log('predicted groups ==== start');
+                    console.log('predicted groups ==== done');
 
                     //set a flag to let the app know if its been remounted that it needs to save the data
                     localforage.setItem('service-worker-indexdb-updates', true, function(err, result) {});
@@ -190,6 +235,173 @@ self.addEventListener('message', (event) => {
             });
 
         });
+
+
+    } else if (event.data && event.data.type === 'PREDICT_NEXT_NUMBERS') {
+        console.log('hi there, lets predict the next numbers !!!!');
+        var output = '';
+        var tD = [];
+        var lastDraw = null;
+        var lastResult = null;
+
+        let hidlayers = eval("[" + event.data.layers + "]");
+
+        var net = new brain.NeuralNetwork({
+            hiddenLayers: hidlayers
+        });
+
+        //check these numbers in 'check' element
+        //lastdraw =  .getElementById('draw').value;
+        let check = event.data.result_group_winning;
+        check = clean(check);
+        let checks = check.split(" ");
+        var filtered = checks.filter(function(el) { //filter out empty
+            return el != "";
+        });
+        checks = filtered;
+
+
+        let inputs = checks;
+
+        //get row length
+        var lengthrow = event.data.lengthrow;
+
+
+        //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
+        let len = lengthrow;
+
+        // put them in groups of 6 for each item
+        //create rows here
+        let finputs = [];
+        for (var i = 0; i < (Math.floor(inputs.length / lengthrow)); i++) {
+
+            //use last column as date ref column filter out the other numbers as winnings
+            let input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
+            finputs.push(input);
+
+        }
+        inputs = finputs;
+
+        //inputs = inputs.reverse(); //reverse so that it's from oldest to newest
+        let balls = event.data.numberballs;
+
+        tD = [];
+        for (var i = 0; i < inputs.length - 1; i++) {
+            let tDin = tD_Ones(balls, inputs[i].slice(0, len));
+            let tDout = tD_Ones(balls, inputs[i + 1].slice(0, len));
+            tD.push({
+                input: tDin,
+                output: tDout
+            });
+        }
+        lastDraw = inputs[inputs.length - 1];
+        console.log('[lastDraw]', inputs);
+        lastResult = tD_Ones(balls, lastDraw.slice(0, len));
+
+
+        new Promise((resolve, reject) => {
+
+            stats = net.train(tD);
+            output = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
+            output += "<br/>Trained.<br/>Run with last Draw result: " + lastDraw.join(", ") + "<br/>";
+            diagram = brain.utilities.toSVG(net)
+
+
+
+            let result = net.run(lastResult);
+            let ordlst = (highestProb(result)).lst;
+            output += (highestProb(result)).output;
+            var numbersToPlay = ordlst.slice(0, lengthrow);
+
+            //remember to set this in the db
+            //this.result_group_numbersToPlay = numbersToPlay;
+
+
+            output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
+            //this.output += "Numbers to play: <b>" + numbersToPlay.join(' ') + "</b><br/>";
+            output += "Numbers to play: <b>";
+
+            for (let [index, val] of numbersToPlay.entries()) {
+                output += "<span class='table-number-to-play'>" + val + "</span>";
+            }
+
+            output += "</b><br/>";
+
+
+            output += "Here are 10 sets ran in series:<br/>";
+            let nextResult = lastResult;
+            let balls = ordlst.length;
+            let numbers = numbersToPlay.length;
+
+
+            output += "<table class='table' style='background-color: white; margin-top: 20px;'><tbody>";
+            for (var i = 0; i < lengthrow; i++) {
+                result = net.run(nextResult);
+                ordlst = (highestProb(result, print = 0)).lst;
+                let thisSet = ordlst.slice(0, numbers);
+
+                // this.output += "<b>"+thisSet.join(" ")+"</b><br/>";
+                // nextResult = this.tD_Ones(balls,thisSet);
+
+                output += "<tr>";
+                for (let [index, val] of thisSet.entries()) {
+                    this.output += "<td>" + val + "</td>";
+                }
+                output += "</tr>";
+                nextResult = tD_Ones(balls, thisSet);
+            }
+
+            output += "</tbody></table>";
+
+
+            resolve({
+                numbersToPlay: numbersToPlay,
+                output: output,
+                diagram: diagram
+            });
+
+        }).then((result) => {
+
+            self.registration.showNotification('Prediction', {
+                body: 'the numbers you should play next are :' + result.numbersToPlay,
+                icon: 'logo.png',
+                vibrate: [200, 100, 200, 100, 200, 100, 200],
+                tag: 'vibration-sample'
+            });
+
+            //update the indexdb
+            localforage.getItem('workplaces', (err, workplaces) => {
+                console.log('service worker', workplaces);
+                console.log('service worker', event.data.selectedWorkplace);
+                console.log('service worker', event.data.selectedGroup);
+                console.log('service worker', result);
+
+                let foundIndex = workplaces.findIndex(x => x.name == event.data.selectedWorkplace.name);
+                workplaces[foundIndex].groups[event.data.selectedGroup].output = result.output;
+                //workplaces[foundIndex].groups[event.data.selectedGroup].diagram = result.diagram;
+                workplaces[foundIndex].groups[event.data.selectedGroup].numbersToPlay = result.numbersToPlay;
+                //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
+
+
+                localforage.setItem('workplaces', workplaces, (err, localresult) => {
+
+                    //-------------------------------------------------
+
+                    console.log('predicted numbers ==== done');
+
+                    //set a flag to let the app know if its been remounted that it needs to save the data
+                    localforage.setItem('service-worker-indexdb-updates', true, function(err, result) {});
+
+                    console.log('predicted numbers', result.output);
+                    event.source.postMessage(result);
+
+                });
+
+            });
+
+
+
+        })
 
 
     }

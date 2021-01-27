@@ -287,6 +287,7 @@
 
                                 <div v-if="loadinggroups">
                                     <div class="spinner"></div>
+                                    <div>You can go get a coffee, i'll send you a message when i'm done.</div>
                                 </div>
 
 
@@ -363,10 +364,11 @@
 
                 <div class="col-12 col-md-4 results-container" style="border-left: 0px solid #F44725;" v-show="viewResult">
 
-                    <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
-                        <button class="btn btn-primary" @click="createnetwork();">Create Network</button>
-                        <button class="btn btn-primary" @click="readtrainingdata();">Train</button>
-                        <button class="btn btn-primary" @click="runapp();">Run</button>
+                    <div class="options-panel scrollmenu" v-if="selectedWorkplace.name && selectedGroup && result_group.length > 1">
+                        <button class="btn btn-primary scrollmenuitem" @click="createnetwork();">Create Network</button>
+                        <button class="btn btn-primary scrollmenuitem" @click="readtrainingdata();">Train</button>
+                        <button class="btn btn-primary scrollmenuitem" @click="runapp();">Run</button>
+                        <button class="btn btn-primary scrollmenuitem" @click="runViaServiceWorker();">Run in background</button>
                     </div>
                     <div class="options-panel" v-if="selectedWorkplace.name && selectedGroup && result_group.length < 2">
                         <div style="height:50px;"></div>
@@ -377,6 +379,7 @@
 
                         <div v-if="loading">
                             <div class="spinner"></div>
+                            <div>You can go get a coffee, i'll send you a message when i'm done.</div>
                         </div>
 
                         <b>Output will show below:</b><br>

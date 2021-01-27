@@ -1129,11 +1129,11 @@ var app = new Vue({
 
 
         createnetwork() {
-            hidlayers = eval("[" + this.selectedWorkplace.layers + "]");
+            let hidlayers = eval("[" + this.selectedWorkplace.layers + "]");
             this.net = new brain.NeuralNetwork({
                 hiddenLayers: hidlayers
             });
-            outputt = "Neural Net created with Hidden Layers Shape [" + hidlayers.join(",") + "]<br/>";
+            let outputt = "Neural Net created with Hidden Layers Shape [" + hidlayers.join(",") + "]<br/>";
             this.output = outputt;
 
         },
@@ -1146,14 +1146,14 @@ var app = new Vue({
         },
 
         highestProb(result, print = 1) {
-            orderlst = [];
+            let orderlst = [];
             for (var i = 0; i < result.length; i++) {
                 orderlst.push([i + 1, result[i]]);
             }
             orderlst = orderlst.sort(function(a, b) {
                 return b[1] - a[1]
             });
-            lst = [];
+            let lst = [];
             if (print == 1) {
                 this.output += "Highest probability is: " + orderlst[0][1] + "<br/>";
                 this.output += "Lowest probability is: " + orderlst[orderlst.length - 1][1] + "<br/>";
@@ -1169,6 +1169,7 @@ var app = new Vue({
             //give time to load the loading animation
             setTimeout(() => {
 
+                //this.runViaServiceWorker();
                 this.trainnetwork();
 
             }, 500); //one sec
@@ -1178,7 +1179,7 @@ var app = new Vue({
 
             //give time to load the loading animation
 
-            stats = this.net.train(this.tD);
+            let stats = this.net.train(this.tD);
             this.output = "Error:" + stats["error"] + " Iterations: " + stats['iterations'];
             this.output += "<br/>Trained.<br/>Run with last Draw result: " + this.lastDraw.join(", ") + "<br/>";
 
@@ -1188,10 +1189,10 @@ var app = new Vue({
         },
 
         runthrough() {
-            lengthrow = +this.selectedWorkplace.lengthrow;
-            result = this.net.run(this.lastResult);
-            ordlst = this.highestProb(result);
-            numbersToPlay = ordlst.slice(0, lengthrow);
+            let lengthrow = +this.selectedWorkplace.lengthrow;
+            let result = this.net.run(this.lastResult);
+            let ordlst = this.highestProb(result);
+            let numbersToPlay = ordlst.slice(0, lengthrow);
 
             this.result_group_numbersToPlay = numbersToPlay;
             this.output += "From most likely to least likely: " + ordlst.join(', ') + "<br/>";
@@ -1206,16 +1207,16 @@ var app = new Vue({
 
 
             this.output += "Here are 10 sets ran in series:<br/>";
-            nextResult = this.lastResult;
-            balls = ordlst.length;
-            numbers = numbersToPlay.length;
+            let nextResult = this.lastResult;
+            let balls = ordlst.length;
+            let numbers = numbersToPlay.length;
 
 
             this.output += "<table class='table' style='background-color: white; margin-top: 20px;'><tbody>";
             for (var i = 0; i < lengthrow; i++) {
                 result = this.net.run(nextResult);
                 ordlst = this.highestProb(result, print = 0);
-                thisSet = ordlst.slice(0, numbers);
+                let thisSet = ordlst.slice(0, numbers);
 
                 // this.output += "<b>"+thisSet.join(" ")+"</b><br/>";
                 // nextResult = this.tD_Ones(balls,thisSet);
@@ -1258,7 +1259,7 @@ var app = new Vue({
                 res.push(0);
             }
             for (var i = 0; i < row.length; i++) {
-                curindex = parseInt(row[i]) - 1;
+                let curindex = parseInt(row[i]) - 1;
                 res[curindex] = 1;
             }
             return res;
@@ -1554,47 +1555,74 @@ var app = new Vue({
 
 
         },
+        runViaServiceWorker() {
+
+            this.loading = true;
+
+
+            this.sendMessage({
+                type: 'PREDICT_NEXT_NUMBERS',
+                layers: this.selectedWorkplace.layers,
+                result_group_winning: this.result_group_winning,
+                lengthrow: +this.selectedWorkplace.lengthrow,
+                numberballs: this.selectedWorkplace.numberballs,
+                selectedWorkplace: this.selectedWorkplace,
+                selectedGroup: this.selectedGroup
+
+            }).then((result) => {
+
+                console.log('result - ', result)
+                this.selectedWorkplace.groups[this.selectedGroup].output = result.output;
+                this.output = result.output;
+                this.diagram = result.diagram;
+                this.numbersToPlay = result.numbersToPlay;
+                this.saveWorkPlace();
+                this.loading = false;
+
+            });
+
+        },
         run() {
-            outputt = "";
+            let outputt = "";
             //check these numbers in 'check' element
             //lastdraw =  .getElementById('draw').value;
-            check = this.result_group_winning;
+            let check = this.result_group_winning;
             check = this.clean(check);
-            checks = check.split(" ");
+            let checks = check.split(" ");
             var filtered = checks.filter(function(el) { //filter out empty
                 return el != "";
             });
             checks = filtered;
 
 
-            inputs = checks;
+            let inputs = checks;
 
             //get row length
-            lengthrow = +this.selectedWorkplace.lengthrow;
+            let lengthrow = +this.selectedWorkplace.lengthrow;
 
 
             //len = inputs[0].length; //Pick-3/Pick-4 indicator based on len.
-            len = lengthrow;
+            let len = lengthrow;
 
             // put them in groups of 6 for each item
             //create rows here
-            finputs = [];
+            let finputs = [];
             for (var i = 0; i < (Math.floor(inputs.length / lengthrow)); i++) {
 
                 //use last column as date ref column filter out the other numbers as winnings
-                input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
+                let input = inputs.slice(i * lengthrow, i * lengthrow + lengthrow);
                 finputs.push(input);
 
             }
             inputs = finputs;
 
             //inputs = inputs.reverse(); //reverse so that it's from oldest to newest
-            balls = this.selectedWorkplace.numberballs;
+            let balls = this.selectedWorkplace.numberballs;
 
             this.tD = [];
             for (var i = 0; i < inputs.length - 1; i++) {
-                tDin = this.tD_Ones(balls, inputs[i].slice(0, len));
-                tDout = this.tD_Ones(balls, inputs[i + 1].slice(0, len));
+                let tDin = this.tD_Ones(balls, inputs[i].slice(0, len));
+                let tDout = this.tD_Ones(balls, inputs[i + 1].slice(0, len));
                 this.tD.push({
                     input: tDin,
                     output: tDout
