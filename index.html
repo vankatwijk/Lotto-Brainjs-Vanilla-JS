@@ -66,6 +66,7 @@
 <body>
     <div id="app">
         <overlay-input-edit :show="overlayInputEditShow" :inputdata="selectedWorkplace.inputData" @showm="overlayInputEditShow=false" @done="inputedit"></overlay-input-edit>
+        <orange-face v-show="showOrangeFace" @closeface="showOrangeFace=false"></orange-face>
 
         <div class="container-fluid">
             <div class="row header">
@@ -84,9 +85,6 @@
                     </label>
                     <em v-show="!isMobile">Enable Dark Mode!</em>
                 </div>
-            </div>
-
-            <div v-if="showOrangeFace">
             </div>
 
             <div class="row main login-container" v-if="showLogin">
@@ -169,12 +167,17 @@
                             </draggable>
 
 
-                            <div class="footer-style footer-margin" v-show="isMobile">
+                            <div class="footer-style footer-margin" v-if="isMobile">
                                 <footer class="card-footer footer-position">
+                                    <button class="btn btn-primary" @click="showOrangeFace = true;">Orange Face</button>
                                     <button class="btn btn-primary" @click="installapp" v-show="installButton">Install App</button>
                                 </footer>
                             </div>
-
+                            <div class="footer-style footer-margin" v-else>
+                                <footer class="card-footer footer-position">
+                                    <button class="btn btn-primary" @click="showOrangeFace = true;">Orange Face</button>
+                                </footer>
+                            </div>
                             <!-- <div class="workplace-button" @click="addWorkPlace();">
                                     <span>+ Add Tab</span>
                                 </div> -->

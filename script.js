@@ -1,6 +1,7 @@
 var app = new Vue({
     el: '#app',
     components: {
+        orangeFace: httpVueLoader('components/orangeFace.vue'),
         overlayInputEdit: httpVueLoader('components/overlayInputEdit.vue'),
         helpInformation: httpVueLoader('components/helpInformation.vue'),
         mycomponent: httpVueLoader('components/mycomponent.vue'),
