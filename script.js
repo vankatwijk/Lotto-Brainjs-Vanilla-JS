@@ -961,11 +961,28 @@ var app = new Vue({
                     alert("You can not remove the last workplace !");
                 } else {
                     var filteredWorkplaces = this.workplaces.filter(x => x.name !== this.selectedWorkplace.name);
+                    console.log('filteredWorkplaces', filteredWorkplaces);
                     this.workplaces = filteredWorkplaces;
                     //localStorage.setItem('workplaces', JSON.stringify(this.workplaces));
 
-                    localforage.setItem('workplaces', this.workplaces, function(err, result) {
+                    localforage.setItem('workplaces', filteredWorkplaces, (err, result) => {
+                        if (this.AppInFire) {
+                            console.log('saveWorkPlaceFromForge app in fire');
 
+                            localforage.getItem('workplaces', (err, value) => {
+
+                                db.collection(this.fireEmail).doc(this.selectedWorkplace.name).delete().then(function() {
+                                    console.log("Document successfully deleted!");
+                                }).catch(function(error) {
+                                    console.error("Error removing document: ", error);
+                                });
+
+                            });
+
+
+                        }
+
+                        this.navigateTo('viewTabs');
                     });
                 }
             } else {
